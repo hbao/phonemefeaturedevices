@@ -1,3 +1,0 @@
-EXPORTS
-	?InitEmulator@@YAHXZ @ 1 NONAME ; int InitEmulator(void)
-
