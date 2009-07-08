@@ -1,0 +1,679 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="http://www-106.ibm.com/developerworks/xml/library/x-antxsl/examples/example2/ant2html.xsl"?>
+<!--
+/**
+*
+ * Copyright (c) 2004-2008 Blue Whale Systems Ltd. All Rights Reserved. 
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER 
+ *  
+ * This program is free software; you can redistribute it and/or 
+ * modify it under the terms of the GNU General Public License version 
+ * 2 only, as published by the Free Software Foundation.  
+ *  
+ * This software is provided "as is," and the copyright holder makes no representations or warranties, express or
+ * implied, including but not limited to warranties of merchantability or fitness for any particular purpose or that the
+ * use of this software or documentation will not infringe any third party patents, copyrights, trademarks or other
+ * rights.
+ * 
+ * The copyright holder will not be liable for any direct, indirect special or consequential damages arising out of any
+ * use of this software or documentation.
+ * 
+ * See the GNU  General Public License version 2 for more details 
+ * (a copy is included at /legal/license.txt).  
+ *  
+ * You should have received a copy of the GNU General Public License 
+ * version 2 along with this work; if not, write to the Free Software 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 
+ * 02110-1301 USA  
+ *  
+ * Please contact Blue Whale Systems Ltd, Suite 123, The LightBox
+ * 111 Power Road, Chiswick, London, W4 5PY, United Kingdom or visit 
+ * www.bluewhalesystems.com if you need additional 
+ * information or have any questions.  
+ */ 
+-->	
+<project name="bluewhalefactory" default="bluewhalefactory_s60v3fp0_winscw" basedir=".">
+	<description>
+        An Ant script to build the Symbian targets.
+    </description>
+
+
+	<target name="usage">
+		<echo message="  Execute one of: " />
+		<echo message="      ant bluewhalefactory_s60v2fp2_arm" />
+		<echo message="      ant bluewhalefactory_s60v2fp2_winscw" />
+		<echo message="      ant bluewhalefactory_s60v2fp3_arm" />
+		<echo message="      ant bluewhalefactory_s60v2fp3_winscw" />
+		<echo message="      ant bluewhalefactory_s60v3fp0_arm" />
+		<echo message="      ant bluewhalefactory_s60v3fp0_winscw    [default]" />
+		<echo message="      ant bluewhalefactory_uiqv3fp0_arm" />
+		<echo message="      ant bluewhalefactory_uiqv3fp0_winscw" />
+	</target>
+
+	<target name="help" depends="usage" />
+
+
+	<path id="SVN.classpath">
+		<fileset dir="C:/java/svnant-1.0.0/lib">
+			<include name="*.jar" />
+		</fileset>
+	</path>
+	<taskdef resource="svntask.properties" classpathref="SVN.classpath" />
+
+
+	<!-- Everything depends on property ${deviceSDK}=one of s60v1fp2, s60v2fp2, s60v2fp2_CW, s60v2fp3, s60v3fp0, etc. -->
+
+	<!-- With Ant, property inheritance and defaults work a little differently than with e.g. make.  	-->
+	<!-- The values set at the "top most" "outer" level override those set in more specific contexts. 	-->
+	<!-- So set defaults within individual targets, and override at higher level targets or 			-->
+	<!-- override ${name} on command line used to invoke ant by specifying 'ant -Dname=val'.			-->
+	<!-- Don't set at this outer scope: <property name = "platform" value = "armi" /> -->
+	<!-- Don't set at this outer scope: <property name = "release" value = "urel" />  -->
+
+	<!-- Enables us to access the systems environment variables, e.g. ${env.Path} (note "Path" is case sensitive in Ant and must exactly "Path" in Windows 2000 and greater) -->
+	<property environment="env" />
+
+	<target name="all" depends="update,bluewhalefactory_uiqv3fp0_winscw,bluewhalefactory_uiqv3fp0_arm,bluewhalefactory_s60v3fp0_winscw,bluewhalefactory_s60v3fp0_arm,bluewhalefactory_s60v2fp3_winscw,bluewhalefactory_s60v2fp3_arm,bluewhalefactory_s60v2fp2_winscw,bluewhalefactory_s60v2fp2_arm" />
+
+	<target name="cruisecontrol_bluewhalefactory_uiqv3fp0_arm" depends="copy_vm_s60v3fp0,update,bluewhalefactory_uiqv3fp0_arm" />
+
+	<target name="cruisecontrol_bluewhalefactory_uiqv3fp0_winscw" depends="copy_vm_s60v3fp0,update,update_tests,bluewhalefactory_uiqv3fp0_winscw,bluewhalefactory_test_uiqv3fp0_winscw" />
+
+	<target name="cruisecontrol_bluewhalefactory_s60v3fp0_arm" depends="update,bluewhalefactory_s60v3fp0_arm" />
+
+	<target name="cruisecontrol_bluewhalefactory_s60v3fp0_winscw" depends="update,update_tests,bluewhalefactory_s60v3fp0_winscw,bluewhalefactory_test_s60v3fp0_winscw" />
+
+	<target name="cruisecontrol_bluewhalefactory_s60v2fp3_arm" depends="update,bluewhalefactory_s60v2fp3_arm" />
+
+	<target name="cruisecontrol_bluewhalefactory_s60v2fp3_winscw" depends="update,update_tests,bluewhalefactory_s60v2fp3_winscw" />
+
+	<target name="cruisecontrol_bluewhalefactory_s60v2fp2_arm" depends="update,bluewhalefactory_s60v2fp2_arm" />
+
+	<target name="cruisecontrol_bluewhalefactory_s60v2fp2_winscw" depends="update,update_tests,bluewhalefactory_s60v2fp2_winscw" />
+
+	<target name="update">
+		<svn>
+			<update dir="${basedir}" />
+		</svn>
+		<svn>
+			<update dir="${basedir}\..\ECOMPLUS" />
+		</svn>
+		<svn>
+			<update dir="${basedir}\..\certificates" />
+		</svn>
+	</target>
+
+	<target name="update_tests">
+		<svn>
+			<update dir="${basedir}\..\TestEmailServer" />
+		</svn>
+		<svn>
+			<update dir="${basedir}\..\SymbianOSUnit" />
+		</svn>
+	</target>
+
+	<target name="copy_vm_s60v3fp0">
+		<copy file="C:\Symbian\9.1\S60_3rd\epoc32\include\commonKNIMacros.h" tofile="c:\symbian\uiq3sdk\epoc32\include\commonKNIMacros.h"/>
+		<copy file="C:\Symbian\9.1\S60_3rd\epoc32\include\gx_image.h" tofile="c:\symbian\uiq3sdk\epoc32\include\gx_image.h"/>
+		<copy file="C:\Symbian\9.1\S60_3rd\epoc32\include\gxapi_graphics.h" tofile="c:\symbian\uiq3sdk\epoc32\include\gxapi_graphics.h"/>
+		<copy file="C:\Symbian\9.1\S60_3rd\epoc32\include\gxj_putpixel.h" tofile="c:\symbian\uiq3sdk\epoc32\include\gxj_putpixel.h"/>
+		<copy file="C:\Symbian\9.1\S60_3rd\epoc32\include\gxutl_image_errorcodes.h" tofile="c:\symbian\uiq3sdk\epoc32\include\gxutl_image_errorcodes.h"/>
+		<copy file="C:\Symbian\9.1\S60_3rd\epoc32\include\java_types.h" tofile="c:\symbian\uiq3sdk\epoc32\include\java_types.h"/>
+		<copy file="C:\Symbian\9.1\S60_3rd\epoc32\include\jvm.h" tofile="c:\symbian\uiq3sdk\epoc32\include\jvm.h"/>
+		<copy file="C:\Symbian\9.1\S60_3rd\epoc32\include\jvmconfig.h" tofile="c:\symbian\uiq3sdk\epoc32\include\jvmconfig.h"/>
+		<copy file="C:\Symbian\9.1\S60_3rd\epoc32\include\keymap_input.h" tofile="c:\symbian\uiq3sdk\epoc32\include\keymap_input.h"/>
+		<copy file="C:\Symbian\9.1\S60_3rd\epoc32\include\kni.h" tofile="c:\symbian\uiq3sdk\epoc32\include\kni.h"/>
+		<copy file="C:\Symbian\9.1\S60_3rd\epoc32\include\kni_md.h" tofile="c:\symbian\uiq3sdk\epoc32\include\kni_md.h"/>
+		<copy file="C:\Symbian\9.1\S60_3rd\epoc32\include\midp_global_status.h" tofile="c:\symbian\uiq3sdk\epoc32\include\midp_global_status.h"/>
+		<copy file="C:\Symbian\9.1\S60_3rd\epoc32\include\midperror.h" tofile="c:\symbian\uiq3sdk\epoc32\include\midperror.h"/>
+		<copy file="C:\Symbian\9.1\S60_3rd\epoc32\include\nim.h" tofile="c:\symbian\uiq3sdk\epoc32\include\nim.h"/>
+		<copy file="C:\Symbian\9.1\S60_3rd\epoc32\include\os_symbian.hpp" tofile="c:\symbian\uiq3sdk\epoc32\include\os_symbian.hpp"/>
+		<copy file="C:\Symbian\9.1\S60_3rd\epoc32\include\osversion.h" tofile="c:\symbian\uiq3sdk\epoc32\include\osversion.h"/>
+		<copy file="C:\Symbian\9.1\S60_3rd\epoc32\include\pcsl_datagram.h" tofile="c:\symbian\uiq3sdk\epoc32\include\pcsl_datagram.h"/>
+		<copy file="C:\Symbian\9.1\S60_3rd\epoc32\include\pcsl_network.h" tofile="c:\symbian\uiq3sdk\epoc32\include\pcsl_network.h"/>
+		<copy file="C:\Symbian\9.1\S60_3rd\epoc32\include\pcsl_network_md.h" tofile="c:\symbian\uiq3sdk\epoc32\include\pcsl_network_md.h"/>
+		<copy file="C:\Symbian\9.1\S60_3rd\epoc32\include\pcsl_socket.h" tofile="c:\symbian\uiq3sdk\epoc32\include\pcsl_socket.h"/>
+		<copy file="C:\Symbian\9.1\S60_3rd\epoc32\include\pcsl_string.h" tofile="c:\symbian\uiq3sdk\epoc32\include\pcsl_string.h"/>
+		<copy file="C:\Symbian\9.1\S60_3rd\epoc32\include\pcsl_string_md.h" tofile="c:\symbian\uiq3sdk\epoc32\include\pcsl_string_md.h"/>
+		<copy file="C:\Symbian\9.1\S60_3rd\epoc32\include\pcsl_string_status.h" tofile="c:\symbian\uiq3sdk\epoc32\include\pcsl_string_status.h"/>
+		<copy file="C:\Symbian\9.1\S60_3rd\epoc32\include\romstructs.h" tofile="c:\symbian\uiq3sdk\epoc32\include\romstructs.h"/>
+
+		<mkdir dir="c:\symbian\uiq3sdk\epoc32\winscw\c\private\2000e27a\vm\resources"/>
+		<copy todir="c:\symbian\uiq3sdk\epoc32\winscw\c\private\2000e27a\vm\resources">
+			<fileset dir="C:\Symbian\9.1\S60_3rd\epoc32\winscw\c\private\2000e27a\vm\resources"/>
+		</copy>		
+		
+		<copy file="C:\Symbian\9.1\S60_3rd\epoc32\release\winscw\udeb\cldc_vm_lib.lib" tofile="c:\symbian\uiq3sdk\epoc32\release\winscw\udeb\cldc_vm_lib.lib"/>
+		<copy file="C:\Symbian\9.1\S60_3rd\epoc32\release\armv5\lib\cldc_vm_lib.dso" tofile="c:\symbian\uiq3sdk\epoc32\release\armv5\lib\cldc_vm_lib.dso"/>
+		<copy file="C:\Symbian\9.1\S60_3rd\epoc32\release\armv5\lib\cldc_vm_lib{000a0000}.dso" tofile="c:\symbian\uiq3sdk\epoc32\release\armv5\lib\cldc_vm_lib{000a0000}.dso"/>
+		<copy file="C:\Symbian\9.1\S60_3rd\epoc32\release\gcce\urel\cldc_vm_lib.dll" tofile="c:\symbian\uiq3sdk\epoc32\release\gcce\urel\cldc_vm_lib.dll"/>
+	</target>
+	
+	<!-- Calls a python script which replaces the specified string '0000' in the pkg file with the -->
+	<!-- current Subversion revision number	-->
+	<!-- An "antcall"able target suitable for invoking Symbian build tool commands.  		-->
+	<!--																					-->
+	<!-- It uses properties which are inherited from the caller when antcall is invoked.  	-->
+	<!-- It invokes the inherited ${dos_command} property and executes this command in the 	-->
+	<!-- ${executionDirectory} directory, first making sure that the appropriate Symbian 	-->
+	<!-- device SDK is used (via the EPOCDEVICE environment variable) , along with the 		-->
+	<!-- correct ${pathAdditions} added to the path environment variable.					-->
+	<!--																					-->
+	<target name="execute_Symbian_build_command_in_correct_environment">
+
+		<!-- Set default platform and release.  These are overriden by specifying  	-->
+		<!-- different values in a calling task, or using command line overrides 	-->
+		<!-- of the form e.g. 'ant -platform=winscw'								-->
+		<property name="platform" value="armi" />
+		<property name="release" value="urel" />
+
+		<echo>dos_command[${dos_command}]    executionDirectory[${executionDirectory}]   deviceSDK[${deviceSDK}]    platform: [${platform}]   release: [${release}]   EPOCDEVICE[${EPOCDEVICE}]   pathAdditions[${pathAdditions}]</echo>
+		<exec executable="cmd" dir="${executionDirectory}" failonerror="true"  outputproperty="output">
+		<arg value="/c" />
+
+			<!-- The antcall'er shoudl have set this property before antcall'ing us -->
+			<arg value="${dos_command}" />
+
+			<!-- Setting this environment variable is equivalent to performing "devices -setdefault @${EPOCDEVICE}" -->
+			<!-- but is valid only for the duration of this execution. -->
+			<!-- See http://newlc.com/Use-of-the-devices-command.html -->
+			<env key="EPOCDEVICE" value="${EPOCDEVICE}" />
+
+			<env key="Path" path="${env.Path};${pathAdditions}" />
+		</exec>
+		<!-- Error patterns to catch the build tool failures -->
+		<regexp id="error.pattern" pattern="(\sError\s\d)|(FATAL\sERROR)|(error:\sfile\sI/O\sfault)"/>
+		<condition property="command.failed" >
+			<matches string="${output}">
+				<regexp refid="error.pattern"/>
+			</matches>
+		</condition>
+		<fail message="${output}" if="command.failed"/>
+
+	</target>
+
+	<target name="revertbuildnumber">
+		<echo>${deviceSDK}</echo>
+		<svn>
+			<revert dir="${basedir}/PlatformVM/inc/buildversion.h" />
+		</svn>
+	</target>
+
+	<!-- Calls a python script which replaces the specified string '0000' in the pkg file with the -->
+	<!-- current Subversion revision number	-->
+	<target name="injectbuildnumber" depends="revertbuildnumber">
+		<echo>${deviceSDK}</echo>
+		<exec executable="python.exe" dir="${basedir}" failonerror="true">
+			<arg value="..\BlueTools\replaceStringWithSubversionRevision.py" />
+			<arg value="${basedir}/PlatformVM/inc/buildversion.h" />
+			<arg value="unknown_00.00.00" />
+			<arg value="." />
+			<arg value="${deviceSDK}_" />
+		</exec>
+	</target>
+
+	<target name="bldmake_bldfiles">
+		<property name="dos_command" value="call bldmake bldfiles" />
+		<echo>dos_command[${dos_command}]    executionDirectory[${executionDirectory}]   deviceSDK[${deviceSDK}]    platform: [${platform}]   release: [${release}]   EPOCDEVICE[${EPOCDEVICE}]   pathAdditions[${pathAdditions}]</echo>
+		<antcall target="execute_Symbian_build_command_in_correct_environment" />
+	</target>
+
+	<target name="reallyclean">
+
+		<!-- Set default platform and release.  These are overriden by specifying  	-->
+		<!-- different values in a calling task, or using command line overrides 	-->
+		<!-- of the form e.g. 'ant -platform=winscw'								-->
+		<property name="platform" value="armi" />
+		<property name="release" value="urel" />
+
+		<property name="dos_command" value="call abld reallyclean ${platform} ${release}" />
+		<echo>dos_command[${dos_command}]    executionDirectory[${executionDirectory}]   deviceSDK[${deviceSDK}]    platform: [${platform}]   release: [${release}]   EPOCDEVICE[${EPOCDEVICE}]   pathAdditions[${pathAdditions}]</echo>
+		<antcall target="execute_Symbian_build_command_in_correct_environment" />
+	</target>
+
+	<target name="makefile">
+
+		<!-- Set default platform and release.  These are overriden by specifying  	-->
+		<!-- different values in a calling task, or using command line overrides 	-->
+		<!-- of the form e.g. 'ant -platform=winscw'								-->
+		<property name="platform" value="armi" />
+		<property name="release" value="urel" />
+
+		<property name="dos_command" value="call abld makefile ${platform} " />
+		<echo>dos_command[${dos_command}]    executionDirectory[${executionDirectory}]   deviceSDK[${deviceSDK}]    platform: [${platform}]   release: [${release}]   EPOCDEVICE[${EPOCDEVICE}]   pathAdditions[${pathAdditions}]</echo>
+		<antcall target="execute_Symbian_build_command_in_correct_environment" />
+	</target>
+
+	<target name="test_reallyclean">
+
+		<!-- Set default platform and release.  These are overriden by specifying  	-->
+		<!-- different values in a calling task, or using command line overrides 	-->
+		<!-- of the form e.g. 'ant -platform=winscw'								-->
+		<property name="platform" value="armi" />
+		<property name="release" value="urel" />
+
+		<property name="dos_command" value="call abld test reallyclean ${platform} ${release}" />
+		<echo>dos_command[${dos_command}]    executionDirectory[${executionDirectory}]   deviceSDK[${deviceSDK}]    platform: [${platform}]   release: [${release}]   EPOCDEVICE[${EPOCDEVICE}]   pathAdditions[${pathAdditions}]</echo>
+		<antcall target="execute_Symbian_build_command_in_correct_environment" />
+	</target>
+
+	<target name="test_makefile">
+
+		<!-- Set default platform and release.  These are overriden by specifying  	-->
+		<!-- different values in a calling task, or using command line overrides 	-->
+		<!-- of the form e.g. 'ant -platform=winscw'								-->
+		<property name="platform" value="armi" />
+		<property name="release" value="urel" />
+
+		<property name="dos_command" value="call abld test makefile ${platform}" />
+		<echo>dos_command[${dos_command}]    executionDirectory[${executionDirectory}]   deviceSDK[${deviceSDK}]    platform: [${platform}]   release: [${release}]   EPOCDEVICE[${EPOCDEVICE}]   pathAdditions[${pathAdditions}]</echo>
+		<antcall target="execute_Symbian_build_command_in_correct_environment" />
+	</target>
+
+	<target name="export">
+
+		<!-- Set default platform and release.  These are overriden by specifying  	-->
+		<!-- different values in a calling task, or using command line overrides 	-->
+		<!-- of the form e.g. 'ant -platform=winscw'								-->
+		<property name="platform" value="armi" />
+		<property name="release" value="urel" />
+
+		<property name="dos_command" value="call abld export" />
+		<echo>dos_command[${dos_command}]    executionDirectory[${executionDirectory}]   deviceSDK[${deviceSDK}]    platform: [${platform}]   release: [${release}]   EPOCDEVICE[${EPOCDEVICE}]   pathAdditions[${pathAdditions}]</echo>
+		<antcall target="execute_Symbian_build_command_in_correct_environment" />
+	</target>
+
+
+	<target name="build">
+
+		<!-- Set default platform and release.  These are overriden by specifying  	-->
+		<!-- different values in a calling task, or using command line overrides 	-->
+		<!-- of the form e.g. 'ant -platform=winscw'								-->
+		<property name="platform" value="armi" />
+		<property name="release" value="urel" />
+
+		<property name="dos_command" value="call abld build ${platform} ${release}" />
+		<echo>dos_command[${dos_command}]    executionDirectory[${executionDirectory}]   deviceSDK[${deviceSDK}]    platform: [${platform}]   release: [${release}]   EPOCDEVICE[${EPOCDEVICE}]   pathAdditions[${pathAdditions}]</echo>
+		<antcall target="execute_Symbian_build_command_in_correct_environment" />
+	</target>
+
+	<target name="test_build">
+
+		<!-- Set default platform and release.  These are overriden by specifying  	-->
+		<!-- different values in a calling task, or using command line overrides 	-->
+		<!-- of the form e.g. 'ant -platform=winscw'								-->
+		<property name="platform" value="armi" />
+		<property name="release" value="urel" />
+
+		<property name="dos_command" value="call abld test build ${platform} ${release}" />
+		<echo>dos_command[${dos_command}]    executionDirectory[${executionDirectory}]   deviceSDK[${deviceSDK}]    platform: [${platform}]   release: [${release}]   EPOCDEVICE[${EPOCDEVICE}]   pathAdditions[${pathAdditions}]</echo>
+		<antcall target="execute_Symbian_build_command_in_correct_environment" />
+	</target>
+
+	<target name="build_bluewhalefactory">
+		<property name="executionDirectory" value="group_${deviceSDK}" />
+		<echo>dos_command[${dos_command}]    executionDirectory[${executionDirectory}]   deviceSDK[${deviceSDK}]    platform: [${platform}]   release: [${release}]   EPOCDEVICE[${EPOCDEVICE}]   pathAdditions[${pathAdditions}]</echo>
+		<antcall target="bldmake_bldfiles" />
+		<antcall target="makefile" />
+		<antcall target="reallyclean" />
+		<antcall target="build" />
+	</target>
+
+	<target name="test_build_bluewhalefactory">
+		<property name="executionDirectory" value="group_${deviceSDK}" />
+		<echo>dos_command[${dos_command}]    executionDirectory[${executionDirectory}]   deviceSDK[${deviceSDK}]    platform: [${platform}]   release: [${release}]   EPOCDEVICE[${EPOCDEVICE}]   pathAdditions[${pathAdditions}]</echo>
+		<antcall target="bldmake_bldfiles" />
+		<antcall target="test_makefile" />
+		<antcall target="test_reallyclean" />
+		<antcall target="test_build" />
+	</target>
+
+	<target name="numbered_clean_build">
+		<echo>dos_command[${dos_command}]    executionDirectory[${executionDirectory}]   deviceSDK[${deviceSDK}]    platform: [${platform}]   release: [${release}]   EPOCDEVICE[${EPOCDEVICE}]   pathAdditions[${pathAdditions}]</echo>
+		<antcall target="injectbuildnumber" />
+		<antcall target="build_bluewhalefactory" />
+	</target>
+
+	<target name="clean_build">
+		<echo>dos_command[${dos_command}]    executionDirectory[${executionDirectory}]   deviceSDK[${deviceSDK}]    platform: [${platform}]   release: [${release}]   EPOCDEVICE[${EPOCDEVICE}]   pathAdditions[${pathAdditions}]</echo>
+		<antcall target="build_bluewhalefactory" />
+	</target>
+
+	<target name="bluewhalefactory_uiqv3fp0_arm">
+
+		<!-- Build external dependencies first -->
+		<ant dir="..\ECOMPLUS" target="ecomplus_uiqv3fp0_arm" inheritAll="false" />
+
+		<!-- Be nice and ensure external dependencies were built successfully early in the process -->
+		<property name="requiredECOMPLUSFile" value="C:\Symbian\UIQ3SDK\Epoc32\release\GCCE\UREL\ECOMPLUS.dll" />
+		<property name="requiredECOMPLUSLib" value="C:\Symbian\UIQ3SDK\EPOC32\RELEASE\ARMV5\LIB\ECOMPLUS.dso" />
+		<available file="${requiredECOMPLUSFile}" property="ecomplus.present" />
+		<fail unless="ecomplus.present" message="Required DLL NOT found: ${requiredECOMPLUSFile} -- be sure to check-out and build the ECOMPLUS project first." />
+		<available file="${requiredECOMPLUSLib}" property="ecompluslib.present" />
+		<fail unless="ecompluslib.present" message="Required lib dso NOT found: ${requiredECOMPLUSLib} -- be sure to check-out and build the ECOMPLUS project first." />
+
+		<property name="finalExpectedOutputFile" value="C:\Symbian\UIQ3SDK\Epoc32\release\gcce\urel\bluewhalefactory.dll" />
+		<delete includeEmptyDirs="true" quiet="true">
+			<fileset file="${finalExpectedOutputFile}" />
+		</delete>
+
+		<!-- For s60v3fp0, override the platform parameter - this will take precedence over parameters set in subtasks. -->
+		<property name="platform" value="gcce" />
+
+		<property name="deviceSDK" value="uiqv3fp0" />
+		<property name="EPOCDEVICE" value="UIQ3:com.symbian.UIQ" />
+		<property name="pathAdditions" value="C:\Program Files\Common Files\SYMBIAN\Tools" />
+		<echo>dos_command[${dos_command}]    executionDirectory[${executionDirectory}]   deviceSDK[${deviceSDK}]    platform: [${platform}]   release: [${release}]   EPOCDEVICE[${EPOCDEVICE}]   pathAdditions[${pathAdditions}]</echo>
+		<antcall target="numbered_clean_build" />
+		<available file="${finalExpectedOutputFile}" property="factorydll.present" />
+		<fail unless="factorydll.present" message="BlueWhaleFactory.dll was not built for ARM" />
+	</target>
+
+	<target name="bluewhalefactory_uiqv3fp0_winscw">
+
+		<!-- Build external dependencies first -->
+		<ant dir="..\ECOMPLUS" target="ecomplus_s60v3fp0_winscw" inheritAll="false" />
+
+		<!-- Be nice and ensure external dependencies were built successfully early in the process -->
+		<property name="requiredECOMPLUSFile" value="C:\Symbian\9.1\S60_3rd\Epoc32\release\winscw\udeb\ECOMPLUS.dll" />
+		<property name="requiredECOMPLUSLib" value="C:\Symbian\9.1\S60_3rd\EPOC32\RELEASE\winscw\udeb\ECOMPLUS.lib" />
+		<available file="${requiredECOMPLUSFile}" property="ecomplus.present" />
+		<fail unless="ecomplus.present" message="Required DLL NOT found: ${requiredECOMPLUSFile} -- be sure to check-out and build the ECOMPLUS project first." />
+		<available file="${requiredECOMPLUSLib}" property="ecompluslib.present" />
+		<fail unless="ecompluslib.present" message="Required lib NOT found: ${requiredECOMPLUSLib} -- be sure to check-out and build the ECOMPLUS project first." />
+
+		<property name="finalExpectedOutputFile" value="C:\Symbian\UIQ3SDK\Epoc32\release\winscw\udeb\bluewhalefactory.dll" />
+		<delete includeEmptyDirs="true" quiet="true">
+			<fileset file="${finalExpectedOutputFile}" />
+		</delete>
+
+		<!-- For s60v3fp0, override the platform parameter - this will take precedence over parameters set in subtasks. -->
+		<property name="platform" value="winscw" />
+		<property name="release" value="udeb" />
+
+		<property name="deviceSDK" value="uiqv3fp0" />
+		<property name="EPOCDEVICE" value="UIQ3:com.symbian.UIQ" />
+		<property name="pathAdditions" value="C:\Program Files\Common Files\SYMBIAN\Tools" />
+		<echo>dos_command[${dos_command}]    executionDirectory[${executionDirectory}]   deviceSDK[${deviceSDK}]    platform: [${platform}]   release: [${release}]   EPOCDEVICE[${EPOCDEVICE}]   pathAdditions[${pathAdditions}]</echo>
+		<antcall target="clean_build" />
+		<!-- check to see if dll was build -->
+		<available file="${finalExpectedOutputFile}" property="factorydll.present" />
+		<fail unless="factorydll.present" message="BlueWhaleFactory.dll was not built for WINSCW" />
+
+	</target>
+
+	<target name="bluewhalefactory_test_uiqv3fp0_winscw" depends="bluewhalefactory_uiqv3fp0_winscw">
+		<property name="platform" value="winscw" />
+		<property name="release" value="udeb" />
+
+		<property name="deviceSDK" value="uiqv3fp0" />
+		<property name="EPOCDEVICE" value="UIQ3:com.symbian.UIQ" />
+		<property name="pathAdditions" value="C:\Program Files\Common Files\SYMBIAN\Tools" />
+		<antcall target="test_build_bluewhalefactory" />
+		<antcall target="unit_tests_uiqv3fp0" />
+	</target>
+
+	<target name="bluewhalefactory_s60v3fp0_arm">
+
+		<!-- Build external dependencies first -->
+		<ant dir="..\ECOMPLUS" target="ecomplus_s60v3fp0_arm" inheritAll="false" />
+
+		<!-- Be nice and ensure external dependencies were built successfully early in the process -->
+		<property name="requiredECOMPLUSFile" value="C:\Symbian\9.1\S60_3rd\Epoc32\release\GCCE\UREL\ECOMPLUS.dll" />
+		<property name="requiredECOMPLUSLib" value="C:\Symbian\9.1\S60_3rd\EPOC32\RELEASE\ARMV5\LIB\ECOMPLUS.dso" />
+		<available file="${requiredECOMPLUSFile}" property="ecomplus.present" />
+		<fail unless="ecomplus.present" message="Required DLL NOT found: ${requiredECOMPLUSFile} -- be sure to check-out and build the ECOMPLUS project first." />
+		<available file="${requiredECOMPLUSLib}" property="ecompluslib.present" />
+		<fail unless="ecompluslib.present" message="Required lib dso NOT found: ${requiredECOMPLUSLib} -- be sure to check-out and build the ECOMPLUS project first." />
+
+		<property name="finalExpectedOutputFile" value="C:\Symbian\9.1\S60_3rd\Epoc32\release\gcce\urel\bluewhalefactory.dll" />
+		<delete includeEmptyDirs="true" quiet="true">
+			<fileset file="${finalExpectedOutputFile}" />
+		</delete>
+		
+		<!-- For s60v3fp0, override the platform parameter - this will take precedence over parameters set in subtasks. -->
+		<property name="platform" value="gcce" />
+
+		<property name="deviceSDK" value="s60v3fp0" />
+		<property name="EPOCDEVICE" value="S60_3rd:com.nokia.s60" />
+		<property name="pathAdditions" value="C:\Program Files\Common Files\SYMBIAN\Tools" />
+		<echo>dos_command[${dos_command}]    executionDirectory[${executionDirectory}]   deviceSDK[${deviceSDK}]    platform: [${platform}]   release: [${release}]   EPOCDEVICE[${EPOCDEVICE}]   pathAdditions[${pathAdditions}]</echo>
+		<antcall target="numbered_clean_build" />
+		<available file="${finalExpectedOutputFile}" property="factorydll.present" />
+		<fail unless="factorydll.present" message="BlueWhaleFactory.dll was not built for ARM" />
+	</target>
+
+	<target name="bluewhalefactory_s60v3fp0_winscw">
+
+		<!-- Build external dependencies first -->
+		<ant dir="..\ECOMPLUS" target="ecomplus_s60v3fp0_winscw" inheritAll="false" />
+
+		<!-- Be nice and ensure external dependencies were built successfully early in the process -->
+		<property name="requiredECOMPLUSFile" value="C:\Symbian\9.1\S60_3rd\Epoc32\release\winscw\udeb\ECOMPLUS.dll" />
+		<property name="requiredECOMPLUSLib" value="C:\Symbian\9.1\S60_3rd\EPOC32\RELEASE\winscw\udeb\ECOMPLUS.lib" />
+		<available file="${requiredECOMPLUSFile}" property="ecomplus.present" />
+		<fail unless="ecomplus.present" message="Required DLL NOT found: ${requiredECOMPLUSFile} -- be sure to check-out and build the ECOMPLUS project first." />
+		<available file="${requiredECOMPLUSLib}" property="ecompluslib.present" />
+		<fail unless="ecompluslib.present" message="Required lib NOT found: ${requiredECOMPLUSLib} -- be sure to check-out and build the ECOMPLUS project first." />
+
+		<property name="finalExpectedOutputFile" value="C:\Symbian\9.1\S60_3rd\Epoc32\release\winscw\udeb\bluewhalefactory.dll" />
+		<delete includeEmptyDirs="true" quiet="true">
+			<fileset file="${finalExpectedOutputFile}" />
+		</delete>
+
+		<!-- For s60v3fp0, override the platform parameter - this will take precedence over parameters set in subtasks. -->
+		<property name="platform" value="winscw" />
+		<property name="release" value="udeb" />
+
+		<property name="deviceSDK" value="s60v3fp0" />
+		<property name="EPOCDEVICE" value="S60_3rd:com.nokia.s60" />
+		<property name="pathAdditions" value="C:\Program Files\Common Files\SYMBIAN\Tools" />
+		<echo>dos_command[${dos_command}]    executionDirectory[${executionDirectory}]   deviceSDK[${deviceSDK}]    platform: [${platform}]   release: [${release}]   EPOCDEVICE[${EPOCDEVICE}]   pathAdditions[${pathAdditions}]</echo>
+		<antcall target="clean_build" />
+	</target>
+	
+	<target name="bluewhalefactory_test_s60v3fp0_winscw" depends="bluewhalefactory_s60v3fp0_winscw">
+		<property name="platform" value="winscw" />
+		<property name="release" value="udeb" />
+
+		<property name="deviceSDK" value="s60v3fp0" />
+		<property name="EPOCDEVICE" value="S60_3rd:com.nokia.s60" />
+		<property name="pathAdditions" value="C:\Program Files\Common Files\SYMBIAN\Tools" />
+		<antcall target="test_build_bluewhalefactory" />
+		<antcall target="unit_tests_s60v3fp0" />
+	</target>
+
+	<target name="bluewhalefactory_s60v2fp3_arm">
+
+		<!-- Build external dependencies first -->
+		<ant dir="..\ECOMPLUS" target="ecomplus_s60v2fp3_arm" inheritAll="false" />
+
+		<!-- Be nice and ensure external dependencies were built successfully early in the process -->
+		<property name="requiredECOMPLUSFile" value="C:\Symbian\8.1a\S60_2nd_FP3\Epoc32\release\ARMI\UREL\ECOMPLUS.dll" />
+		<property name="requiredECOMPLUSLib" value="C:\Symbian\8.1a\S60_2nd_FP3\EPOC32\RELEASE\ARMI\UREL\ECOMPLUS.lib" />
+		<available file="${requiredECOMPLUSFile}" property="ecomplus.present" />
+		<fail unless="ecomplus.present" message="Required DLL NOT found: ${requiredECOMPLUSFile} -- be sure to check-out and build the ECOMPLUS project first." />
+		<available file="${requiredECOMPLUSLib}" property="ecompluslib.present" />
+		<fail unless="ecompluslib.present" message="Required lib dso NOT found: ${requiredECOMPLUSLib} -- be sure to check-out and build the ECOMPLUS project first." />
+
+		<property name="finalExpectedOutputFile" value="C:\Symbian\8.1a\S60_2nd_FP3\Epoc32\release\armi\urel\bluewhalefactory.lib" />
+		<delete includeEmptyDirs="true" quiet="true">
+			<fileset file="${finalExpectedOutputFile}" />
+		</delete>
+
+		<!-- For s60v2fp3, override the platform parameter - this will take precedence over parameters set in subtasks. -->
+		<property name="platform" value="armi" />
+
+		<property name="deviceSDK" value="s60v2fp3" />
+		<property name="EPOCDEVICE" value="S60_2nd_FP3:com.nokia.series60" />
+		<property name="pathAdditions" value="C:\Program Files\Common Files\SYMBIAN\Tools" />
+		<echo>dos_command[${dos_command}]    executionDirectory[${executionDirectory}]   deviceSDK[${deviceSDK}]    platform: [${platform}]   release: [${release}]   EPOCDEVICE[${EPOCDEVICE}]   pathAdditions[${pathAdditions}]</echo>
+		<antcall target="numbered_clean_build" />
+		<available file="${finalExpectedOutputFile}" property="factorylib.present" />
+		<fail unless="factorylib.present" message="BlueWhaleFactory.lib was not built for ARM" />
+	</target>
+
+	<target name="bluewhalefactory_s60v2fp3_winscw">
+
+		<!-- Build external dependencies first -->
+		<ant dir="..\ECOMPLUS" target="ecomplus_s60v2fp3_winscw" inheritAll="false" />
+
+		<!-- Be nice and ensure external dependencies were built successfully early in the process -->
+		<property name="requiredECOMPLUSFile" value="C:\Symbian\8.1a\S60_2nd_FP3\Epoc32\release\winscw\udeb\ECOMPLUS.dll" />
+		<property name="requiredECOMPLUSLib" value="C:\Symbian\8.1a\S60_2nd_FP3\EPOC32\RELEASE\winscw\udeb\ECOMPLUS.lib" />
+		<available file="${requiredECOMPLUSFile}" property="ecomplus.present" />
+		<fail unless="ecomplus.present" message="Required DLL NOT found: ${requiredECOMPLUSFile} -- be sure to check-out and build the ECOMPLUS project first." />
+		<available file="${requiredECOMPLUSLib}" property="ecompluslib.present" />
+		<fail unless="ecompluslib.present" message="Required lib NOT found: ${requiredECOMPLUSLib} -- be sure to check-out and build the ECOMPLUS project first." />
+
+		<property name="finalExpectedOutputFile" value="C:\Symbian\8.1a\S60_2nd_FP3\Epoc32\release\winscw\udeb\bluewhalefactory.dll" />
+		<delete includeEmptyDirs="true" quiet="true">
+			<fileset file="${finalExpectedOutputFile}" />
+		</delete>
+		
+		<!-- For s60v2fp3, override the platform parameter - this will take precedence over parameters set in subtasks. -->
+		<property name="platform" value="winscw" />
+		<property name="release" value="udeb" />
+
+		<property name="deviceSDK" value="s60v2fp3" />
+		<property name="EPOCDEVICE" value="S60_2nd_FP3:com.nokia.series60" />
+		<property name="pathAdditions" value="C:\Program Files\Common Files\SYMBIAN\Tools" />
+		<echo>dos_command[${dos_command}]    executionDirectory[${executionDirectory}]   deviceSDK[${deviceSDK}]    platform: [${platform}]   release: [${release}]   EPOCDEVICE[${EPOCDEVICE}]   pathAdditions[${pathAdditions}]</echo>
+		<antcall target="clean_build" />
+		<!-- check to see if dll was build -->
+		<available file="${finalExpectedOutputFile}" property="factorydll.present" />
+		<fail unless="factorydll.present" message="BlueWhaleFactory.dll was not built for WINSCW" />
+
+	</target>
+
+	<target name="bluewhalefactory_s60v2fp2_arm">
+
+		<!-- Build external dependencies first -->
+		<ant dir="..\ECOMPLUS" target="ecomplus_s60v2fp2_arm" inheritAll="false" />
+
+		<!-- Be nice and ensure external dependencies were built successfully early in the process -->
+		<property name="requiredECOMPLUSFile" value="C:\Symbian\8.0a\S60_2nd_FP2_CW\Epoc32\release\ARMI\UREL\ECOMPLUS.dll" />
+		<property name="requiredECOMPLUSLib" value="C:\Symbian\8.0a\S60_2nd_FP2_CW\EPOC32\RELEASE\ARMI\UREL\ECOMPLUS.lib" />
+		<available file="${requiredECOMPLUSFile}" property="ecomplus.present" />
+		<fail unless="ecomplus.present"
+              message="Required DLL NOT found: ${requiredECOMPLUSFile} -- be sure to check-out and build the ECOMPLUS project first."
+        />
+		<available file="${requiredECOMPLUSLib}" property="ecompluslib.present" />
+		<fail unless="ecompluslib.present"
+              message="Required lib dso NOT found: ${requiredECOMPLUSLib} -- be sure to check-out and build the ECOMPLUS project first."
+        />
+
+		<property name="finalExpectedOutputFile" value="C:\Symbian\8.0a\S60_2nd_FP2_CW\Epoc32\release\armi\urel\bluewhalefactory.lib" />
+		<delete includeEmptyDirs="true" quiet="true">
+			<fileset file="${finalExpectedOutputFile}" />
+		</delete>
+
+		<!-- For s60v2fp2, override the platform parameter - this will take precedence over parameters set in subtasks. -->
+		<property name="platform" value="armi" />
+
+		<property name="deviceSDK" value="s60v2fp2" />
+		<property name="EPOCDEVICE" value="S60_2nd_FP2_CW:com.nokia.series60" />
+		<property name="pathAdditions" value="C:\Program Files\Common Files\SYMBIAN\Tools" />
+		<echo>dos_command[${dos_command}]    executionDirectory[${executionDirectory}]   deviceSDK[${deviceSDK}]    platform: [${platform}]   release: [${release}]   EPOCDEVICE[${EPOCDEVICE}]   pathAdditions[${pathAdditions}]</echo>
+		<antcall target="numbered_clean_build" />
+		<available file="${finalExpectedOutputFile}" property="factorylib.present" />
+		<fail unless="factorylib.present" message="BlueWhaleFactory.lib was not built for ARM" />
+	</target>
+
+	<target name="bluewhalefactory_s60v2fp2_winscw">
+
+		<!-- Build external dependencies first -->
+		<ant dir="..\ECOMPLUS" target="ecomplus_s60v2fp2_winscw" inheritAll="false" />
+
+		<!-- Be nice and ensure external dependencies were built successfully early in the process -->
+		<property name="requiredECOMPLUSFile" value="C:\Symbian\8.0a\S60_2nd_FP2_CW\Epoc32\release\winscw\udeb\ECOMPLUS.dll" />
+		<property name="requiredECOMPLUSLib" value="C:\Symbian\8.0a\S60_2nd_FP2_CW\EPOC32\RELEASE\winscw\udeb\ECOMPLUS.lib" />
+		<available file="${requiredECOMPLUSFile}" property="ecomplus.present" />
+		<fail unless="ecomplus.present"
+              message="Required DLL NOT found: ${requiredECOMPLUSFile} -- be sure to check-out and build the ECOMPLUS project first."
+        />
+		<available file="${requiredECOMPLUSLib}" property="ecompluslib.present" />
+		<fail unless="ecompluslib.present"
+              message="Required lib NOT found: ${requiredECOMPLUSLib} -- be sure to check-out and build the ECOMPLUS project first."
+        />
+
+		<property name="finalExpectedOutputFile" value="C:\Symbian\8.0a\S60_2nd_FP2_CW\Epoc32\release\winscw\udeb\bluewhalefactory.dll" />
+		<delete includeEmptyDirs="true" quiet="true">
+			<fileset file="${finalExpectedOutputFile}" />
+		</delete>
+
+		<!-- For s60v2fp2, override the platform parameter - this will take precedence over parameters set in subtasks. -->
+		<property name="platform" value="winscw" />
+		<property name="release" value="udeb" />
+
+		<property name="deviceSDK" value="s60v2fp2" />
+		<property name="EPOCDEVICE" value="S60_2nd_FP2_CW:com.nokia.series60" />
+		<property name="pathAdditions" value="C:\Program Files\Common Files\SYMBIAN\Tools" />
+		<echo>dos_command[${dos_command}]    executionDirectory[${executionDirectory}]   deviceSDK[${deviceSDK}]    platform: [${platform}]   release: [${release}]   EPOCDEVICE[${EPOCDEVICE}]   pathAdditions[${pathAdditions}]</echo>
+		<antcall target="clean_build" />
+		<!-- check to see if dll was build -->
+		<available file="${finalExpectedOutputFile}" property="factorydll.present" />
+		<fail unless="factorydll.present" message="BlueWhaleFactory.dll was not built for WINSCW" />
+
+	</target>
+
+	<target name="unit_tests_s60v3fp0">
+		<property name="tests.output.dir" location="C:\Symbian\9.1\S60_3rd\Epoc32/winscw/c/logs" />
+		<property name="tests.report.dir" location="${basedir}/test_results"/>
+		<exec executable="C:\Symbian\9.1\S60_3rd\Epoc32\release\winscw\udeb\bluewhalefactory_test.exe" failonerror="true">
+			<arg value="-dtextshell"/>
+			<arg value="-DScreenWidth=640"/>
+			<arg value="-DScreenHeight=240"/>
+			<arg value=" "/>
+		</exec>
+		<mkdir dir="${tests.report.dir}" />
+		<junitreport todir="${tests.report.dir}" >
+			<fileset dir="${tests.output.dir}">
+				<include name="*.xml"/>
+			</fileset>
+			<report format="noframes" todir="${tests.report.dir}" />
+		</junitreport>
+		<condition property="tests.all.passed" >
+			<isfileselected file="${tests.report.dir}/TESTS-Testsuites.xml" >
+				<contains text='testsuite errors="0" failures="0' />
+			</isfileselected>
+	    </condition>
+		<fail message="Tests failed" unless="tests.all.passed" />
+
+	</target>
+
+	<target name="unit_tests_uiqv3fp0">
+		<property name="tests.output.dir" location="C:\Symbian\UIQ3SDK\Epoc32/winscw/c/logs" />
+		<property name="tests.report.dir" location="${basedir}/test_results"/>
+		<exec executable="C:\Symbian\UIQ3SDK\Epoc32\release\winscw\udeb\bluewhalefactory_test.exe" failonerror="true">
+			<arg value="-dtextshell"/>
+			<arg value="-DScreenWidth=640"/>
+			<arg value="-DScreenHeight=240"/>
+			<arg value=" "/>
+		</exec>
+		<mkdir dir="${tests.report.dir}" />
+		<junitreport todir="${tests.report.dir}" >
+			<fileset dir="${tests.output.dir}">
+				<include name="*.xml"/>
+			</fileset>
+			<report format="noframes" todir="${tests.report.dir}" />
+		</junitreport>
+		<condition property="tests.all.passed" >
+			<isfileselected file="${tests.report.dir}/TESTS-Testsuites.xml" >
+				<contains text='testsuite errors="0" failures="0' />
+			</isfileselected>
+		</condition>
+		<fail message="Tests failed" unless="tests.all.passed" />
+
+	</target>
+
+	<target name="localtests">
+		<exec executable="python.exe" dir="${basedir}\..\TestEmailServer" failonerror="true">
+			<arg value="testrunner.py" />
+			<arg value="${basedir}\..\TestEmailServer\GoldStandardSampleEmails" />
+			<arg value="${basedir}" />
+		</exec>
+	</target>
+
+
+</project>
