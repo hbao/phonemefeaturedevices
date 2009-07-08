@@ -1,0 +1,379 @@
+[Version]
+Signature="$Windows NT$"
+CESignature="$Windows CE$"
+Provider=%CompanyName%
+
+[CEDevice]
+BuildMax=0xE0000000
+;this ensures that you do not get the "this app may not run on this version of windows Mobile" warning
+
+[DefaultInstall]
+CopyFiles=Files1,Files2,Files3
+CEShortcuts=Shortcuts
+
+[SourceDisksNames]
+1=,"Files1",, "\wince_vm\wm2003_ppc\midp\appdb\"
+2=,"Files2",, "\wince_vm\wm2003_ppc\midp\bin\arm\"
+3=,"Files3",, "\wince_vm\wm2003_ppc\midp\lib\"
+
+[SourceDisksFiles]
+"trustedmidlet_icon.png" = 1
+"_ack8.png" = 1
+"_ch_disabled.png" = 1
+"_ch_fg_requested.png" = 1
+"_ch_hilight_bg.png" = 1
+"_ch_single.png" = 1
+"_ch_suite.png" = 1
+"_dukeok8.png" = 1
+"_main.ks" = 1
+"_single8.png" = 1
+"_suite8.png" = 1
+"ImageToRawTool.jar" = 2
+"j2se_test_keystore.bin" = 2
+"JadTool.jar" = 2
+"kdp.jar" = 2
+"MEKeyTool.jar" = 2
+"preverify.exe" = 2
+"readme.txt" = 2
+"Romizer.jar" = 2
+"runMidlet.exe" = 2
+"SkinRomizationTool.jar" = 2
+"alert.image_bg0.png" = 3
+"alert.image_bg1.png" = 3
+"alert.image_bg2.png" = 3
+"alert.image_bg3.png" = 3
+"alert.image_bg4.png" = 3
+"alert.image_bg5.png" = 3
+"alert.image_bg6.png" = 3
+"alert.image_bg7.png" = 3
+"alert.image_bg8.png" = 3
+"alert.image_icon_alrm.png" = 3
+"alert.image_icon_cnfm.png" = 3
+"alert.image_icon_errr.png" = 3
+"alert.image_icon_info.png" = 3
+"alert.image_icon_warn.png" = 3
+"busycrsr.image_bg.png" = 3
+"busycrsr.image_frame0.png" = 3
+"busycrsr.image_frame1.png" = 3
+"busycrsr.image_frame10.png" = 3
+"busycrsr.image_frame11.png" = 3
+"busycrsr.image_frame12.png" = 3
+"busycrsr.image_frame13.png" = 3
+"busycrsr.image_frame14.png" = 3
+"busycrsr.image_frame15.png" = 3
+"busycrsr.image_frame16.png" = 3
+"busycrsr.image_frame2.png" = 3
+"busycrsr.image_frame3.png" = 3
+"busycrsr.image_frame4.png" = 3
+"busycrsr.image_frame5.png" = 3
+"busycrsr.image_frame6.png" = 3
+"busycrsr.image_frame7.png" = 3
+"busycrsr.image_frame8.png" = 3
+"busycrsr.image_frame9.png" = 3
+"calendar.png" = 3
+"choice.image_btn_bg0.png" = 3
+"choice.image_btn_bg1.png" = 3
+"choice.image_btn_bg2.png" = 3
+"choice.image_btn_bg3.png" = 3
+"choice.image_btn_bg4.png" = 3
+"choice.image_btn_bg5.png" = 3
+"choice.image_btn_bg6.png" = 3
+"choice.image_btn_bg7.png" = 3
+"choice.image_btn_bg8.png" = 3
+"choice.image_btn_icon.png" = 3
+"choice.image_chkbx0.png" = 3
+"choice.image_chkbx1.png" = 3
+"choice.image_popup_bg0.png" = 3
+"choice.image_popup_bg1.png" = 3
+"choice.image_popup_bg2.png" = 3
+"choice.image_popup_bg3.png" = 3
+"choice.image_popup_bg4.png" = 3
+"choice.image_popup_bg5.png" = 3
+"choice.image_popup_bg6.png" = 3
+"choice.image_popup_bg7.png" = 3
+"choice.image_popup_bg8.png" = 3
+"choice.image_radio0.png" = 3
+"choice.image_radio1.png" = 3
+"dateeditor.image_ampm.png" = 3
+"dateeditor.image_cal_bg.png" = 3
+"dateeditor.image_clock_bg.png" = 3
+"dateeditor.image_dates.png" = 3
+"dateeditor.image_mon_bg.png" = 3
+"dateeditor.image_radio0.png" = 3
+"dateeditor.image_radio1.png" = 3
+"dateeditor.image_time_bg.png" = 3
+"dateeditor.image_yr_bg.png" = 3
+"datefield.image_btn_bg0.png" = 3
+"datefield.image_btn_bg1.png" = 3
+"datefield.image_btn_bg2.png" = 3
+"datefield.image_btn_bg3.png" = 3
+"datefield.image_btn_bg4.png" = 3
+"datefield.image_btn_bg5.png" = 3
+"datefield.image_btn_bg6.png" = 3
+"datefield.image_btn_bg7.png" = 3
+"datefield.image_btn_bg8.png" = 3
+"datefield.image_icon_date.png" = 3
+"datefield.image_icon_datetime.png" = 3
+"datefield.image_icon_time.png" = 3
+"gauge.image_bg.png" = 3
+"gauge.image_dec_btn.png" = 3
+"gauge.image_inc_btn.png" = 3
+"gauge.image_mtr_empty.png" = 3
+"gauge.image_mtr_full.png" = 3
+"gauge.image_values.png" = 3
+"indicator_bar.png" = 3
+"indicator_home.png" = 3
+"indicator_network.png" = 3
+"indicator_trusted.png" = 3
+"menu.image_bg0.png" = 3
+"menu.image_bg1.png" = 3
+"menu.image_bg2.png" = 3
+"menu.image_bg3.png" = 3
+"menu.image_bg4.png" = 3
+"menu.image_bg5.png" = 3
+"menu.image_bg6.png" = 3
+"menu.image_bg7.png" = 3
+"menu.image_bg8.png" = 3
+"menu.image_submenu.png" = 3
+"menu.image_submenu_hl.png" = 3
+"menu.image_submenu_hl_right.png" = 3
+"menu.image_submenu_right.png" = 3
+"pbar.image_bg.png" = 3
+"pbar.image_mtr_empty.png" = 3
+"pbar.image_mtr_full.png" = 3
+"pbar.image_prcnts.png" = 3
+"pbar.image_values.png" = 3
+"pti.left_arrow.png" = 3
+"pti.right_arrow.png" = 3
+"screen.image_bg.png" = 3
+"skin.bin" = 3
+"softbtn.image_au_bg0.png" = 3
+"softbtn.image_au_bg1.png" = 3
+"softbtn.image_au_bg2.png" = 3
+"softbtn.image_bg0.png" = 3
+"softbtn.image_bg1.png" = 3
+"softbtn.image_bg2.png" = 3
+"softbtn.image_mu_bg0.png" = 3
+"softbtn.image_mu_bg1.png" = 3
+"softbtn.image_mu_bg2.png" = 3
+"stringitem.image_btn0.png" = 3
+"stringitem.image_btn1.png" = 3
+"stringitem.image_btn2.png" = 3
+"stringitem.image_btn3.png" = 3
+"stringitem.image_btn4.png" = 3
+"stringitem.image_btn5.png" = 3
+"stringitem.image_btn6.png" = 3
+"stringitem.image_btn7.png" = 3
+"stringitem.image_btn8.png" = 3
+"stringitem.image_lnk.png" = 3
+"ticker.image_au_bg0.png" = 3
+"ticker.image_au_bg1.png" = 3
+"ticker.image_au_bg2.png" = 3
+"title.image_bg3.png" = 3
+"title.image_bg4.png" = 3
+"title.image_bg5.png" = 3
+"title.image_bg6.png" = 3
+"title.image_bg7.png" = 3
+"title.image_bg8.png" = 3
+"trustedmidlet_icon.png" = 3
+"trusted_icon.png" = 3
+"untrusted_icon.png" = 3
+"updatebar.image_bg.png" = 3
+"updatebar.image_frame0.png" = 3
+"updatebar.image_frame1.png" = 3
+"updatebar.image_frame2.png" = 3
+"updatebar.image_frame3.png" = 3
+"updatebar.image_frame4.png" = 3
+"updatebar.image_frame5.png" = 3
+"updatebar.image_frame6.png" = 3
+
+[DestinationDirs]
+Shortcuts =,%CE11%          ; create shortcut in \Windows\Start Menu\Programs
+Files1 = 0,"%InstallDir%\appdb"
+Files2 = 0,"%InstallDir%\bin\arm"
+Files3 = 0,"%InstallDir%\lib"
+
+[Files1]
+"trustedmidlet_icon.png","trustedmidlet_icon.png",,0
+"_ack8.png","_ack8.png",,0
+"_ch_disabled.png","_ch_disabled.png",,0
+"_ch_fg_requested.png","_ch_fg_requested.png",,0
+"_ch_hilight_bg.png","_ch_hilight_bg.png",,0
+"_ch_single.png","_ch_single.png",,0
+"_ch_suite.png","_ch_suite.png",,0
+"_dukeok8.png","_dukeok8.png",,0
+"_main.ks","_main.ks",,0
+"_single8.png","_single8.png",,0
+"_suite8.png","_suite8.png",,0
+
+[Files2]
+"ImageToRawTool.jar","ImageToRawTool.jar",,0
+"j2se_test_keystore.bin","j2se_test_keystore.bin",,0
+"JadTool.jar","JadTool.jar",,0
+"kdp.jar","kdp.jar",,0
+"MEKeyTool.jar","MEKeyTool.jar",,0
+"preverify.exe","preverify.exe",,0
+"readme.txt","readme.txt",,0
+"Romizer.jar","Romizer.jar",,0
+"runMidlet.exe","runMidlet.exe",,0
+"SkinRomizationTool.jar","SkinRomizationTool.jar",,0
+
+[Files3]
+"alert.image_bg0.png","alert.image_bg0.png",,0
+"alert.image_bg1.png","alert.image_bg1.png",,0
+"alert.image_bg2.png","alert.image_bg2.png",,0
+"alert.image_bg3.png","alert.image_bg3.png",,0
+"alert.image_bg4.png","alert.image_bg4.png",,0
+"alert.image_bg5.png","alert.image_bg5.png",,0
+"alert.image_bg6.png","alert.image_bg6.png",,0
+"alert.image_bg7.png","alert.image_bg7.png",,0
+"alert.image_bg8.png","alert.image_bg8.png",,0
+"alert.image_icon_alrm.png","alert.image_icon_alrm.png",,0
+"alert.image_icon_cnfm.png","alert.image_icon_cnfm.png",,0
+"alert.image_icon_errr.png","alert.image_icon_errr.png",,0
+"alert.image_icon_info.png","alert.image_icon_info.png",,0
+"alert.image_icon_warn.png","alert.image_icon_warn.png",,0
+"busycrsr.image_bg.png","busycrsr.image_bg.png",,0
+"busycrsr.image_frame0.png","busycrsr.image_frame0.png",,0
+"busycrsr.image_frame1.png","busycrsr.image_frame1.png",,0
+"busycrsr.image_frame10.png","busycrsr.image_frame10.png",,0
+"busycrsr.image_frame11.png","busycrsr.image_frame11.png",,0
+"busycrsr.image_frame12.png","busycrsr.image_frame12.png",,0
+"busycrsr.image_frame13.png","busycrsr.image_frame13.png",,0
+"busycrsr.image_frame14.png","busycrsr.image_frame14.png",,0
+"busycrsr.image_frame15.png","busycrsr.image_frame15.png",,0
+"busycrsr.image_frame16.png","busycrsr.image_frame16.png",,0
+"busycrsr.image_frame2.png","busycrsr.image_frame2.png",,0
+"busycrsr.image_frame3.png","busycrsr.image_frame3.png",,0
+"busycrsr.image_frame4.png","busycrsr.image_frame4.png",,0
+"busycrsr.image_frame5.png","busycrsr.image_frame5.png",,0
+"busycrsr.image_frame6.png","busycrsr.image_frame6.png",,0
+"busycrsr.image_frame7.png","busycrsr.image_frame7.png",,0
+"busycrsr.image_frame8.png","busycrsr.image_frame8.png",,0
+"busycrsr.image_frame9.png","busycrsr.image_frame9.png",,0
+"calendar.png","calendar.png",,0
+"choice.image_btn_bg0.png","choice.image_btn_bg0.png",,0
+"choice.image_btn_bg1.png","choice.image_btn_bg1.png",,0
+"choice.image_btn_bg2.png","choice.image_btn_bg2.png",,0
+"choice.image_btn_bg3.png","choice.image_btn_bg3.png",,0
+"choice.image_btn_bg4.png","choice.image_btn_bg4.png",,0
+"choice.image_btn_bg5.png","choice.image_btn_bg5.png",,0
+"choice.image_btn_bg6.png","choice.image_btn_bg6.png",,0
+"choice.image_btn_bg7.png","choice.image_btn_bg7.png",,0
+"choice.image_btn_bg8.png","choice.image_btn_bg8.png",,0
+"choice.image_btn_icon.png","choice.image_btn_icon.png",,0
+"choice.image_chkbx0.png","choice.image_chkbx0.png",,0
+"choice.image_chkbx1.png","choice.image_chkbx1.png",,0
+"choice.image_popup_bg0.png","choice.image_popup_bg0.png",,0
+"choice.image_popup_bg1.png","choice.image_popup_bg1.png",,0
+"choice.image_popup_bg2.png","choice.image_popup_bg2.png",,0
+"choice.image_popup_bg3.png","choice.image_popup_bg3.png",,0
+"choice.image_popup_bg4.png","choice.image_popup_bg4.png",,0
+"choice.image_popup_bg5.png","choice.image_popup_bg5.png",,0
+"choice.image_popup_bg6.png","choice.image_popup_bg6.png",,0
+"choice.image_popup_bg7.png","choice.image_popup_bg7.png",,0
+"choice.image_popup_bg8.png","choice.image_popup_bg8.png",,0
+"choice.image_radio0.png","choice.image_radio0.png",,0
+"choice.image_radio1.png","choice.image_radio1.png",,0
+"dateeditor.image_ampm.png","dateeditor.image_ampm.png",,0
+"dateeditor.image_cal_bg.png","dateeditor.image_cal_bg.png",,0
+"dateeditor.image_clock_bg.png","dateeditor.image_clock_bg.png",,0
+"dateeditor.image_dates.png","dateeditor.image_dates.png",,0
+"dateeditor.image_mon_bg.png","dateeditor.image_mon_bg.png",,0
+"dateeditor.image_radio0.png","dateeditor.image_radio0.png",,0
+"dateeditor.image_radio1.png","dateeditor.image_radio1.png",,0
+"dateeditor.image_time_bg.png","dateeditor.image_time_bg.png",,0
+"dateeditor.image_yr_bg.png","dateeditor.image_yr_bg.png",,0
+"datefield.image_btn_bg0.png","datefield.image_btn_bg0.png",,0
+"datefield.image_btn_bg1.png","datefield.image_btn_bg1.png",,0
+"datefield.image_btn_bg2.png","datefield.image_btn_bg2.png",,0
+"datefield.image_btn_bg3.png","datefield.image_btn_bg3.png",,0
+"datefield.image_btn_bg4.png","datefield.image_btn_bg4.png",,0
+"datefield.image_btn_bg5.png","datefield.image_btn_bg5.png",,0
+"datefield.image_btn_bg6.png","datefield.image_btn_bg6.png",,0
+"datefield.image_btn_bg7.png","datefield.image_btn_bg7.png",,0
+"datefield.image_btn_bg8.png","datefield.image_btn_bg8.png",,0
+"datefield.image_icon_date.png","datefield.image_icon_date.png",,0
+"datefield.image_icon_datetime.png","datefield.image_icon_datetime.png",,0
+"datefield.image_icon_time.png","datefield.image_icon_time.png",,0
+"gauge.image_bg.png","gauge.image_bg.png",,0
+"gauge.image_dec_btn.png","gauge.image_dec_btn.png",,0
+"gauge.image_inc_btn.png","gauge.image_inc_btn.png",,0
+"gauge.image_mtr_empty.png","gauge.image_mtr_empty.png",,0
+"gauge.image_mtr_full.png","gauge.image_mtr_full.png",,0
+"gauge.image_values.png","gauge.image_values.png",,0
+"indicator_bar.png","indicator_bar.png",,0
+"indicator_home.png","indicator_home.png",,0
+"indicator_network.png","indicator_network.png",,0
+"indicator_trusted.png","indicator_trusted.png",,0
+"menu.image_bg0.png","menu.image_bg0.png",,0
+"menu.image_bg1.png","menu.image_bg1.png",,0
+"menu.image_bg2.png","menu.image_bg2.png",,0
+"menu.image_bg3.png","menu.image_bg3.png",,0
+"menu.image_bg4.png","menu.image_bg4.png",,0
+"menu.image_bg5.png","menu.image_bg5.png",,0
+"menu.image_bg6.png","menu.image_bg6.png",,0
+"menu.image_bg7.png","menu.image_bg7.png",,0
+"menu.image_bg8.png","menu.image_bg8.png",,0
+"menu.image_submenu.png","menu.image_submenu.png",,0
+"menu.image_submenu_hl.png","menu.image_submenu_hl.png",,0
+"menu.image_submenu_hl_right.png","menu.image_submenu_hl_right.png",,0
+"menu.image_submenu_right.png","menu.image_submenu_right.png",,0
+"pbar.image_bg.png","pbar.image_bg.png",,0
+"pbar.image_mtr_empty.png","pbar.image_mtr_empty.png",,0
+"pbar.image_mtr_full.png","pbar.image_mtr_full.png",,0
+"pbar.image_prcnts.png","pbar.image_prcnts.png",,0
+"pbar.image_values.png","pbar.image_values.png",,0
+"pti.left_arrow.png","pti.left_arrow.png",,0
+"pti.right_arrow.png","pti.right_arrow.png",,0
+"screen.image_bg.png","screen.image_bg.png",,0
+"skin.bin","skin.bin",,0
+"softbtn.image_au_bg0.png","softbtn.image_au_bg0.png",,0
+"softbtn.image_au_bg1.png","softbtn.image_au_bg1.png",,0
+"softbtn.image_au_bg2.png","softbtn.image_au_bg2.png",,0
+"softbtn.image_bg0.png","softbtn.image_bg0.png",,0
+"softbtn.image_bg1.png","softbtn.image_bg1.png",,0
+"softbtn.image_bg2.png","softbtn.image_bg2.png",,0
+"softbtn.image_mu_bg0.png","softbtn.image_mu_bg0.png",,0
+"softbtn.image_mu_bg1.png","softbtn.image_mu_bg1.png",,0
+"softbtn.image_mu_bg2.png","softbtn.image_mu_bg2.png",,0
+"stringitem.image_btn0.png","stringitem.image_btn0.png",,0
+"stringitem.image_btn1.png","stringitem.image_btn1.png",,0
+"stringitem.image_btn2.png","stringitem.image_btn2.png",,0
+"stringitem.image_btn3.png","stringitem.image_btn3.png",,0
+"stringitem.image_btn4.png","stringitem.image_btn4.png",,0
+"stringitem.image_btn5.png","stringitem.image_btn5.png",,0
+"stringitem.image_btn6.png","stringitem.image_btn6.png",,0
+"stringitem.image_btn7.png","stringitem.image_btn7.png",,0
+"stringitem.image_btn8.png","stringitem.image_btn8.png",,0
+"stringitem.image_lnk.png","stringitem.image_lnk.png",,0
+"ticker.image_au_bg0.png","ticker.image_au_bg0.png",,0
+"ticker.image_au_bg1.png","ticker.image_au_bg1.png",,0
+"ticker.image_au_bg2.png","ticker.image_au_bg2.png",,0
+"title.image_bg3.png","title.image_bg3.png",,0
+"title.image_bg4.png","title.image_bg4.png",,0
+"title.image_bg5.png","title.image_bg5.png",,0
+"title.image_bg6.png","title.image_bg6.png",,0
+"title.image_bg7.png","title.image_bg7.png",,0
+"title.image_bg8.png","title.image_bg8.png",,0
+"trustedmidlet_icon.png","trustedmidlet_icon.png",,0
+"trusted_icon.png","trusted_icon.png",,0
+"untrusted_icon.png","untrusted_icon.png",,0
+"updatebar.image_bg.png","updatebar.image_bg.png",,0
+"updatebar.image_frame0.png","updatebar.image_frame0.png",,0
+"updatebar.image_frame1.png","updatebar.image_frame1.png",,0
+"updatebar.image_frame2.png","updatebar.image_frame2.png",,0
+"updatebar.image_frame3.png","updatebar.image_frame3.png",,0
+"updatebar.image_frame4.png","updatebar.image_frame4.png",,0
+"updatebar.image_frame5.png","updatebar.image_frame5.png",,0
+"updatebar.image_frame6.png","updatebar.image_frame6.png",,0
+
+[Shortcuts]
+%AppName%,0,"runMidlet.exe"
+
+[CEStrings]
+InstallDir=%CE1%\%AppName%
+AppName="pMEF MIDP"
+
+[Strings]
+CompanyName="D.Preuveneers"
