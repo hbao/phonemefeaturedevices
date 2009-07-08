@@ -1,0 +1,38 @@
+/**
+*
+* Copyright © 2005 - 2007 Blue Whale Systems Ltd.
+* 
+* This software is provided "as is," and the copyright holder 
+* makes no representations or warranties, express or implied,
+* including but not limited to warranties of merchantability or 
+* fitness for any particular purpose or that the use of this software
+* or documentation will not infringe any third party patents, 
+* copyrights, trademarks or other rights.
+*
+* The copyright holder will not be liable for any direct, indirect
+* special or consequential damages arising out of any use of this
+* software or documentation.
+*
+*/
+/**
+ * A factory library for our core code.
+ *
+ * Note: to work around a bug in S60_V2_FP3 in Carbide make the project a static .lib 
+ *
+ */
+
+MACRO __DONT_USE_IN_CODE__MMP_ONLY__S60_V3_FP0__
+
+TARGET        pcsl_string.lib
+TARGETTYPE    lib
+OPTION GCCE -O2 -fno-unit-at-a-time
+
+SOURCEPATH    	..\..\string\utf16
+SOURCE 		pcsl_string.cpp
+SOURCEPATH    	..\..\string\util
+SOURCE		utf.cpp
+
+USERINCLUDE   	  .
+
+SYSTEMINCLUDE     \epoc32\include \epoc32\include\libc ..\..\string
+
