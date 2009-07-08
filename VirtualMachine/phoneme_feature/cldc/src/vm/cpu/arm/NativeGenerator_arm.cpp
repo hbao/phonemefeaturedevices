@@ -24,6 +24,12 @@
  * Clara, CA 95054 or visit www.sun.com if you need additional
  * information or have any questions.
  *
+ * NOTICE: Portions Copyright (c) 2007-2009 Blue Whale Systems.  
+ * This file has been modified by Blue Whale Systems on 04May2009. 
+ * The changes are licensed under the terms of the GNU General Public  
+ * License version 2. This notice was added to meet the conditions of  
+ * Section 3.a of the GNU General Public License version 2.  
+ * 
  *!c<
  * Copyright 2006 Intel Corporation. All rights reserved.
  *!c>
@@ -289,197 +295,6 @@ void NativeGenerator::generate_native_string_entries() {
   bind(bailout);
     comment("Bail out to the general <init>() implementation");
     push(init_args);
-    b("interpreter_method_entry");
-  }
-
-  //----------------------java.lang.String.equals(java.lang.Object)---------
-
-  {
-    Segment seg(this, code_segment, "java.lang.String.equals(java.lang.Object)");
-    Label aligned_loop, unaligned_loop;
-    Label aligned, unaligned;
-    Label small_string, error;
-    Label done_true, done_false;
-    // java.lang.String.equals
-    // Method boolean equals(java.lang.String)
-    bind_rom_linkable("native_string_equals_entry");
-  
-    wtk_profile_quick_call(/* param size */ 2);
-
-    comment("get strings to compare");
-    pop(tmp2);   // get first parameter;
-    pop(tmp0);   // get receiver
-
-    Register str0       = tmp0;
-    Register str0_count = tmp4;
-    Register str0_charp = tmp1;
-    
-    Register str1       = tmp2;
-    Register str1_count = tmp5;
-    Register str1_charp = tmp3;
-
-    Register offset0    = str0;
-    Register offset1    = str1;
-
-    Register value0     = str0;
-    Register value1     = str1;
-
-    Register str0_class = str0_count;
-    Register str1_class = str1_count;
-
-    Register junk       = tmp5;
-    Register result     = tos_val;
-
-    Register junk0      = tos_val;
-    Register junk1      = tos_tag;
-
-    // Warning:  We cannot bash tos_val until after we know we don't have 
-    // an errors, since it contains the method
-    comment("Null receiver?");
-    cmp(str0, zero);
-    b(error, eq);
-
-    comment("Identity?");
-    cmp(str0, reg(str1));
-    b(done_true, eq);
-
-    comment("Null argument?");
-    cmp(str1, zero);
-
-    comment("Get str0.class, str1.class");
-    ldr(str0_class, imm_index(str0, Oop::klass_offset()), ne);
-    ldr(str1_class, imm_index(str1, Oop::klass_offset()), ne);
-
-    b(done_false, eq);
-
-    cmp(str0_class, reg(str1_class));
-
-    comment("Get str0.blueprint, str1.blueprint");
-    ldr(str0_class, imm_index(str0_class, Oop::klass_offset()), ne);
-    ldr(str1_class, imm_index(str1_class, Oop::klass_offset()), ne);
-
-    comment("Different classes?");
-    cmp(str0_class, reg(str1_class), ne);
-
-    comment("Get str0.count, str1.count");
-    ldr(str0_count, imm_index(str0, String::count_offset()), eq);
-    ldr(str1_count, imm_index(str1, String::count_offset()), eq);
-
-    comment("Different length?");
-    cmp(str0_count, reg(str1_count), eq);
-
-    b(done_false, ne);
-
-    comment("Get str0.value[], str1.value[]");
-    ldr(str0_charp, imm_index(str0, String::value_offset()));
-    ldr(str1_charp, imm_index(str1, String::value_offset()));
-
-    comment("Get str0.offset, str1.offset");
-    ldr(offset0, imm_index(str0, String::offset_offset()));
-    ldr(offset1, imm_index(str1, String::offset_offset()));
-    
-    comment("Compute start of character data");
-    add(str0_charp, str0_charp, imm(Array::base_offset()));
-    add(str1_charp, str1_charp, imm(Array::base_offset()));
-    add(str0_charp, str0_charp, imm_shift(offset0, lsl, LogBytesPerShort));
-    add(str1_charp, str1_charp, imm_shift(offset1, lsl, LogBytesPerShort));
-    
-    comment("Small string?");
-    cmp(str0_count, imm(2));
-    b(small_string, le);
-
-    comment("Both strings are aligned?");
-    orr(junk, str0_charp, reg(str1_charp));
-    tst(junk, imm(3));
-    comment("Unaligned strings are uncommon - go out of the fast path ASAP");
-    b(unaligned, ne);
-
-  bind(aligned);
-    comment("Get number of words");
-    mov(str0_count, imm_shift(str0_count, lsr, 
-                              (LogBytesPerWord - LogBytesPerShort)), set_CC);
-
-    comment("Count word-aligned?");
-    ldr(value0, imm_index(str0_charp, BytesPerWord, post_indexed), cc);
-    ldr(value1, imm_index(str1_charp, BytesPerWord, post_indexed), cc);
-    b(aligned_loop, cc);
-
-    comment("Get offset of the last char");
-    mov(str1_count, imm_shift(str0_count, lsl, LogBytesPerWord));
-    comment("Compare last char");
-    ldrh(value0, add_index3(str0_charp, str1_count));
-    ldrh(value1, add_index3(str1_charp, str1_count));
-    cmp(value0, reg(value1));
-    ldr(value0, imm_index(str0_charp, BytesPerWord, post_indexed), eq);
-    ldr(value1, imm_index(str1_charp, BytesPerWord, post_indexed), eq);
-    b(done_false, ne);
-
-  bind(aligned_loop);
-    cmp(value0, reg(value1));
-    b(done_false, ne);
-    sub(str0_count, str0_count, one, set_CC);
-    ldr(value0, imm_index(str0_charp, BytesPerWord, post_indexed), ne);
-    ldr(value1, imm_index(str1_charp, BytesPerWord, post_indexed), ne);
-    b(done_true, eq);
-    cmp(value0, reg(value1));
-    b(done_false, ne);
-    sub(str0_count, str0_count, one, set_CC);
-    ldr(value0, imm_index(str0_charp, BytesPerWord, post_indexed), ne);
-    ldr(value1, imm_index(str1_charp, BytesPerWord, post_indexed), ne);
-    b(aligned_loop, ne);
-
-  bind(done_true);
-    comment("Return true");
-    mov(result, one);
-    set_return_type(T_INT);
-    comment("continue in caller");
-    jmpx(lr);
-
-  bind(unaligned);
-    comment("Check relative alignment");
-    eor(junk, str0_charp, reg(str1_charp));
-    tst(junk, imm(3));
-    b(unaligned_loop, ne);
-
-    comment("Strings are both unaligned");
-    comment("Compare first char and become word-aligned");
-    ldrh(value0, imm_index3(str0_charp, BytesPerShort, post_indexed));
-    ldrh(value1, imm_index3(str1_charp, BytesPerShort, post_indexed));
-    cmp(value0, reg(value1));
-    sub(str0_count, str0_count, one, eq);    
-    b(aligned, eq);
-
-  bind(done_false);
-    comment("Return false");
-    mov(result, zero);
-    set_return_type(T_INT);
-    comment("continue in caller");
-    jmpx(lr);
-
-  bind(small_string);
-    comment("Empty string?");
-    cmp(str0_count, zero);
-    b(done_true, eq);
-
-  bind(unaligned_loop);
-    comment("Char-aligned loop");
-    ldrh(value0, imm_index3(str0_charp, BytesPerShort, post_indexed));
-    ldrh(value1, imm_index3(str1_charp, BytesPerShort, post_indexed));
-    cmp(value0, reg(value1));
-    b(done_false, ne);
-    sub(str0_count, str0_count, one, set_CC);
-    b(unaligned_loop, ne);
-
-    comment("Return true");
-    mov(result, one);
-    set_return_type(T_INT);
-    comment("continue in caller");
-    jmpx(lr);
-
-  bind(error);
-    comment("We have some sort of error");
-    push(tmp0);
-    push(tmp2);
     b("interpreter_method_entry");
   }
 
@@ -1160,7 +975,7 @@ void NativeGenerator::generate_native_string_entries() {
     cmp(endIndex, reg(count), eq);
     b(return_this, eq);
 
-    sub(heap_top, heap_top, imm(4 * BytesPerWord), set_CC);
+    sub(heap_top, heap_top, imm(5 * BytesPerWord), set_CC);
     b(bailout, mi);
     cmp(heap_top, reg(result));
 
@@ -1204,7 +1019,7 @@ void NativeGenerator::generate_native_string_entries() {
     eol_comment("return new string in r%d", tos_val);
     mov(tos_val, reg(result));
 
-    add(result, result, imm(4 * BytesPerWord));
+    add(result, result, imm(5 * BytesPerWord));
     set_inline_allocation_top(result);
 
     set_return_type(T_OBJECT);
@@ -1679,8 +1494,10 @@ void NativeGenerator::generate_native_system_entries() {
 
   UNCHECKED_ARRAY_COPY_ENTRY(obj);
 
-bind(copy_object_array);  
-  comment("If dst is in new space, there's no need to set bitvector");
+bind(copy_object_array);
+  // Blue Whale Systems 07Feb2009: Single quotes upset the Symbian armi compiler and break s60v2fp2 and s60v2fp3 builds.
+  //comment("If dst is in new space, there's no need to set bitvector"); 
+  comment("If dst is in new space, there is no need to set bitvector");
   get_old_generation_end(t3);
   cmp(dst, reg(t3));
   b(copy_int_array, ge);
@@ -1741,7 +1558,9 @@ bind(copy_upwards);
     mov_imm(m1, -1);
 
     comment("The main copy loop copies 32 elements each iteration.");
-    comment("If don't have (n*32 + {0..7}) elements, jump to the");
+    // Blue Whale Systems 07Feb2009: Single quotes upset the Symbian armi compiler and break s60v2fp2 and s60v2fp3 builds.
+    //comment("If don't have (n*32 + {0..7}) elements, jump to the"); 
+    comment("If do not have (n*32 + {0..7}) elements, jump to the");
     comment("middle of the array");
 
     Label n_x_32_plus_24;
@@ -1835,7 +1654,9 @@ bind(done);
   jmpx(lr);
 
 bind(copy_illegal);
-  comment("Shouldn't call this");
+  // Blue Whale Systems 07Feb2009: Single quotes upset the Symbian armi compiler and break s60v2fp2 and s60v2fp3 builds.
+  //comment("Shouldn't call this");
+  comment("Should not call this");
   breakpoint();
 
 bind(bailout_2);
@@ -1971,7 +1792,7 @@ void NativeGenerator::generate_native_misc_entries() {
     Label div_loop, div10_magic_constant;
 
     const int max_len = 12; // the longest number (-2147483648) is of 11 chars
-    const int string_instance_size = String::header_size() + 12;
+    const int string_instance_size = String::header_size() + 16;
     const int charray_instance_size = TypeArray::base_offset() +
                                       sizeof(jchar) * max_len;
     const int needed_memory = string_instance_size + charray_instance_size;
@@ -2039,6 +1860,9 @@ void NativeGenerator::generate_native_misc_entries() {
     eol_comment("set String.offset");
     rsb(ptr, ptr, imm(max_len));
     str(ptr, imm_index(result, String::offset_offset()));
+    eol_comment("set String.hashCodeValue");
+    mov(ptr, zero);
+    str(ptr, imm_index(result, String::hashCodeValue_offset()));
     
     comment("Return to caller");
     set_return_type(T_OBJECT);

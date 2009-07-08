@@ -427,13 +427,31 @@ public:
     return _heap_size;
   }
 
-#if ENABLE_ISOLATES
-  static int available_for_current_task();
-#else
-  static inline int available_for_current_task() {
-    return free_memory();
-  }
+  static int available_for_current_task( void ) {
+    int available = free_memory();
+#if ENABLE_COMPILER
+    available += compiler_area_free(); 
 #endif
+#if ENABLE_ISOLATES
+    available -= _reserved_memory_deficit;
+    const TaskMemoryInfo& task_info = get_task_info(_current_task_id);
+    const int estimate = task_info.estimate;
+    {
+      const int unused = task_info.reserve - estimate;
+      if (unused > 0) {
+        available += unused;
+      }
+    }
+    {
+      const int unused = task_info.limit - estimate;
+      if (unused < available) {
+        available = unused;
+      }
+    }
+    GUARANTEE(available >= 0, "sanity");
+#endif
+    return available;
+  }
 
   static OopDesc** mark_area_end (void) {
     return _large_object_area_bottom;
@@ -449,15 +467,15 @@ public:
 
   static void update_compiler_area_top(const OopDesc* latest_compiled_method) {
     OopDesc** compiler_area_top = _saved_compiler_area_top;
+    _saved_compiler_area_top = NULL;
+
     if( latest_compiled_method ) {
       GUARANTEE(latest_compiled_method == (OopDesc*)compiler_area_top, "sanity");
       compiler_area_top = DERIVED(OopDesc**, compiler_area_top,
                                    latest_compiled_method->object_size());
     }
     compiler_area_terminate( compiler_area_top );
-  #ifndef PRODUCT
-    _saved_compiler_area_top = NULL;
-  #endif
+
     if (VerifyGC >= 2) {
       verify();
     }
@@ -489,7 +507,11 @@ public:
     return compiler_area_tail(_compiler_area_start);
   }
   static int compiler_area_free (void) {
-    return compiler_area_tail(_compiler_area_top);
+    OopDesc** compiler_area_top = _saved_compiler_area_top;
+    if( !_saved_compiler_area_top ) {
+      compiler_area_top = _compiler_area_top;
+    }
+    return compiler_area_tail(compiler_area_top);
   }
   static int compiler_area_used (void) {
     return DISTANCE(_compiler_area_start, _compiler_area_top);

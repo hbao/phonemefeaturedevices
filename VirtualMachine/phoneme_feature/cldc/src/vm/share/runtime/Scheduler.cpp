@@ -19,6 +19,12 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA
  * 
+ * NOTICE: Portions Copyright (c) 2007-2009 Blue Whale Systems.
+ * This file has been modified by Blue Whale Systems on 27May2009.
+ * The changes are licensed under the terms of the GNU General Public
+ * License version 2. This notice was added to meet the conditions of
+ * Section 3.a of the GNU General Public License version 2.
+ * 
  * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa
  * Clara, CA 95054 or visit www.sun.com if you need additional
  * information or have any questions.
@@ -621,6 +627,14 @@ void Scheduler::wake_up_terminated_sleepers(int task_id JVM_TRAPS) {
         }
         remove_waiting_thread(&this_thread);
         notify_wakeup(&this_thread JVM_CHECK);
+		if ((!next_thread.is_null() && next_thread().wait_obj() == NULL) ||
+			(!next_waiting.is_null() && next_waiting().wait_obj() == NULL))
+		{
+			// next_thread and/or next_waiting has been removed within the notify_wakeup call
+			// Restart the traversal to ensure integrity
+			next_waiting = Universe::scheduler_waiting();
+			break;
+		}
       }
       this_thread = next_thread;
     }
@@ -710,6 +724,14 @@ void Scheduler::wake_up_timed_out_sleepers(JVM_SINGLE_ARG_TRAPS) {
         }
         remove_waiting_thread(&this_thread);
         notify_wakeup(&this_thread JVM_CHECK);
+		if ((!next_thread.is_null() && next_thread().wait_obj() == NULL) ||
+			(!next_waiting.is_null() && next_waiting().wait_obj() == NULL))
+		{
+			// next_thread and/or next_waiting has been removed within the notify_wakeup call
+			// Restart the traversal to ensure integrity
+			next_waiting = Universe::scheduler_waiting();
+			break;
+		}
       }
       this_thread = next_thread;
     }

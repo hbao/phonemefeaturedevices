@@ -613,7 +613,7 @@ final class LoadedSkinResources {
 // #ifdef ENABLE_CDC
     protected native void finalize();
 // #else
-    private native void finalize();
+    protected native void finalize();
 // #endif
     
 }
@@ -682,7 +682,7 @@ final class LoadedSkinData {
 // #ifdef ENABLE_CDC
     protected native void finalize();
 // #else
-    private native void finalize();
+    protected native void finalize();
 // #endif
 
     LoadedSkinData() {

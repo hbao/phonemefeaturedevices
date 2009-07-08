@@ -23,7 +23,13 @@
  * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa
  * Clara, CA 95054 or visit www.sun.com if you need additional
  * information or have any questions.
- *
+ *   
+ * NOTICE: Portions Copyright (c) 2007-2009 Blue Whale Systems.  
+ * This file has been modified by Blue Whale Systems on 07Feb2009. 
+ * The changes are licensed under the terms of the GNU General Public  
+ * License version 2. This notice was added to meet the conditions of  
+ * Section 3.a of the GNU General Public License version 2.  
+ * 
  *!c<
  * Copyright 2006 Intel Corporation. All rights reserved.
  *!c>
@@ -684,7 +690,9 @@ InterpreterGenerator::generate_quick_native_method_entry(BasicType return_type)
 #endif /* #if ENABLE_PROFILER*/
 
   Label throwit;
-  comment("Tell VM we're out of quick native methods");
+  // Blue Whale Systems 07Feb2009: Single quotes upset the Symbian armi compiler and break s60v2fp2 and s60v2fp3 builds.
+  //comment("Tell VM we're out of quick native methods"); 
+  comment("Tell VM we are out of quick native methods");
   get_jvm_quick_native_exception(tmp1);
   mov_imm(tmp2, 0);
   set_jvm_in_quick_native_method(tmp2);
@@ -1001,7 +1009,9 @@ void InterpreterGenerator::generate_fast_memroutines() {
     comment("compensate");
     add(r2, r2, imm(3));
    bind(small);
-    comment("we're here when data is heavily misaligned, or few bytes left");
+    // Blue Whale Systems 07Feb2009: Single quotes upset the Symbian armi compiler and break s60v2fp2 and s60v2fp3 builds.
+    //comment("we're here when data is heavily misaligned, or few bytes left"); 
+    comment("we are here when data is heavily misaligned, or few bytes left");
     cmp(r2, imm(0));
     mov(r0, imm(0), eq);
     jmpx(lr, eq);

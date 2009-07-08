@@ -231,7 +231,7 @@ public class PIMDatabase {
 
 	try {
 	    tmpDir = (FileConnection)conn.openPrim(classSecurityToken,
-                getTypeDir(listType) + "/" + listName);
+                getTypeDir(listType) + fileSep + listName);
 	    enListDir = tmpDir.list();
             tmpDir.close();
         } catch (IOException e) {

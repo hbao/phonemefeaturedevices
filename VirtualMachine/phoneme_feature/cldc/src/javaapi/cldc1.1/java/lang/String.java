@@ -19,6 +19,12 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA
  * 
+ * NOTICE: Portions Copyright (c) 2007-2009 Blue Whale Systems.
+ * This file has been modified by Blue Whale Systems on 04May2009.
+ * The changes are licensed under the terms of the GNU General Public
+ * License version 2. This notice was added to meet the conditions of
+ * Section 3.a of the GNU General Public License version 2.
+ * 
  * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa
  * Clara, CA 95054 or visit www.sun.com if you need additional
  * information or have any questions.
@@ -97,6 +103,9 @@ class String {
     /** The count is the number of characters in the String. */
     private int count;
 
+	/** Cached value of this String's hash code. */
+    private int hashCodeValue = 0;
+
     /**
      * Initializes a newly created <code>String</code> object so that it
      * represents an empty character sequence.
@@ -116,6 +125,7 @@ class String {
         count = value.length();
         this.value = new char[count];
         value.getChars(0, count, this.value, 0);
+        hashCodeValue = value.hashCodeValue;
     }
 
     /**
@@ -408,15 +418,20 @@ class String {
      * @see     java.lang.String#compareTo(java.lang.String)
      * @see     java.lang.String#equalsIgnoreCase(java.lang.String)
      */
-/*
+
     public native boolean equals(Object anObject);
-*/
+/*
     public boolean equals(Object anObject) {
         if (this == anObject) {
             return true;
         }
         if (anObject instanceof String) {
             String anotherString = (String)anObject;
+			if (hashCodeValue != 0 && anotherString.hashCodeValue != 0 && hashCodeValue != anotherString.hashCodeValue)
+			{
+				return false;
+			}
+
             int n = count;
             if (n == anotherString.count) {
                 char v1[] = value;
@@ -433,7 +448,7 @@ class String {
         }
         return false;
     }
-
+*/
     /**
      * Compares this <code>String</code> to another <code>String</code>,
      * ignoring case considerations.  Two strings are considered equal
@@ -506,6 +521,8 @@ class String {
      * @exception java.lang.NullPointerException if <code>anotherString</code>
      *          is <code>null</code>.
      */
+    public native int compareTo(String anotherString);
+/*
     public int compareTo(String anotherString) {
         int len1 = count;
         int len2 = anotherString.count;
@@ -537,6 +554,7 @@ class String {
         }
         return len1 - len2;
     }
+*/
 
     /**
      * Tests if two string regions are equal.
@@ -647,6 +665,8 @@ class String {
      * @exception java.lang.NullPointerException if <code>prefix</code> is
      *          <code>null</code>.
      */
+    public native boolean startsWith(String prefix, int toffset);
+/*
     public boolean startsWith(String prefix, int toffset) {
         char ta[] = value;
         int to = offset + toffset;
@@ -665,6 +685,7 @@ class String {
         }
         return true;
     }
+*/
 
     /**
      * Tests if this string starts with the specified prefix.
@@ -910,16 +931,18 @@ class String {
      * @exception java.lang.NullPointerException if <code>str</code> is
      *          <code>null</code>
      */
+    public native int indexOf(String str, int fromIndex);
+/*
     public int indexOf(String str, int fromIndex) {
         char v1[] = value;
         char v2[] = str.value;
         int max = offset + (count - str.count);
         if (fromIndex >= count) {
             if (count == 0 && fromIndex == 0 && str.count == 0) {
-                /* There is an empty string at index 0 in an empty string. */
+                // There is an empty string at index 0 in an empty string.
                 return 0;
             }
-            /* Note: fromIndex might be near -1>>>1 */
+            // Note: fromIndex might be near -1>>>1
             return -1;
         }
         if (fromIndex < 0) {
@@ -936,7 +959,7 @@ class String {
     startSearchForFirstChar:
         while (true) {
 
-            /* Look for first character. */
+            // Look for first character.
             while (i <= max && v1[i] != first) {
                 i++;
             }
@@ -944,21 +967,21 @@ class String {
                 return -1;
             }
 
-            /* Found first character, now look at the rest of v2 */
+            // Found first character, now look at the rest of v2
             int j = i + 1;
             int end = j + str.count - 1;
             int k = strOffset + 1;
             while (j < end) {
                 if (v1[j++] != v2[k++]) {
                     i++;
-                    /* Look for str's first char again. */
+                    // Look for str's first char again.
                     continue startSearchForFirstChar;
                 }
             }
-            return i - offset;  /* Found whole string. */
+            return i - offset;  // Found whole string.
         }
     }
-
+*/
     /**
      * Returns a new string that is a substring of this string. The
      * substring begins with the character at the specified index and
@@ -1090,12 +1113,14 @@ class String {
      * @return  a string derived from this string by replacing every
      *          occurrence of <code>oldChar</code> with <code>newChar</code>.
      */
+    public native String replace(char oldChar, char newChar);
+/*
     public String replace(char oldChar, char newChar) {
         if (oldChar != newChar) {
             int len = count;
             int i = -1;
-            char[] val = value; /* avoid getfield opcode */
-            int off = offset;   /* avoid getfield opcode */
+            char[] val = value; // avoid getfield opcode
+            int off = offset;   // avoid getfield opcode
 
             while (++i < len) {
                 if (val[off + i] == oldChar) {
@@ -1117,6 +1142,7 @@ class String {
         }
         return this;
     }
+*/
 
     /**
      * Converts all of the characters in this <code>String</code> to lower case.

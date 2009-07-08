@@ -17,6 +17,12 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA
  * 
+ * NOTICE: Portions Copyright (c) 2007-2009 Blue Whale Systems.
+ * This file has been modified by Blue Whale Systems on 23Mar2009.
+ * The changes are licensed under the terms of the GNU General Public
+ * License version 2. This notice was added to meet the conditions of
+ * Section 3.a of the GNU General Public License version 2.
+ *
  * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa
  * Clara, CA 95054 or visit www.sun.com if you need additional
  * information or have any questions.
@@ -1248,41 +1254,43 @@ class EscapedUtil {
      * </pre>
      * @param name string to be processed
      * @return escaped string
-     * @throws IllegalArgumentException if encoding not supported
      *
      */
-    public static String getUnescapedString(String name) {
-        try {
-            if (name == null) {
-                return null;
-            }
-            if (name.indexOf("%") == -1) {
-                return name;
-            } else {
-                byte newName[] = new byte[name.length()];
-                int nextPlace = 0;
-                for (int i = 0; i < name.length(); i++) {
-                    char c = name.charAt(i);
-                    if (c == '%') {
-                        String hexNum = name.substring(i+1, i+3).toUpperCase();
-                        if (isHexCharsLegal(hexNum)) {
-                            c = hexToChar(hexNum);
-                            i = i + 2;
-                        } else {
-                            throw new IllegalArgumentException("Bad format");
-                        }
-                    } else if (containsReserved(c)) {
-                        throw
-                            new IllegalArgumentException("Bad escaped format");
-                    }
-                    newName[nextPlace++] = (byte)c;
-                }
-                return new String(newName, 0, nextPlace,  "UTF-8");
-            }
-        } catch (UnsupportedEncodingException uee) {
-            throw new IllegalArgumentException(uee.getMessage());
-        }
-    }
+	public static String getUnescapedString(String name)
+	{
+		if (name == null)
+		{
+			return null;
+		}
+		if (name.indexOf("%") == -1)
+		{
+			return name;
+		}
+		else
+		{
+			char newName[] = new char[name.length()];	// unescaped string length is <= escaped string length
+			int nextPlace = 0;
+			for (int i = 0; i < name.length(); i++)
+			{
+				char c = name.charAt(i);
+				if (c == '%')
+				{
+					String hexNum = name.substring(i+1, i+3).toUpperCase();
+					if (isHexCharsLegal(hexNum))
+					{
+						c = hexToChar(hexNum);
+						i = i + 2;
+					}
+					else
+					{
+						throw new IllegalArgumentException("Bad format");
+					}
+				}
+				newName[nextPlace++] = c;
+			}
+			return new String(newName, 0, nextPlace);
+		}
+	}
 
     /**
      * Checks if the hexadecimal character is valid.

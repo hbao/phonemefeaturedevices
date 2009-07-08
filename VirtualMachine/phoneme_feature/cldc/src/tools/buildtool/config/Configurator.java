@@ -40,7 +40,7 @@ import util.*;
  */
 public class Configurator {
     Vector flags;
-    Hashtable platform;
+    public Hashtable platform;
     Hashtable product;
 
     public Configurator() {

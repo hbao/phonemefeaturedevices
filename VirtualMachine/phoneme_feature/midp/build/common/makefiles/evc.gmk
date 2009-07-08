@@ -23,6 +23,15 @@
 # Clara, CA 95054 or visit www.sun.com if you need additional
 # information or have any questions.
 #
+
+# 
+# NOTICE: Portions Copyright (c) 2007-2009 Davy Preuveneers.
+# This file has been modified by Davy Preuveneers on 2009/01/11. The
+# changes are licensed under the terms of the GNU General Public
+# License version 2. This notice was added to meet the conditions of
+# Section 3.a of the GNU General Public License version 2.
+# 
+
 ######################################################################
 #
 # Generic compiler specific defines
@@ -83,6 +92,7 @@ else
     LD                 := $(EVC_ARCH_PATH)/link.exe
     RC                 := $(EVC_COMMON_PATH)/rc.exe
     ASM                := $(EVC_ARCH_PATH)/$(ASM)
+    AR                 := $(EVC_ARCH_PATH)/lib.exe
 
     CEVersion           = 400
 endif
@@ -95,7 +105,26 @@ CC_OUTPUT	    = /Fo
 LD_OUTPUT	    = /out:
 LINKER_OUTPUT	= $(LD_OUTPUT)
 LIBS		      = 
-LD_FLAGS 	    = /subsystem:windowsce,3.00 /MACHINE:ARM /DLL $(DEBUG_LD_FLAGS)
+
+ifeq ($(USE_VS2005), true)
+MRI_ADD		    =
+MRI_CREATE	    = /OUT:
+MRI_SAVE	    =
+MRI_OPT		    = /subsystem:windowsce,5.01 /MACHINE:THUMB /NOLOGO @
+else
+MRI_ADD		    =
+MRI_CREATE	    = /OUT:
+MRI_SAVE	    =
+MRI_OPT		    = /subsystem:windowsce,3.00 /MACHINE:ARM /NOLOGO @
+endif
+
+
+
+ifeq ($(USE_VS2005), true)
+LD_FLAGS 	    = /subsystem:windowsce,5.01 /MACHINE:THUMB $(DEBUG_LD_FLAGS)
+else
+LD_FLAGS 	    = /subsystem:windowsce,3.00 /MACHINE:ARM $(DEBUG_LD_FLAGS)
+endif
 
 
 endif

@@ -266,7 +266,7 @@ initImageDst(_imageDstPtr p) {
   p->hasAlpha               = KNI_FALSE;
 }
 
-
+#ifdef UNDER_CE
 /**
  * Decodes the given input data into a storage format used by immutable
  * images.  The input data should be a PNG image.
@@ -322,6 +322,7 @@ imgdcd_decode_png
 
     return dstData.hasAlpha;
 }
+#endif
 
 #if ENABLE_JPEG
 #define RGB565_PIXEL_SIZE sizeof(imgdcd_pixel_type)

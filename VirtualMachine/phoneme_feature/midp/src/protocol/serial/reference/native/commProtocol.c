@@ -24,6 +24,14 @@
  * information or have any questions.
  */
 
+/*
+ * NOTICE: Portions Copyright (c) 2007-2009 Davy Preuveneers.
+ * This file has been modified by Davy Preuveneers on 2009/01/11. The
+ * changes are licensed under the terms of the GNU General Public
+ * License version 2. This notice was added to meet the conditions of
+ * Section 3.a of the GNU General Public License version 2.
+ */
+
 /*=========================================================================
  * SYSTEM:    KVM
  * SUBSYSTEM: networking
@@ -236,7 +244,11 @@ KNIEXPORT KNI_RETURNTYPE_INT
     info = (MidpReentryData*)SNI_GetReentryData(NULL);
     if (info == NULL) {
 
+#ifndef UNDER_CE
         if (hPort <= 0) {
+#else
+		if (0) {
+#endif
             midp_snprintf(gKNIBuffer, KNI_BUFFER_SIZE,
                 "Read from port: handle %d is invalid\n", hPort);
             REPORT_INFO1(LC_PROTOCOL, "%s\n", gKNIBuffer);

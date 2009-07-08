@@ -23,6 +23,15 @@
 #
 ######################################################################
 
+# 
+# NOTICE: Portions Copyright (c) 2007-2009 Davy Preuveneers.
+# This file has been modified by Davy Preuveneers on 2009/01/11. The
+# changes are licensed under the terms of the GNU General Public
+# License version 2. This notice was added to meet the conditions of
+# Section 3.a of the GNU General Public License version 2.
+# 
+
+
 # Create library from object files
 #
 # IMPL_NOTE: win32 platform has limitation of environment (32K),
@@ -37,6 +46,7 @@ OBJLIB = $(OBJ_DIR)/$(OBJLIBNAME)
 OBJLIB_SCRIPT = $(OBJLIB)-list
 
 $(OBJLIB): $(OBJ_FILES)
+	@echo "Building $(OBJLIB) ..."
 	$(shell echo $(MRI_CREATE)$(OBJLIBNAME) > $(OBJLIB_SCRIPT))
 	$(foreach path, $(OBJ_FILES), $(shell echo $(MRI_ADD)`$(call fixcygpath,$(path))` >> $(OBJLIB_SCRIPT)))
 	$(shell echo $(MRI_SAVE) >> $(OBJLIB_SCRIPT))

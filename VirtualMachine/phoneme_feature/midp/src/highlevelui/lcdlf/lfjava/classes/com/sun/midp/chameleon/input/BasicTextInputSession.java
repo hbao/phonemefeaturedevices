@@ -412,6 +412,12 @@ public class BasicTextInputSession implements
             }
         }
 
+        for (int i = 0; i < inputModeSet.length; i++) {
+            if (inputModeSet[i] instanceof KeyboardInputMode) {
+                newMode = inputModeSet[i];
+            }
+        }
+
         if (newMode != null) {
             if (newMode != currentMode) {
                 endInputMode(currentMode);

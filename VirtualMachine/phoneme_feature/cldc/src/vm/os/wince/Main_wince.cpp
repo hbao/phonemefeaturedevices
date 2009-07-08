@@ -24,6 +24,14 @@
  * information or have any questions.
  */
 
+/*
+ * NOTICE: Portions Copyright (c) 2007-2009 Davy Preuveneers.
+ * This file has been modified by Davy Preuveneers on 2009/01/11. The
+ * changes are licensed under the terms of the GNU General Public
+ * License version 2. This notice was added to meet the conditions of
+ * Section 3.a of the GNU General Public License version 2.
+ */
+
 #include "incls/_precompiled.incl"
 #include "incls/_Main_wince.cpp.incl"
 
@@ -535,8 +543,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
   }
 
   process_command_line(lpCmdLine);
-  if (_WindowSystem && _argc == 1) {
-    int eembc = 0, hello = 0, mixed = 1, done = 0;
+  if (_WindowSystem && _argc >= 1) {
+    int eembc = 0, hello = 0, mixed = 1, done = 1;
 
     init_gui(hInstance, hPrevInstance, nShowCmd);
     if (!done && MessageBox(NULL, TEXT("EEMBC (mixed)?"),

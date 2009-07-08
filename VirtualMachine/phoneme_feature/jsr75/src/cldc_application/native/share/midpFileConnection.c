@@ -19,6 +19,12 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA
  * 
+ * NOTICE: Portions Copyright (c) 2007-2009 Blue Whale Systems.
+ * This file has been modified by Blue Whale Systems on 27Mar2009.
+ * The changes are licensed under the terms of the GNU General Public
+ * License version 2. This notice was added to meet the conditions of
+ * Section 3.a of the GNU General Public License version 2.
+ *
  * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa
  * Clara, CA 95054 or visit www.sun.com if you need additional
  * information or have any questions.
@@ -457,12 +463,12 @@ Java_com_sun_cdc_io_j2me_file_DefaultFileHandler_truncate()
 
                 if (truncStatus != 0)
                 {
-                    KNI_ThrowNew(midpIOException, EXCEPTION_MSG(fcTruncFileFailed));
+					KNI_ThrowNew(midpIOException, EXCEPTION_MSG(fcTruncFileFailed));
                 }
             }
             else
             {
-                KNI_ThrowNew(midpIOException, EXCEPTION_MSG(fcOpenFileFailed));
+				KNI_ThrowNew(midpIOException, EXCEPTION_MSG(fcOpenFileFailed));
             }
         }
         else
@@ -890,12 +896,16 @@ Java_com_sun_cdc_io_j2me_file_DefaultFileHandler_openDir()
 {
     const pcsl_string * fileName = NULL;
     PCSL_DEFINE_ASCII_STRING_LITERAL_START(sep)
+#ifdef __unix__
      {'/', '\0' }
+#else
+     {'\\', '\0' }
+#endif
     PCSL_DEFINE_ASCII_STRING_LITERAL_END(sep);
     pcsl_string dirName  = PCSL_STRING_NULL;
     void*       fileList = NULL;
     jlong       res      = 0;    
-
+    const pcsl_string* finalName = NULL;
     DEBUG_PRINT("openDir");
     
     KNI_StartHandles(1);
@@ -905,20 +915,52 @@ Java_com_sun_cdc_io_j2me_file_DefaultFileHandler_openDir()
 
     fileName = (const pcsl_string *)(long)KNI_GetLongField(objectHandle, fileNameID);
 
-    if (fileName == NULL) {        
+    if (fileName == NULL) 
+	{        
         KNI_ThrowNew(midpNullPointerException, EXCEPTION_MSG(fcDirNameIsNull));
-    } else {
-	if (pcsl_string_cat(fileName, &sep, &dirName) != PCSL_STRING_OK) {
-            KNI_ThrowNew(midpOutOfMemoryError, NULL);	
-	} else {
-	  fileList = pcsl_file_openfilelist(&dirName);        
-	  pcsl_string_free(&dirName);
-	  if (fileList == NULL) {
-	      KNI_ThrowNew(midpIOException, EXCEPTION_MSG(fcDirOpenFailed));
-	  } else {
-	      res = (jlong)(long)fileList;
-	  }
-	}
+    } 
+	else 
+	{
+#ifdef UNDER_CE
+		if (pcsl_string_cat(fileName, &sep, &dirName) != PCSL_STRING_OK)
+		{
+			KNI_ThrowNew(midpOutOfMemoryError, NULL);	
+		}
+		else
+		{
+			finalName = &dirName;
+		}
+#else
+		// ensure there's a trailing separator
+		if (!pcsl_string_ends_with(fileName, &sep))
+		{
+			if (pcsl_string_cat(fileName, &sep, &dirName) != PCSL_STRING_OK)
+			{
+				KNI_ThrowNew(midpOutOfMemoryError, NULL);
+			}
+			else
+			{
+				finalName = &dirName;
+			}
+		}
+		else
+		{
+			finalName = fileName;
+		}
+#endif
+		if (finalName)
+		{
+			fileList = pcsl_file_openfilelist(finalName);
+			pcsl_string_free(&dirName);
+			if (fileList == NULL)
+			{
+				KNI_ThrowNew(midpIOException, EXCEPTION_MSG(fcDirOpenFailed));
+			}
+			else
+			{
+				res = (jlong)(long)fileList;
+			}
+		}
     }
 
     KNI_EndHandles();
@@ -958,12 +1000,17 @@ Java_com_sun_cdc_io_j2me_file_DefaultFileHandler_dirGetNextFile()
 {
     const pcsl_string * fileName      = NULL;
     PCSL_DEFINE_ASCII_STRING_LITERAL_START(sep)
+#ifdef __unix__
       {'/', '\0' }
+#else
+      {'\\', '\0' }
+#endif
     PCSL_DEFINE_ASCII_STRING_LITERAL_END(sep);
     pcsl_string dirName       = PCSL_STRING_NULL;
     pcsl_string found         = PCSL_STRING_NULL;
     pcsl_string shortName     = PCSL_STRING_NULL;
     pcsl_string resultName    = PCSL_STRING_NULL;    
+    const pcsl_string* finalName    = NULL;
     void*       fileList      = NULL;
     int         includeHidden = 0;
     int         statusNext    = -1;
@@ -997,62 +1044,90 @@ Java_com_sun_cdc_io_j2me_file_DefaultFileHandler_dirGetNextFile()
     }
     else
     {
-        if (pcsl_string_cat(fileName, &sep, &dirName) != PCSL_STRING_OK) {
-            KNI_ThrowNew(midpOutOfMemoryError, NULL);
-        } else {
-	  const jsize dirNameLen = pcsl_string_length(&dirName);
-	  while (!finish) {   
-            statusNext = pcsl_file_getnextentry(fileList, &dirName, &found);
-                            
-            if (statusNext == 0)
-            {
-                statusHidden = pcsl_file_get_attribute(&found,
-                                            PCSL_FILE_ATTR_HIDDEN, &hidden);
-                if (statusHidden == 0)		
-                {
-		    if (hidden == 0 || includeHidden == 1)
-		    {
-		        const jsize foundLen = pcsl_string_length(&found);  
-                        /* remove path prefix */
-			if (pcsl_string_substring(&found, 
-						  dirNameLen, foundLen,
-						  &shortName) != PCSL_STRING_OK) {
-		            KNI_ThrowNew(midpOutOfMemoryError, NULL);
-	                } else {                       
-			  /* add trailing '/' if the file is a directory */
-			  statusDir = pcsl_file_is_directory(&found);
-			  if (statusDir == 1)
-			  {
-			    if (pcsl_string_cat(&shortName, &sep, &resultName) != PCSL_STRING_OK) {
-                              KNI_ThrowNew(midpOutOfMemoryError, NULL);
-			    }
-			    pcsl_string_free(&shortName);
-			  }  
-			  else
-                          {
-                            resultName = shortName;
-                          }
-
-			  if (midp_jstring_from_pcsl_string(&resultName, fnameHandle)) {
-                              KNI_ThrowNew(midpOutOfMemoryError, NULL);
-			  }
-
-			  pcsl_string_free(&resultName);
+#ifdef UNDER_CE
+		if (pcsl_string_cat(fileName, &sep, &dirName) != PCSL_STRING_OK)
+		{
+			KNI_ThrowNew(midpOutOfMemoryError, NULL);
+		}
+		else
+		{
+			finalName = &dirName;
+		}
+#else
+		// ensure there's a trailing separator
+		if (!pcsl_string_ends_with(fileName, &sep))
+		{
+			if (pcsl_string_cat(fileName, &sep, &dirName) != PCSL_STRING_OK)
+			{
+				KNI_ThrowNew(midpOutOfMemoryError, NULL);
 			}
-                        finish = 1;
-		    }
-                }
-            }
-            else
-            {                                
-                KNI_ReleaseHandle(fnameHandle);
-                finish = 1;                
-            }
+			else
+			{
+				finalName = &dirName;
+			}
+		}
+		else
+		{
+			finalName = fileName;
+		}
+#endif
+		if (finalName)
+		{
+			const jsize dirNameLen = pcsl_string_length(finalName);
+			while (!finish)
+			{
+				statusNext = pcsl_file_getnextentry(fileList, finalName, &found);
+
+				if (statusNext == 0)
+				{
+					statusHidden = pcsl_file_get_attribute(&found, PCSL_FILE_ATTR_HIDDEN, &hidden);
+					if (statusHidden == 0)		
+					{
+						if (hidden == 0 || includeHidden == 1)
+						{
+							const jsize foundLen = pcsl_string_length(&found);  
+							/* remove path prefix */
+							if (pcsl_string_substring(&found, dirNameLen, foundLen, &shortName) != PCSL_STRING_OK)
+							{
+								KNI_ThrowNew(midpOutOfMemoryError, NULL);
+							}
+							else
+							{                       
+								/* add trailing '/' if the file is a directory */
+								statusDir = pcsl_file_is_directory(&found);
+								if (statusDir == 1)
+								{
+									if (pcsl_string_cat(&shortName, &sep, &resultName) != PCSL_STRING_OK)
+									{
+										KNI_ThrowNew(midpOutOfMemoryError, NULL);
+									}
+									pcsl_string_free(&shortName);
+								}  
+								else
+								{
+									resultName = shortName;
+								}
+
+								if (midp_jstring_from_pcsl_string(&resultName, fnameHandle))
+								{
+									KNI_ThrowNew(midpOutOfMemoryError, NULL);
+								}
+								pcsl_string_free(&resultName);
+							}
+							finish = 1;
+						}
+					}
+				}
+				else
+				{
+					KNI_ReleaseHandle(fnameHandle);
+					finish = 1;                
+				}
             
-            pcsl_string_free(&found);
-	  }
-	  pcsl_string_free(&dirName);
-	}
+				pcsl_string_free(&found);
+			}
+			pcsl_string_free(&dirName);
+		}
     }
 
     KNI_EndHandlesAndReturnObject(fnameHandle);

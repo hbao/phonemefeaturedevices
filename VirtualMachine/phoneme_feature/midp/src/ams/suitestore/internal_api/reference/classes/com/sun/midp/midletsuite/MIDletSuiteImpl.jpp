@@ -656,7 +656,7 @@ public final class MIDletSuiteImpl implements MIDletSuite {
 // #ifdef ENABLE_CDC
     protected native void finalize();
 // #else
-    private native void finalize();
+    protected native void finalize();
 // #endif
 
     /**

@@ -186,8 +186,8 @@ typedef struct bn_mont_ctx_st
 
 INTEGER BN_mod_exp_mont(BIGNUM *r, BIGNUM *a, BIGNUM *p, BIGNUM *m,BN_CTX *ctx);
 BIGNUM  *BN_value_one();
-INTEGER BN_mask_bits();
-BIGNUM  *BN_mod_inverse();
+INTEGER BN_mask_bits(BIGNUM *a,INTEGER n);
+BIGNUM  *BN_mod_inverse(BIGNUM *a, BIGNUM *n, BN_CTX *ctx);
 INTEGER BN_mod_exp(BIGNUM *r, BIGNUM *a, BIGNUM *p, BIGNUM *m,BN_CTX *ctx);
 BN_MONT_CTX *BN_MONT_CTX_new(INTEGER bytes);
 INTEGER BN_from_montgomery(BIGNUM *r,BIGNUM *a,BN_MONT_CTX *mont,BN_CTX *ctx);

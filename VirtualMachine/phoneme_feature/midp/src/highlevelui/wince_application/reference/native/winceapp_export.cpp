@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright  1990-2008 Sun Microsystems, Inc. All Rights Reserved.
+ * Copyright  1990-2007 Sun Microsystems, Inc. All Rights Reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER
  * 
  * This program is free software; you can redistribute it and/or
@@ -25,6 +25,24 @@
  */
 
 /*
+ * NOTICE: Portions Copyright (c) 2007-2009 Davy Preuveneers.
+ * This file has been modified by Davy Preuveneers on 2009/01/11. The
+ * changes are licensed under the terms of the GNU General Public
+ * License version 2. This notice was added to meet the conditions of
+ * Section 3.a of the GNU General Public License version 2.
+ */
+
+/*
+ * NOTICE: Portions Copyright (c) 2009 Blue Whale Systems Ltd.
+ * This file has been modified by Blue Whale Systems Ltd on 09 Mar 2009. The
+ * changes are licensed under the terms of the GNU General Public
+ * License version 2. This notice was added to meet the conditions of
+ * Section 3.a of the GNU General Public License version 2.
+ */
+
+
+
+/*
  * This file implements the launching of the stand-along CDC-HI VM
  * on the WinCE platform.
  */
@@ -36,6 +54,13 @@
 #include <sipapi.h>
 #include <tpcshell.h>
 
+#include <winsock.h>
+
+#undef ENABLE_DIRECT_DRAW
+
+#if ENABLE_DIRECT_DRAW
+#error ENABLE_DIRECT_DRAW is set but Direct Draw is not properly supported!
+#endif
 
 #if ENABLE_DIRECT_DRAW
 #include <ddraw.h>
@@ -45,6 +70,11 @@
 #include <swvapi.h>
 #endif
 
+#define ENABLE_FULLSCREEN 0
+#define ENABLE_GAPI 0
+//#define ENABLE_NETWORK_TRACING 1
+
+#if ENABLE_GAPI
 
 /**
  * The functions exported by gx.h use C++ linkage, hence this file
@@ -52,6 +82,8 @@
  */
 #define GXDLL_EXPORTS
 #include <gx.h>
+
+#endif
 
 extern "C" {
 
@@ -70,14 +102,43 @@ extern "C" {
 #include <midp_mastermode_port.h>
 #include <anc_indicators.h>
 
+#include <midpUtilKni.h>
+#include <sni.h>
+#include <commonKNIMacros.h>
+
 #define KEYMAP_MD_KEY_HOME (KEYMAP_KEY_MACHINE_DEP)
+
+#include <Msgqueue.h>
+#include <PM.h>
+// from pmimpl.h file.
+#ifndef MAX_MESSAGES
+#define MAX_MESSAGES       5
+#endif
+#ifndef MAX_NAMELEN
+#define MAX_NAMELEN         128
+#endif
+
+#ifndef QUEUE_SIZE
+#define QUEUE_SIZE          (MAX_MESSAGES * (sizeof(POWER_BROADCAST) + (MAX_PATH * sizeof(TCHAR))))
+#endif
+
+HANDLE hMsgQueue = NULL;
+HANDLE hPowerNotify = NULL;
+int WINAPI PowerNotifyThread(LPVOID pvParam);
+
+#define WM_POWER_STATE_RESUME  0x123456
+#define WM_POWER_STATE_SUSPEND 0x567890
+#define IDT_TIMER1 WM_USER+100
 
 /* global variables defined in midp_msgQueue_md.c */
 extern int inMidpEventLoop;
 extern int lastWmSettingChangeTick;
 
+jboolean bVirtualModeEnabled = KNI_FALSE;
+
 gxj_screen_buffer gxj_system_screen_buffer;
 
+static HWND hwndToolbar = NULL;
 static HWND hwndMain = NULL;
 static HWND hwndTextActive = NULL;
 static HWND hwndTextField = NULL;
@@ -86,7 +147,11 @@ static WNDPROC oldTextFieldProc;
 static WNDPROC oldTextBoxProc;
 static int editBoxShown = 0;
 static int editCHX, editCHY, editCHW, editCHH; /* in CHAM coordinates */
+#if ENABLE_FULLSCREEN
+static int titleHeight = 0;
+#else
 static int titleHeight = JWC_WINCE_TITLE_HEIGHT;
+#endif
 static RECT rcVisibleDesktop;
 static HANDLE eventThread;
 static HINSTANCE instanceMain;
@@ -229,20 +294,137 @@ static void createEditors() {
     SetWindowLong(hwndTextBox, GWL_WNDPROC, (LONG)&myTextBoxProc);
 }
 
-static void updateDimensions() {
+static void showToolbar(bool bShow) {
+    ShowWindow(hwndToolbar, bShow ? SW_SHOWNORMAL : SW_HIDE);
+    UpdateWindow(hwndToolbar);
+}
+
+static void showSipButton(bool bShow) {
+    HWND hWin = FindWindow(TEXT("MS_SIPBUTTON"), NULL);
+    if (hWin > 0) {
+        ShowWindow(hWin, bShow ? SW_SHOWNORMAL : SW_HIDE);
+        UpdateWindow(hWin);
+    }
+}
+
+static void showInputPanel(bool bShow) {
+    HWND hWin = FindWindow(TEXT("SipWndClass"), NULL);
+    if (hWin > 0) {
+        ShowWindow(hWin, bShow ? SW_SHOWNORMAL : SW_HIDE);
+        UpdateWindow(hWin);
+    }
+}
+
+static void showTaskBar(bool bShow) {
+    HWND hWin = FindWindow(TEXT("HHTaskBar"), NULL);
+    if (hWin > 0) {
+        ShowWindow(hWin, bShow ? SW_SHOWNORMAL : SW_HIDE);
+        UpdateWindow(hWin);
+    }
+}
+
+void initDeviceType() {
+    TCHAR platform[256];
+
+    titleHeight = JWC_WINCE_TITLE_HEIGHT;
+    if (SystemParametersInfo(SPI_GETPLATFORMTYPE, sizeof(platform), platform, 0) != 0) {
+        if (lstrcmp(platform, TEXT("PocketPC")) == 0) {
+            titleHeight = 0;
+        } else
+        if (lstrcmp(platform, TEXT("Smartphone")) == 0) {
+            titleHeight = 0;
+        }
+    }
+}
+
+#if ENABLE_GAPI
+
+static void debugScreen() {
     SIPINFO sipinfo;
     RECT rc;
+    DEVMODE devmode;
 
     memset(&sipinfo, 0, sizeof(sipinfo));
     sipinfo.cbSize = sizeof(SIPINFO);
     SHSipInfo(SPI_GETSIPINFO, 0, &sipinfo, 0);
     rcVisibleDesktop = sipinfo.rcVisibleDesktop;
 
-    SystemParametersInfo(SPI_GETWORKAREA, 0, &rc, 0);
-    gxj_system_screen_buffer.width = rc.right;
-    gxj_system_screen_buffer.height = rc.bottom;
+    fprintf(stdout, "Visible: %d,%d,%d,%d\n", sipinfo.rcVisibleDesktop.left, sipinfo.rcVisibleDesktop.top,
+        sipinfo.rcVisibleDesktop.right, sipinfo.rcVisibleDesktop.bottom);
 
-    MoveWindow(hwndMain, rc.left, rc.top, rc.right, rc.bottom, TRUE);
+    GetWindowRect(hwndMain, &rc);
+    fprintf(stdout, "Window: %d,%d,%d,%d\n", rc.left, rc.top, rc.right, rc.bottom);
+
+    GetWindowRect(hwndMain, &rc);
+    fprintf(stdout, "Screen: %d,%d\n", GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN));
+
+    memset(&devmode, 0, sizeof(devmode));
+    devmode.dmSize  = sizeof(devmode);
+    devmode.dmFields = DM_DISPLAYORIENTATION;
+    ChangeDisplaySettingsEx(NULL, &devmode, NULL, CDS_TEST, NULL);
+    if (devmode.dmDisplayOrientation != DMDO_0)
+       fprintf(stdout, "Orientation: Landscape\n");
+    else
+       fprintf(stdout, "Orientation: Portrait\n");
+}
+
+#endif
+
+static DWORD hasKeyboard() {
+    DWORD   dwSize, dwErr, dwValType, dwValue = 0;
+    HKEY    hKey = NULL;
+
+    dwSize = sizeof(dwValue);
+    if (RegOpenKeyEx(HKEY_CURRENT_USER, TEXT("Software\\Microsoft\\Shell"), 0, KEY_QUERY_VALUE, &hKey) == ERROR_SUCCESS) {
+        if ((dwErr = RegQueryValueEx(hKey, TEXT("HasKeyboard"), NULL, &dwValType, (LPBYTE)&dwValue, &dwSize)) != ERROR_SUCCESS) {
+            dwValue = 0;
+        }
+        RegCloseKey(hKey);
+    }
+    return dwValue;
+}
+
+static void updateDimensions() {
+    SIPINFO sipinfo;
+    RECT rc;
+
+    memset(&sipinfo, 0, sizeof(sipinfo));
+    sipinfo.cbSize = sizeof(SIPINFO);
+    SipGetInfo(&sipinfo);
+
+    if (bVirtualModeEnabled) {
+        memcpy(&rc, &sipinfo.rcVisibleDesktop, sizeof(rc));
+        if (sipinfo.fdwFlags & SIPF_ON) {
+            rc.bottom = sipinfo.rcSipRect.top;
+        } else {
+            RECT rcToolbar;
+            GetWindowRect(hwndToolbar, &rcToolbar);
+            rc.bottom = rcToolbar.bottom;
+        }
+    } else {
+        RECT rcToolbar;
+        DWORD dwSIP;
+
+        dwSIP = (hasKeyboard() ? SHFS_HIDESIPBUTTON : SHFS_SHOWSIPBUTTON);
+#if ENABLE_FULLSCREEN
+        SHFullScreen(hwndMain, dwSIP | SHFS_HIDETASKBAR | SHFS_HIDESTARTICON);
+#else
+        SHFullScreen(hwndMain, dwSIP | SHFS_SHOWTASKBAR | SHFS_SHOWSTARTICON);
+#endif
+        GetWindowRect(hwndMain, &rc);
+        rc.bottom = GetSystemMetrics(SM_CYSCREEN) - titleHeight;
+    }
+#if ENABLE_FULLSCREEN
+    rc.top = 0;
+#endif
+    rcVisibleDesktop = rc;
+
+    gxj_system_screen_buffer.width = rc.right - rc.left;
+    gxj_system_screen_buffer.height = rc.bottom - rc.top;
+
+    MoveWindow(hwndMain, rc.left, rc.top, gxj_system_screen_buffer.width,
+        gxj_system_screen_buffer.height, TRUE);
+    showToolbar(bVirtualModeEnabled);
 }
 
 static void initPutpixelSurface() {
@@ -259,6 +441,17 @@ static void initPutpixelSurface() {
 
 static void releasePutpixelSurface() {
     midpFree(gxj_system_screen_buffer.pixelData);
+}
+
+static void deleteGDIObjects() {
+    if (NULL != g_hMemDC) {
+        DeleteDC(g_hMemDC);
+        g_hMemDC = NULL;
+    }
+    if (NULL != g_hBitmap) {
+        DeleteObject(g_hBitmap);
+        g_hBitmap = NULL;
+    }
 }
 
 #if ENABLE_DIRECT_DRAW
@@ -327,17 +520,6 @@ static void releaseDirectDraw() {
     g_screen.pDD = NULL;
 }
 
-static void deleteGDIObjects() {
-    if (NULL != g_hMemDC) {
-        DeleteDC(g_hMemDC);
-        g_hMemDC = NULL;
-    }
-    if (NULL != g_hBitmap) {
-        DeleteObject(g_hBitmap);
-        g_hBitmap = NULL;
-    }
-}
-
 /*
  * Flushing for direct_flush();
  */
@@ -399,7 +581,23 @@ static LPDIRECTDRAWSURFACE createMemorySurface(void* pVmem, int width, int heigh
  */
 
 static PTCHAR    _szAppName    = TEXT(MAIN_WINDOW_CLASS_NAME);
-static PTCHAR    _szTitle      = TEXT(MAIN_WINDOW_CLASS_NAME);
+
+/*
+ #2996: WinCE: Clicking on BlueWhale TodayItem when the process is already
+ running does nothing
+
+ #2993 WinCE: App title bar shows "phoneME" instead of "BlueWhale"
+
+ Putting the first instance of the process back in the foreground failed
+ because the title of the VM window defined below did not match with the
+ one looked for in the ActivatePreviousInstance() call in runMidlet_md.c.
+
+ When rebranding also change the name in:
+ midp/src/ams/example/jams_port/wince/native/runMidlet_md.c
+ */
+
+//static PTCHAR    _szTitle      = TEXT(MAIN_WINDOW_CLASS_NAME);
+static PTCHAR    _szTitle      = TEXT("BlueWhale");
 static HINSTANCE _hInstance;
 
 static BOOL InitApplication(HINSTANCE hInstance) {
@@ -415,12 +613,27 @@ static BOOL InitApplication(HINSTANCE hInstance) {
     wc.hbrBackground = (HBRUSH) GetStockObject(WHITE_BRUSH);
     wc.lpszMenuName = NULL;
     wc.lpszClassName = _szAppName;
+    _hInstance = hInstance;
 
     return RegisterClass(&wc);
 }
 
+static void CreateMenuBar() {
+    SHMENUBARINFO mbi;
+    
+    memset(&mbi, 0, sizeof(SHMENUBARINFO));
+    mbi.cbSize = sizeof(SHMENUBARINFO);
+    mbi.hwndParent = hwndMain;
+    mbi.dwFlags = SHCMBF_EMPTYBAR | SHCMBF_HIDDEN;
+    mbi.hInstRes = _hInstance;
+    
+    if (SHCreateMenuBar(&mbi)) {
+        hwndToolbar = mbi.hwndMB;
+    }
+}
+
 static BOOL InitInstance(HINSTANCE hInstance, int CmdShow) {
-    HWND _hwndMain = CreateWindowEx(WS_EX_CAPTIONOKBTN,
+    HWND _hwndMain = CreateWindowEx(0,
                                _szAppName,
                                _szTitle,
                                WS_VISIBLE,
@@ -433,23 +646,50 @@ static BOOL InitInstance(HINSTANCE hInstance, int CmdShow) {
     if (!_hwndMain)
         return FALSE;
 
-    SHFullScreen(_hwndMain, SHFS_SHOWTASKBAR | SHFS_HIDESIPBUTTON | SHFS_SHOWSTARTICON);
-
     winceapp_set_window_handle(_hwndMain);
     ShowWindow(_hwndMain, CmdShow);
     UpdateWindow(_hwndMain);
 
-#ifdef ENABLE_CDC
+#if ENABLE_CDC
     /* Temporary fix to enter exclusive input mode.
      * A better solution should register for hot keys.
      */
+#if ENABLE_GAPI
     GXOpenInput();
 #endif
 
+#endif
+
+    MSGQUEUEOPTIONS msgQueueOptions = {0};
+    HANDLE hPowerNotifyThread = NULL;
+
+    msgQueueOptions.dwSize = sizeof(MSGQUEUEOPTIONS);
+    msgQueueOptions.dwFlags = 0;
+    msgQueueOptions.dwMaxMessages = MAX_MESSAGES;
+    msgQueueOptions.cbMaxMessage = sizeof(POWER_BROADCAST) + MAX_PATH;
+    msgQueueOptions.bReadAccess = TRUE;
+
+    hMsgQueue = CreateMsgQueue(NULL, &msgQueueOptions);
+
+    if (hMsgQueue == NULL) {
+	MessageBox(NULL, TEXT("Failed to CreateMsgQueue"), TEXT("Bye"), MB_OK);
+        return FALSE;
+    }
+
+    hPowerNotify = RequestPowerNotifications(hMsgQueue, POWER_NOTIFY_ALL);
+
+    if (hPowerNotify == NULL) {
+	MessageBox(NULL, TEXT("Failed to RequestPowerNotifications"), TEXT("Bye"), MB_OK);
+        return FALSE;
+    }
+
+    hPowerNotifyThread = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)PowerNotifyThread, NULL, 0, NULL);
+
+    SetTimer(hwndMain, IDT_TIMER1, 1000, (TIMERPROC)NULL);
     return TRUE;
 }
 
-static BOOL initWindows(HINSTANCE hInstance, int nShowCmd) {
+BOOL initWindows(HINSTANCE hInstance, int nShowCmd) {
     if (!InitApplication(hInstance))
         return FALSE;
     if (!InitInstance(hInstance, nShowCmd))
@@ -473,11 +713,14 @@ DWORD WINAPI CreateWinCEWindow(LPVOID lpParam) {
 #endif
 
 
+#if ENABLE_CDC
     if (!initWindows(GetModuleHandle(NULL), SW_SHOW)) {
         REPORT_ERROR(LC_AMS, "init_gui() failed");
         MessageBox(NULL, TEXT("Failed to start JWC"), TEXT("Bye"), MB_OK);
     }
+#endif
 
+    CreateMenuBar();
     initPutpixelSurface();
     if (eventWindowInit) {
         SetEvent(eventWindowInit);
@@ -486,8 +729,12 @@ DWORD WINAPI CreateWinCEWindow(LPVOID lpParam) {
 #if ENABLE_DIRECT_DRAW
     initDirectDraw();
 #else
+
+#if ENABLE_GAPI
     if (GXOpenDisplay(hwndMain, 0) == 0)
         REPORT_ERROR(LC_HIGHUI, "GXOpenDisplay() failed");
+#endif
+
 #endif
 
 #ifdef ENABLE_SPLASH_SCREEN
@@ -511,6 +758,7 @@ DWORD WINAPI CreateWinCEWindow(LPVOID lpParam) {
 }
 
 void winceapp_init() {
+    initDeviceType();
     eventWindowInit = CreateEvent(NULL, TRUE, FALSE, NULL);
     if (eventWindowInit == NULL) {
         REPORT_ERROR(LC_AMS, "Creating WindowInit event failed");
@@ -579,12 +827,13 @@ LRESULT CALLBACK winceapp_wndproc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
     int cmd;
     DWORD err;
     static int ignoreCancelMode = 0;
-    int result = 0;
-    int action = 0;
+    static HANDLE hEvent = CreateEvent(NULL, FALSE, TRUE, NULL);
+    static bool bButtonDown = false;
+    LRESULT result = 0;
 
     switch (msg) {
     case WM_CREATE:
-        return 0;
+        break;
 
     case WM_HOTKEY:
         /* If back key is overriden, back button messages are sent in
@@ -596,7 +845,7 @@ LRESULT CALLBACK winceapp_wndproc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
                 SendMessage(hwndTextActive, WM_CHAR, VK_BACK, 0);
             else {
 #if ENABLE_MULTIPLE_ISOLATES
-                if (gForegroundIsolateId == midpGetAmsIsolateId()) {
+                if (gForegroundIsolateId == 0) {
                     SHNavigateBack();
                 } else {
                     pMidpEventResult->type = SELECT_FOREGROUND_EVENT;
@@ -607,36 +856,50 @@ LRESULT CALLBACK winceapp_wndproc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
 #endif
             }
         }
-        return 1;
+        result = 1;
+        break;
 
     case WM_SETTINGCHANGE:
-        if (SETTINGCHANGE_RESET == wp) {
+#if ENABLE_GAPI
+        // If the virtual keyboard pops up, update the visible area
+        SIPINFO sipinfo;
+        RECT rc;
+
+        memset(&sipinfo, 0, sizeof(sipinfo));
+        sipinfo.cbSize = sizeof(SIPINFO);
+        if (SipGetInfo(&sipinfo)) {
+            rcVisibleDesktop = sipinfo.rcVisibleDesktop;
+#if ENABLE_FULLSCREEN
+            rcVisibleDesktop.top = 0;
+#endif
+        }
+
+        debugScreen();
+#endif
+
+        if (SETTINGCHANGE_RESET == wp || SPI_SETSIPINFO == wp || SPI_SETCURRENTIM == wp || SPI_SIPMOVE == wp) {
             updateDimensions();
             updateEditorForRotation();
             lastWmSettingChangeTick = GetTickCount();
-
+            
             pMidpEventResult->type = ROTATION_EVENT;
             pSignalResult->waitingFor = UI_SIGNAL;
             pMidpEventResult->DISPLAY = gForegroundDisplayId;
             sendMidpKeyEvent(pMidpEventResult, sizeof(*pMidpEventResult));
-
-            /* Handle Virtual Keyboard change */
-            /*
-            RECT virtualKeyboardRect = {0, 0};
-            HWND hWndInputPanel = FindWindow(TEXT("SipWndClass"), NULL);
-            if (hWndInputPanel != NULL) {
-                if (IsWindowVisible(hWndInputPanel)) {
-                    GetWindowRect(hWndInputPanel, &virtualKeyboardRect);
-                }
-            }
-            virtualKeyboardHeight = 
-	            virtualKeyboardRect.bottom - virtualKeyboardRect.top;
-            */
-            return DefWindowProc(hwnd, msg, wp, lp);
+            result = 0;
+            enablePaint();
         }
+        break;
 
-    case WM_TIMER:
-        return 0;
+    case WM_TIMER: 
+        switch (wp) { 
+        case IDT_TIMER1: 
+            enablePaint();
+            // SetForegroundWindow(hwnd);
+            SetFocus(hwnd);
+        }
+        result = 0;
+        break;
 
     case WM_COMMAND:
         switch ((cmd = GET_WM_COMMAND_ID(wp, lp))) {
@@ -647,7 +910,7 @@ LRESULT CALLBACK winceapp_wndproc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
              * the 'task switch' event - click on the OK button on
              * the window title
              */
-            if (gForegroundIsolateId == midpGetAmsIsolateId()) {
+            if (gForegroundIsolateId == 0) {
                 SetForegroundWindow(GetDesktopWindow());
                 /* SHNavigateBack(); */
             } else {
@@ -665,15 +928,16 @@ LRESULT CALLBACK winceapp_wndproc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
              */
             if (!midpPaintAllowed)
                 enablePaint();
-            return 0;
+            break;
         default:
-                return DefWindowProc(hwnd, msg, wp, lp);
+            result = DefWindowProc(hwnd, msg, wp, lp);
         }
         break;
 
     case WM_ACTIVATE:
         if (LOWORD(wp)) { /* active */
             enablePaint();
+            SetFocus(hwnd);
             if (editBoxShown)
                 SetFocus(hwndTextActive);
         } else { /* inactive */
@@ -683,11 +947,13 @@ LRESULT CALLBACK winceapp_wndproc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
 #endif
             disablePaint();
         }
-        return DefWindowProc(hwnd, msg, wp, lp);
+        result = DefWindowProc(hwnd, msg, wp, lp);
+        break;
 
     case WM_EXITMENULOOP:
         enablePaint();
-        return DefWindowProc(hwnd, msg, wp, lp);
+        result = DefWindowProc(hwnd, msg, wp, lp);
+        break;
 
     case WM_CANCELMODE:
         if (!ignoreCancelMode) {
@@ -696,7 +962,8 @@ LRESULT CALLBACK winceapp_wndproc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
             ignoreCancelMode--;
         }
         /* We have to do this, or else windows is unhappy. */
-        return DefWindowProc(hwnd, msg, wp, lp);
+        result = DefWindowProc(hwnd, msg, wp, lp);
+        break;
 
     case WM_PAINT:
         hdc = BeginPaint(hwnd, &ps);
@@ -704,23 +971,32 @@ LRESULT CALLBACK winceapp_wndproc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
         enablePaint();
         if (editBoxShown)
             SetFocus(hwndTextActive);
-        return 0;
+        break;
 
     case WM_CLOSE:
-        return DefWindowProc(hwnd, msg, wp, lp);
+        DestroyWindow(hwnd);
+        result = 0;
+        break;
 
     case WM_DESTROY:
         winceapp_finalize();
-#ifdef ENABLE_CDC
+#if ENABLE_CDC
         /* Temporary fix, leaving exclusive input mode */
+
+#if ENABLE_GAPI
         GXCloseInput();
 #endif
-        PostQuitMessage(0);
-        exit(0);
-        return 0;
 
-    case WM_MOUSEMOVE:
+#endif
+        PostQuitMessage(0);
+        pMidpEventResult->type = SHUTDOWN_EVENT;
+        pSignalResult->waitingFor = AMS_SIGNAL;
+        break;
+
     case WM_LBUTTONDOWN:
+        //ResetEvent(hEvent);
+        bButtonDown = true;
+    case WM_MOUSEMOVE:
     case WM_LBUTTONUP:
         {
             lastUserInputTick = GetTickCount();
@@ -740,8 +1016,12 @@ LRESULT CALLBACK winceapp_wndproc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
             pSignalResult->waitingFor = UI_SIGNAL;
             pMidpEventResult->DISPLAY = gForegroundDisplayId;
             sendMidpKeyEvent(pMidpEventResult, sizeof(*pMidpEventResult));
+            if (msg == WM_LBUTTONUP) {
+                bButtonDown=false;
+                //SetEvent(hEvent);
+            }
         }
-        return 0;
+        break;
     case WM_KEYDOWN: /* fall through */
     case WM_KEYUP:
         switch (wp) {
@@ -754,32 +1034,117 @@ LRESULT CALLBACK winceapp_wndproc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
         case VK_RIGHT:
         case VK_TSOFT1:
         case VK_TSOFT2:
-            return processKey(hwnd, mapAction(msg, lp), mapKey(wp, lp));
+            result = processKey(hwnd, mapAction(msg, lp), mapKey(wp, lp));
+            break;
         case VK_THOME:
         case VK_TTALK:
         case VK_TEND:
             if (WM_KEYDOWN == msg)
-                return processSystemKey(hwnd, mapKey(wp, lp));
+                result = processSystemKey(hwnd, mapKey(wp, lp));
             break;
         default:
-            // May need special handling for soft keys?
+            // May need special handling for soft keys?  Not sure yet...
             if (0 != lastKeyPressed && WM_KEYUP == msg) { 
                 //should use cached pressed key code for input
                 result = processKey(hwnd, KEYMAP_STATE_RELEASED, lastKeyPressed);
             }
             lastKeyPressed = 0;
         }
-        return result;
+        break;
     case WM_CHAR:
         if (wp >= 0x20 && wp <= 0x7f) {
             lastKeyPressed = wp;
             result = processKey(hwnd, mapAction(msg, lp), lastKeyPressed);
         }
-        return result;
+        break;
+    case WM_POWER_STATE_SUSPEND:
+        // SetForegroundWindow(GetDesktopWindow());
+        break;
+    case WM_POWER_STATE_RESUME:
+        enablePaint();
+        // SetForegroundWindow(hwnd);
+        SetFocus(hwnd);
+        break;
+    case WM_KILLFOCUS:
+        break;
+    case WM_SETFOCUS:
+        DWORD dwSIP;
+
+        dwSIP = (hasKeyboard() ? SHFS_HIDESIPBUTTON : SHFS_SHOWSIPBUTTON);
+#if ENABLE_FULLSCREEN
+        SHFullScreen(hwnd, dwSIP | SHFS_HIDETASKBAR | SHFS_HIDESTARTICON);
+#else
+        SHFullScreen(hwnd, dwSIP | SHFS_SHOWTASKBAR | SHFS_SHOWSTARTICON);
+#endif
+        break;
+    case WM_NETWORK:
+#ifdef ENABLE_NETWORK_TRACING
+        fprintf(stderr, "Got WM_NETWORK(");
+        fprintf(stderr, "descriptor = %d, ", (int)wp);
+        fprintf(stderr, "status = %d, ", WSAGETSELECTERROR(lp));
+#endif
+        pSignalResult->status = WSAGETSELECTERROR(lp);
+        pSignalResult->descriptor = (int)wp;
+
+        switch (WSAGETSELECTEVENT(lp)) {
+        case FD_CONNECT:
+            /* Change this to a write. */
+            pSignalResult->waitingFor = NETWORK_WRITE_SIGNAL;
+#ifdef ENABLE_NETWORK_TRACING
+            fprintf(stderr, "FD_CONNECT)\n");
+#endif
+            break;
+
+        case FD_WRITE:
+            pSignalResult->waitingFor = NETWORK_WRITE_SIGNAL;
+#ifdef ENABLE_NETWORK_TRACING
+            fprintf(stderr, "FD_WRITE)\n");
+#endif
+            break;
+
+        case FD_ACCEPT:
+#ifdef ENABLE_NETWORK_TRACING
+            fprintf(stderr, "FD_ACCEPT, ");
+#endif
+        case FD_READ:
+            pSignalResult->waitingFor = NETWORK_READ_SIGNAL;
+#ifdef ENABLE_NETWORK_TRACING
+            fprintf(stderr, "FD_READ)\n");
+#endif
+            break;
+
+        case FD_CLOSE:
+            pSignalResult->waitingFor = NETWORK_EXCEPTION_SIGNAL;
+#ifdef ENABLE_NETWORK_TRACING
+            fprintf(stderr, "FD_CLOSE)\n");
+#endif
+            break;
+
+        default:
+#ifdef ENABLE_NETWORK_TRACING
+            fprintf(stderr, "unsolicited event %d)\n",
+                    WSAGETSELECTEVENT(lp));
+#endif
+            break;
+        }
+
+        result = 0;
+        break;
+
+    case WM_HOST_RESOLVED:
+#ifdef ENABLE_TRACE_NETWORKING
+        fprintf(stderr, "Got Windows event WM_HOST_RESOLVED \n");
+#endif
+        pSignalResult->waitingFor = HOST_NAME_LOOKUP_SIGNAL;
+        pSignalResult->descriptor = (int) wp;
+        pSignalResult->status = WSAGETASYNCERROR(lp);
+        result = 0;
+        break;
+
     default:
-        return DefWindowProc(hwnd, msg, wp, lp);
+        result = DefWindowProc(hwnd, msg, wp, lp);
     }
-    return DefWindowProc(hwnd, msg, wp, lp);
+    return result;
 }
 
 static LRESULT processKey(HWND hwnd, UINT action, int key) {
@@ -824,10 +1189,20 @@ static LRESULT processSystemKey(HWND hwnd, int key) {
  * Finalize the WINCE native resources.
  */
 void winceapp_finalize() {
+    if (hPowerNotify) {
+        StopPowerNotifications(hPowerNotify);
+    }
+
+    KillTimer(hwndMain, IDT_TIMER1);
+
 #if ENABLE_DIRECT_DRAW
     releaseDirectDraw();
 #else
+
+#if ENABLE_GAPI
     GXCloseDisplay();
+#endif
+
 #endif
     deleteGDIObjects();
 #ifdef ENABLE_JSR_184
@@ -836,6 +1211,24 @@ void winceapp_finalize() {
 
     CloseHandle(eventThread);
     releasePutpixelSurface();
+
+#ifdef ENABLE_CDC
+    /* Temporary fix, leaving exclusive input mode */
+
+#if ENABLE_GAPI
+    GXCloseInput();
+#endif
+
+#endif
+    PostQuitMessage(0);
+
+#if ENABLE_GAPI
+    showSipButton(FALSE);
+    showSipButton(TRUE);
+    showInputPanel(FALSE);
+    showTaskBar(FALSE);
+    showTaskBar(TRUE);
+#endif
 }
 
 static void processSkippedRefresh() {
@@ -878,7 +1271,7 @@ static BOOL startDirectPaint() {
         if (g_screen.pDDSMemory == NULL)
             return FALSE;
     }
-    
+
     if (DD_OK != g_screen.pDDSPrimary->IsLost()) {
         if (DD_OK != g_screen.pDDSPrimary->Restore())
             return FALSE;
@@ -890,6 +1283,8 @@ static BOOL startDirectPaint() {
         g_screen.height = ddsd.dwHeight;
     }
 #else
+
+#if ENABLE_GAPI
     if (editBoxShown)
         return FALSE;
     if (g_screen.width == 0) {
@@ -902,13 +1297,25 @@ static BOOL startDirectPaint() {
     if (NULL == g_screen.pixels)
         return FALSE;
 #endif
+
+#endif
+
+#if ENABLE_GAPI
     return TRUE;
+#else
+    return FALSE;
+#endif
+
 }
 
 static void endDirectPaint() {
 #if ENABLE_DIRECT_DRAW
 #else
+
+#if ENABLE_GAPI
     GXEndDraw();
+#endif
+
     g_screen.pixels = NULL;
 #endif
 }
@@ -950,6 +1357,13 @@ void GDIBitBlt(gxj_pixel_type *src, int x1, int x2, int y1, int y2) {
 void winceapp_refresh(int x1, int y1, int x2, int y2) {
     if (NULL == hwndMain || !midpPaintAllowed)
         return;
+
+    if (y1 > rcVisibleDesktop.bottom - rcVisibleDesktop.top)
+        return;
+
+    // fprintf(stdout, "Paint (%d,%d,%d,%d)\n", x1, y1, x2, y2);
+    if (y2 > rcVisibleDesktop.bottom - rcVisibleDesktop.top)
+        y2 = rcVisibleDesktop.bottom - rcVisibleDesktop.top;
 
     if (x2 > winceapp_get_screen_width())
         x2 = winceapp_get_screen_width();
@@ -997,6 +1411,11 @@ void winceapp_refresh(int x1, int y1, int x2, int y2) {
     g_screen.pDDSPrimary->Blt(&dstRect, g_screen.pDDSMemory, &srcRect, 0, NULL); 
 
 #else /* !ENABLE_DIRECT_DRAW */
+    if (x2 <= x1 || y2 <= y1)
+        // it is possible srcHeight < 0 when SIP shown and java refresh 
+        // the lower part screen(system menu up/dn,etc.)
+        return;
+
     int srcWidth = x2 - x1;
     int srcHeight = y2 - y1;
 
@@ -1013,7 +1432,7 @@ void winceapp_refresh(int x1, int y1, int x2, int y2) {
         for (; y1 < y2; y1++) {
             memcpy(dst, src, srcWidth * sizeof(gxj_pixel_type));
             src += winceapp_get_screen_width();
-            dst += (gxj_pixel_type*)( ((int)dst) + g_screen.yPitch );
+            dst = (gxj_pixel_type*)( ((int)dst) + g_screen.yPitch );
         }
 #endif /* ENABLE_DIRECT_DRAW */
     endDirectPaint();
@@ -1061,12 +1480,14 @@ jboolean winceapp_direct_flush(const java_graphics *g,
 #endif /* ENABLE_DIRECT_DRAW */    
 }
 
+#if ENABLE_CDC
 char * strdup(const char *s) {
     char *result = (char*)malloc(strlen(s) + 1);
     if (result)
         strcpy(result, s);
     return result;
 }
+#endif
 
 void winceapp_set_window_handle(HWND hwnd) {
     hwndMain = hwnd;
@@ -1358,6 +1779,12 @@ jboolean winceapp_reverse_orientation() {
 }
 
 /**
+ * Handle clamshell event
+ */
+void winceapp_hadle_clamshell_event() {
+}
+
+/**
  * Invert screen rotation flag
  */
 jboolean winceapp_get_reverse_orientation() {
@@ -1377,4 +1804,64 @@ int winceapp_get_screen_width() {
 int winceapp_get_screen_height() {
     return gxj_system_screen_buffer.height;
 }
+
+#if !ENABLE_CDC
+
+KNIEXPORT KNI_RETURNTYPE_VOID
+KNIDECL(com_sun_midp_chameleon_input_VirtualKeyboardInputMode_showNativeKeyboard) {
+    // bVirtualModeEnabled = KNI_TRUE;
+    // midpPaintAllowed = 0;
+    // SipShowIM(SIPF_ON);
+    showSipButton(TRUE);
+    showInputPanel(TRUE);
+    KNI_ReturnVoid();
+}
+
+KNIEXPORT KNI_RETURNTYPE_VOID
+KNIDECL(com_sun_midp_chameleon_input_VirtualKeyboardInputMode_hideNativeKeyboard) {
+    // bVirtualModeEnabled = KNI_FALSE;
+    // midpPaintAllowed = 0;
+    // SipShowIM(SIPF_OFF);
+
+    if (hasKeyboard())
+        showSipButton(FALSE);
+    else
+        showSipButton(TRUE);
+
+    showInputPanel(FALSE);
+    KNI_ReturnVoid();
+}
+
+#endif
+
+int WINAPI PowerNotifyThread(LPVOID pvParam) {
+    char buffer[QUEUE_SIZE];
+    int numberOfBytesRead = 0;
+    DWORD dwFlags = 0;
+
+    while (TRUE) {
+      if (WaitForSingleObject(hMsgQueue, INFINITE) != WAIT_OBJECT_0) {
+            return 0;
+        }
+        memset(buffer, 0, QUEUE_SIZE);
+        if (ReadMsgQueue(hMsgQueue, buffer, QUEUE_SIZE, (LPDWORD)&numberOfBytesRead, INFINITE, &dwFlags)) {
+            if (numberOfBytesRead >= sizeof(POWER_BROADCAST)) {
+                PPOWER_BROADCAST pPB = (PPOWER_BROADCAST)buffer;
+                if (pPB->Message == PBT_RESUME) {
+                    /* Avoid having the PBT_RESUME notification arrive to quickly after
+                    * the POWER_STATE_SUSPEND notification.
+                    */
+                    Sleep(500);
+                    SendMessage(hwndMain, WM_POWER_STATE_RESUME, 0, 0);
+                } else if (pPB->Message == PBT_TRANSITION) {
+                    if (POWER_STATE(pPB->Flags) == POWER_STATE_SUSPEND) {
+                        SendMessage(hwndMain, WM_POWER_STATE_SUSPEND, 0, 0);
+                    }
+                }
+            }
+        }
+    }
+    return 0;
+}
+
 } /* extern "C" */

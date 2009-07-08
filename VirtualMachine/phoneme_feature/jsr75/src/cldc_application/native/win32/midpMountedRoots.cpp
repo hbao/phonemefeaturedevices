@@ -37,6 +37,7 @@
 #include <midpMalloc.h>
 #include <midpStorage.h>
 
+#include <windows.h>
 
 MidpMountedRoots*      mr = NULL;
 
@@ -267,13 +268,27 @@ void MidpMountedRoots::update(bool notify)
     if (pcsl_string_length(stg) >= 0) {
         const char* cstg = (const char*)pcsl_string_get_utf8_data(stg);
 
-
         /* FC root */
 
-        const char* fcSubPath = "storage/";
-        char* fcPath = (char*)midpMalloc(strlen(cstg) + strlen(fcSubPath) + 1);
+        const char* fcSubPath = "storage\\";
+        char* fcPath = (char*)midpMalloc(strlen(cstg) + strlen(fcSubPath) + 1 + 8);
         strcpy(fcPath, cstg);
         strcat(fcPath, fcSubPath);
+
+        WIN32_FIND_DATA findFileData;
+        HANDLE handle;
+
+        handle = FindFirstFile(L"\\memory card\\", &findFileData);
+        if (handle != INVALID_HANDLE_VALUE) {
+            FindClose(handle);
+            strcpy(fcPath, "\\memory card\\");
+        } else {
+            handle = FindFirstFile(L"\\storage card\\", &findFileData);
+            if (handle != INVALID_HANDLE_VALUE) {
+                FindClose(handle);
+                strcpy(fcPath, "\\storage card\\");
+	    }
+        }
 
         pcsl_string pcslFcPath;
         if (pcsl_string_convert_from_utf8(
@@ -298,7 +313,7 @@ void MidpMountedRoots::update(bool notify)
 
         /* PIM root */
 
-        const char* pimSubPath = "pimdb/";
+        const char* pimSubPath = "pimdb\\";
         char* pimPath =
             (char*)midpMalloc(strlen(cstg) + strlen(pimSubPath) + 1);
         strcpy(pimPath, cstg);
@@ -325,14 +340,17 @@ void MidpMountedRoots::update(bool notify)
             pcsl_string_free(&pcslPimPath);
         }
 
-
         /* Private root */
 
-        const char* privSubPath = "private/";
+        const char* privSubPath = "private\\";
         char* privPath =
             (char*)midpMalloc(strlen(cstg) + strlen(privSubPath) + 1);
         strcpy(privPath, cstg);
         strcat(privPath, privSubPath);
+
+        // const char* privSubPath = "\\my documents\\";
+        // char* privPath = (char*)midpMalloc(strlen(privSubPath) + 1);
+        // strcpy(privPath, privSubPath);
 
         pcsl_string pcslPrivPath;
         if (pcsl_string_convert_from_utf8((jbyte*)privPath, strlen(privPath),
@@ -355,6 +373,32 @@ void MidpMountedRoots::update(bool notify)
             pcsl_string_free(&pcslPrivPath);
         }
 
+        /* Main root */
+
+        const char* rootSubPath = "\\c:\\..\\";
+        char* rootPath = (char*)midpMalloc(strlen(rootSubPath) + 1);
+        strcpy(rootPath, rootSubPath);
+
+        pcsl_string pcslRootPath;
+        if (pcsl_string_convert_from_utf8(
+            (jbyte*)rootPath, strlen(rootPath), &pcslRootPath) == PCSL_STRING_OK) {
+            // determine whether the path exists and it's a directory
+            // Note: the path is created by the build system.
+            if (pcsl_file_is_directory(&pcslRootPath)) {
+                int idx = getDiskIndex("root");
+                if (idx >= 0) {
+                   count++;
+
+                   indexes[count - 1] = idx;
+                   paths  [count - 1] = rootPath;
+		   
+		   if (!isCachedDisk(idx)) {
+                       rebuild = true;
+                   }
+               }
+            }
+            pcsl_string_free(&pcslRootPath);
+        }
 
         pcsl_string_release_utf8_data((const jbyte*)cstg, stg);
     }

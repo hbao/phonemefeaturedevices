@@ -52,6 +52,9 @@ class NullPointerException extends RuntimeException {
      */
     public NullPointerException() {
         super();
+        // This is a handy debugging trick to catch all NullPointerException's.
+        // Comment out in production.
+        //printStackTrace();
     }
 
     /**
@@ -62,5 +65,8 @@ class NullPointerException extends RuntimeException {
      */
     public NullPointerException(String s) {
         super(s);
+        // This is a handy debugging trick to catch all NullPointerException's.
+        // Comment out in production.
+        //printStackTrace();
     }
 }

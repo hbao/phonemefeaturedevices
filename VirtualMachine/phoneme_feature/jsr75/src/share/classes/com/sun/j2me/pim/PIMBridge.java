@@ -734,4 +734,12 @@ public class PIMBridge extends PIMHandler {
         deleteCategory(listHandle, currentCategory);
         addCategory(listHandle, newCategory);
     }
+    
+    public int getMaxCategoriesPerItem(Object listHandle) {
+        return -1;
+    }
+    
+    public int getMaxCategories(Object listHandle) {
+        return -1;
+    }
 }

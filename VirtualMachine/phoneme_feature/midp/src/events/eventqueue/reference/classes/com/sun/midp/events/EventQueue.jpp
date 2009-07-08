@@ -248,7 +248,7 @@ public class EventQueue implements Runnable {
      */
     private native void sendShutdownEvent();
 
-    private native void finalize();
+    protected native void finalize();
 // #endif
 
     /**

@@ -130,6 +130,10 @@ public class AppIsolateMIDletSuiteLoader extends CldcMIDletSuiteLoader {
         return allocateReservedResources0();
     }
 
+    protected void releaseReservedResources() {
+        releaseReservedResources0();
+    }
+
     /**
      * Posts suite task error to event system.
      *
@@ -174,7 +178,7 @@ public class AppIsolateMIDletSuiteLoader extends CldcMIDletSuiteLoader {
      * Native cleanup code, called when this isolate is done,
      * even if killed.
      */
-    private native void finalize();
+    protected native void finalize();
 
     /**
      * Allocates reserved resources for the given isolate.
@@ -182,6 +186,8 @@ public class AppIsolateMIDletSuiteLoader extends CldcMIDletSuiteLoader {
      * @return true if the reserved resources are available otherwise false
      */
     private native static boolean allocateReservedResources0();
+
+    private native static boolean releaseReservedResources0();
 
     /**
      * Handles a fatal error

@@ -19,6 +19,12 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA
  * 
+ * NOTICE: Portions Copyright (c) 2007-2009 Blue Whale Systems.  
+ * This file has been modified by Blue Whale Systems on 07Feb2009. 
+ * The changes are licensed under the terms of the GNU General Public  
+ * License version 2. This notice was added to meet the conditions of  
+ * Section 3.a of the GNU General Public License version 2.  
+ *  
  * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa
  * Clara, CA 95054 or visit www.sun.com if you need additional
  * information or have any questions.
@@ -1989,7 +1995,9 @@ bind(return_point);
   restore_interpreter_state();
   get_thread(tmp1);
   ldr(tmp2, imm_index(tmp1, Thread::async_redo_offset()));
-  comment("Clear Thread.async_redo so that we won't loop indefinitely");
+  // Blue Whale Systems 07Feb2009: Single quotes upset the Symbian armi compiler and break s60v2fp2 and s60v2fp3 builds.
+  //comment("Clear Thread.async_redo so that we won't loop indefinitely"); 
+  comment("Clear Thread.async_redo so that we will not loop indefinitely");
   mov(tmp3, zero);
   str(tmp3, imm_index(tmp1, Thread::async_redo_offset()));
 
@@ -2365,7 +2373,9 @@ void bc_fast_anewarray::generate() {
   ldr_cp_entry_B(clazz, tmp2);
 #if ENABLE_ISOLATES
   Label done;
-  comment("If arrayclass pointer is non-zero we're done");
+  // Blue Whale Systems 07Feb2009: Single quotes upset the Symbian armi compiler and break s60v2fp2 and s60v2fp3 builds.
+  //comment("If arrayclass pointer is non-zero we're done"); 
+  comment("If arrayclass pointer is non-zero we are done");
   get_class_list_base(tmp3);
   ldr_class_from_index_and_base(tmp2, clazz, tmp3);
   ldr(tmp2, imm_index(tmp2, JavaClass::array_class_offset()));

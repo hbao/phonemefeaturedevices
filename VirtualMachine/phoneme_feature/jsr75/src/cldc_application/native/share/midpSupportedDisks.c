@@ -56,6 +56,7 @@ const char* validDisks [][VD_DIMENSIONS] = {
       {"pimdb", "PIMdb/", "PIM_Database/"},    // special root for pim
       {"storage", "Storage/", "Main_Storage/"}, // special root for fc
       {"private", "Private/", "Private_Storage/"},//root for midlet private dirs
+      {"root", "/", "Root_Storage/"},//root for midlet dirs
 };
 
 /**

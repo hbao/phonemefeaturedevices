@@ -211,6 +211,7 @@
 #define MEDIATOR_ISCLEARKEY 5
 #define MEDIATOR_GETAVAILABLESIZE 6
 #define MEDIATOR_ISNEWLINEKEY 7
+#define MEDIATOR_UPDATE 8
 /** @} */
 
 /** data type for a constraint map; there's one constraint map

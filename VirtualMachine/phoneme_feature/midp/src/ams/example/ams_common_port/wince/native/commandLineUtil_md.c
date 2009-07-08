@@ -24,6 +24,14 @@
  * information or have any questions.
  */
 
+/*
+ * NOTICE: Portions Copyright (c) 2007-2009 Davy Preuveneers.
+ * This file has been modified by Davy Preuveneers on 2009/01/11. The
+ * changes are licensed under the terms of the GNU General Public
+ * License version 2. This notice was added to meet the conditions of
+ * Section 3.a of the GNU General Public License version 2.
+ */
+
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -35,6 +43,8 @@
 
 /* for getCharFileSeparator()   */
 /* #include <commandLineUtil.h> */
+
+#include <windows.h>
 
 static char appDirBuffer[MAX_FILENAME_LENGTH+1];
 static char confDirBuffer[MAX_FILENAME_LENGTH+1];
@@ -65,6 +75,31 @@ static char confDirBuffer[MAX_FILENAME_LENGTH+1];
  */
 char* getApplicationDir(char *cmd) {
     FILE *fp;
+    TCHAR filename[MAX_FILENAME_LENGTH+1];
+    char *p;
+
+    GetModuleFileName(NULL, filename, MAX_FILENAME_LENGTH);
+    WideCharToMultiByte(CP_ACP, 0, filename, -1, appDirBuffer, wcslen(filename), NULL, NULL);
+
+    p = strstr(appDirBuffer, "\\bin\\arm\\runMidlet.exe");
+    if (p) {
+        p = strrchr(appDirBuffer, '\\');
+        p[0] = '\0';
+        p = strrchr(appDirBuffer, '\\');
+        p[0] = '\0';
+        p = strrchr(appDirBuffer, '\\');
+        strcpy(p, "\\appdb");
+	return appDirBuffer;
+    }
+
+    p = strstr(appDirBuffer, "\\bin\\cvm.exe");
+    if (p) {
+        p = strrchr(appDirBuffer, '\\');
+        p[0] = '\0';
+        p = strrchr(appDirBuffer, '\\');
+	strcpy(p, "\\midp\\midp_wince\\appdb");
+	return appDirBuffer;
+    }
 
     if ((fp = fopen("\\Storage Card\\appdb\\_main.ks", "r")) != NULL) {
         /* This is usually the case when running on emulator, where
@@ -111,6 +146,36 @@ char* getApplicationDir(char *cmd) {
  */
 char* getConfigurationDir(char *cmd) {
     FILE *fp;
+    TCHAR filename[MAX_FILENAME_LENGTH+1];
+    char *p;
+
+    GetModuleFileName(NULL, filename, MAX_FILENAME_LENGTH);
+    WideCharToMultiByte(CP_ACP, 0, filename, -1, confDirBuffer, wcslen(filename), NULL, NULL);
+
+    p = strstr(confDirBuffer, "\\bin\\arm\\runMidlet.exe");
+    if (p) {
+        p = strrchr(confDirBuffer, '\\');
+        p[0] = '\0';
+        p = strrchr(confDirBuffer, '\\');
+        p[0] = '\0';
+        p = strrchr(confDirBuffer, '\\');
+	strcpy(p, "\\lib");
+	return confDirBuffer;
+    }
+
+    p = strstr(confDirBuffer, "\\bin\\cvm.exe");
+    if (p) {
+        // ...\bin\cvm.exe
+        p = strrchr(confDirBuffer, '\\');
+        p[0] = '\0';
+        // ...\bin
+        p = strrchr(confDirBuffer, '\\');
+	strcpy(p, "\\midp\\midp_wince\\lib");
+        // ...\midp\midp_wince\lib
+
+        // printf("%s\n", confDirBuffer);
+	return confDirBuffer;
+    }
 
     if ((fp = fopen("\\Storage Card\\appdb\\_main.ks", "r")) != NULL) {
         /* This is usually the case when running on emulator, where

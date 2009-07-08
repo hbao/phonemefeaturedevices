@@ -341,4 +341,10 @@ public final class EventTypes {
      * This event is used by AutoTester.
      */
     public static final int AUTOTESTER_EVENT = 53;
+	
+	
+	public static final int PUSH_REGISTER_EVENT = 54;
+    
+    public static final int PLATFORM_REQUEST_INSTALL_EVENT = 55;
+    
 }

@@ -771,9 +771,11 @@ storage_rename_file(char** ppszError, const pcsl_string* oldFilename_str,
 
 static char*
 getLastError(char* pszFunction) {
-    char* temp;
+    char* temp = NULL;
 
+#ifndef UNDER_CE
     temp = strerror(errno);
+#endif
     if (temp == NULL) {
         return "Unspecified Error";
     }
@@ -786,13 +788,15 @@ getLastError(char* pszFunction) {
 
 static char*
 storage_get_last_file_error(char* pszFunction, const pcsl_string* filename_str) {
-    char* temp;
+    char* temp = NULL;
     int charsLeft;
     int i;
     int j;
     int lim;
 
-    temp = strerror(errno);
+#ifndef UNDER_CE
+	temp = strerror(errno);
+#endif
     if (temp == NULL) {
         return "Unspecified Error";
     }

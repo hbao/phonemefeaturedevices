@@ -22,6 +22,15 @@
  * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa
  * Clara, CA 95054 or visit www.sun.com if you need additional
  * information or have any questions.
+*
+*
+ * NOTICE: Portions Copyright (c) 2007-2009 Blue Whale Systems.  
+ * This file has been modified by Blue Whale Systems on 31 Mar 2009. 
+ * The changes are licensed under the terms of the GNU General Public  
+ * License version 2. This notice was added to meet the conditions of  
+ * Section 3.a of the GNU General Public License version 2.  
+ * 
+*
  */
 
 package javax.microedition.io;
@@ -139,8 +148,9 @@ public class Connector {
      */
     static {
         /* Set up the platform name */
-        platform = System.getProperty("microedition.platform");
-        if ((platform == null) || (platform.equals("generic"))) {
+		// Blue Whale Systems:  Added check for bluewhale_platform platform property.
+		platform = System.getProperty("microedition.platform");
+        if ((platform == null) || (platform.equals("generic")) || (platform.startsWith("bluewhale_platform"))) {
             platform = "j2me";
         }
 

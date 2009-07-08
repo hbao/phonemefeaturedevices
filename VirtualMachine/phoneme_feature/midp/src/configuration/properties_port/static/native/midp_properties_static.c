@@ -132,8 +132,13 @@ static char* doCallout(const char* key) {
 static void
 setProp(Property** propertySet, const char* key, const char* value,
         jboolean useMalloc) {
-    Property *p;
-    for (p = *propertySet; p; p = p->next) {
+	Property *p;
+
+#ifndef UNDER_CE
+	JVMSPI_SetSystemProperty(key,value);
+#endif
+
+	for (p = *propertySet; p; p = p->next) {
         if (strcmp(key, p->key) == 0) {
             if (IS_NEW_VALUE(p)) {
                 midpFree((void *)p->value);

@@ -713,8 +713,14 @@ public class MIDPWindow extends CWindow {
                 // TODO: scroll arrows (bar? ) indicator has to be hidden?
                 titleLayer.visible = false;
                 tickerLayer.visible = false;
-                buttonLayer.visible =
-                    buttonLayer.isInteractive();
+
+                /*
+                 * #3148: WinCE: No menu drawn in (fullscreen) email or Facebook viewer screens
+                 * Check whether there is a command defined for the first or second soft button
+                 *
+                 * WAS: buttonLayer.visible = buttonLayer.isInteractive();
+                 */
+                buttonLayer.visible = ((getSoftOne() != null) || (getSoftTwo() != null));
                 break;
             case NORMAL_MODE:
                 titleLayer.visible =

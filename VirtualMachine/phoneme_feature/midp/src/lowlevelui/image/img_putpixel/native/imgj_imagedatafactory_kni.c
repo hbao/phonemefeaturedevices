@@ -587,7 +587,7 @@ KNIDECL(javax_microedition_lcdui_ImageDataFactory_loadPNG) {
      */
     status = imgdcd_decode_png((srcBuffer + offset), length,
                         midpImageData->width, 
-                        midpImageData->width,
+                        midpImageData->height,
                         (imgdcd_pixel_type *)imgPixelData,
                         (imgdcd_alpha_type *)imgAlphaData,
                         &creationError);
@@ -615,6 +615,7 @@ KNIDECL(javax_microedition_lcdui_ImageDataFactory_loadPNG) {
  */
 KNIEXPORT KNI_RETURNTYPE_VOID
 KNIDECL(javax_microedition_lcdui_ImageDataFactory_loadJPEG) {
+#ifdef UNDER_CE
     int            length = KNI_GetParameterAsInt(4);
     int            offset = KNI_GetParameterAsInt(3);
     unsigned char* srcBuffer = NULL;
@@ -674,6 +675,7 @@ KNIDECL(javax_microedition_lcdui_ImageDataFactory_loadJPEG) {
     }
 
     KNI_EndHandles();
+#endif
     KNI_ReturnVoid();
 }
 

@@ -27,7 +27,9 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#ifndef UNDER_CE
 #include <sys/stat.h>
+#endif
 #include <ctype.h>
 #include <midpStorage.h>
 

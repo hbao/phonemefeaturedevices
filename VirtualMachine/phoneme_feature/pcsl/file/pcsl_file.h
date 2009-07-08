@@ -191,6 +191,27 @@ int pcsl_file_finalize();
  */
 int pcsl_file_open(const pcsl_string * fileName, int flags, void **handle);
 
+
+
+/**
+ * BlueWhaleSystems fix: - Michael Maguire - 15 Aug 2007
+ *
+ * PCSL already contained an open function, but Symbian supports the concept
+ * of RFile::Replace, which opens a new file, nuking existing contents if already exists.
+ *
+ * From the Symbian docs:
+ *
+ * "Replaces a file. If there is an existing file with the same name, this function 
+ * overwrites it. If the file does not already exist, it is created."
+ * 
+ * This is extremely handy for temporary file creation and beats checking
+ * for existence, deleting and opening.
+ */
+#ifndef UNDER_CE
+int pcsl_file_replace(const pcsl_string * fileName, int flags, void **handle);
+#endif
+
+
 /**
  * Closes the file with the specified identifier i.e.this identifier
  * is no longer associated with a file. Any pending writes, will be

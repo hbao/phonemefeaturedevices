@@ -23,6 +23,15 @@
 # Clara, CA 95054 or visit www.sun.com if you need additional
 # information or have any questions.
 #
+
+# 
+# NOTICE: Portions Copyright (c) 2007-2009 Davy Preuveneers.
+# This file has been modified by Davy Preuveneers on 2009/01/11. The
+# changes are licensed under the terms of the GNU General Public
+# License version 2. This notice was added to meet the conditions of
+# Section 3.a of the GNU General Public License version 2.
+# 
+
 ######################################################################
 #
 # Module's Component Configuration file
@@ -38,7 +47,7 @@
 PUSH_SERVER_LIB = push_server
 LIB_SET += $(PUSH_SERVER_LIB)
 
-ifneq ($(findstring $(PLATFORM),linux_qte linux_fb win32 javacall),)
+ifneq ($(findstring $(PLATFORM),linux_qte linux_fb win32 javacall wince),)
 LIB_PUSH_SERVER_IMPL = reference
 else
 LIB_PUSH_SERVER_IMPL = stubs

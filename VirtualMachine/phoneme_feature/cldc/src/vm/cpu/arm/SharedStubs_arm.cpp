@@ -24,6 +24,12 @@
  * Clara, CA 95054 or visit www.sun.com if you need additional
  * information or have any questions.
  *
+ * NOTICE: Portions Copyright (c) 2007-2009 Blue Whale Systems.  
+ * This file has been modified by Blue Whale Systems on 07Feb2009. 
+ * The changes are licensed under the terms of the GNU General Public  
+ * License version 2. This notice was added to meet the conditions of  
+ * Section 3.a of the GNU General Public License version 2.  
+ * 
  *!c<
  * Copyright 2006 Intel Corporation. All rights reserved.
  *!c>
@@ -618,7 +624,9 @@ void SharedStubs::generate_invoke_pending_entries() {
   ldr_label(r0, "_current_thread", false);
   ldr(r0, imm_index(r0));
 
-  comment("Check if there's pending entries at all");
+  // Blue Whale Systems 07Feb2009: Single quotes upset the Symbian armi compiler and break s60v2fp2 and s60v2fp3 builds.
+  //comment("Check if there's pending entries at all"); 
+  comment("Check if there are pending entries at all");
   ldr(r1, imm_index(r0, Thread::pending_entries_offset()));
   cmp(r1, zero);
   jmpx(lr, eq);
@@ -1001,7 +1009,9 @@ bind(maybe_slow_case);
   // r1 contains a stack lock in the monitor block, already set to "object"
   // tmp1 contains the near object
   get_thread(tmp0);
-  eol_comment("thread of object's lock");
+  // Blue Whale Systems 07Feb2009: Single quotes upset the Symbian armi compiler and break s60v2fp2 and s60v2fp3 builds.
+  //eol_comment("thread of object's lock"); 
+  eol_comment("thread of objects lock");
   ldr(tmp1, imm_index(tmp1, StackLock::thread_offset()
                               - StackLock::copied_near_offset()));
   eol_comment("set our own real java near field to nul");

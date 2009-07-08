@@ -24,6 +24,14 @@
  * information or have any questions.
  */
 
+/*
+ * NOTICE: Portions Copyright (c) 2007-2009 Davy Preuveneers.
+ * This file has been modified by Davy Preuveneers on 2009/01/11. The
+ * changes are licensed under the terms of the GNU General Public
+ * License version 2. This notice was added to meet the conditions of
+ * Section 3.a of the GNU General Public License version 2.
+ */
+
 /**
  * @file
  *
@@ -71,6 +79,7 @@ midp_ThreadId midp_startNativeThread(midp_ThreadRoutine thread,
         return (midp_ThreadId)handle;
     }
 }
+#endif
 
 /**
  * suspends current thread for a given number of seconds.
@@ -83,7 +92,8 @@ midp_ThreadId midp_startNativeThread(midp_ThreadRoutine thread,
 void midp_sleepNativeThread(int duration) {
     Sleep(duration);
 }
-#endif
+// midp_sleepNativeThread() is also called in suspend_resume_port.c
+// #endif
 
 /**
  * Returns the platform-specific handle of the current thread.

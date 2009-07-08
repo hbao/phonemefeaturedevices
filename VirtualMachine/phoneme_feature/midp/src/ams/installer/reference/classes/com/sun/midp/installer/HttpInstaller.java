@@ -354,7 +354,13 @@ public class HttpInstaller extends Installer {
 
                     throw new InvalidJadException(serverNotFoundCode, url);
                 }
-
+                if ((responseCode == HttpConnection.HTTP_TEMP_REDIRECT) ||
+                        (responseCode == HttpConnection.HTTP_MOVED_TEMP) ||
+                        (responseCode == HttpConnection.HTTP_MOVED_PERM)) {
+                    url =   httpConnection.getHeaderField("location");
+                    continue;
+                }
+                
                 if (responseCode != HttpConnection.HTTP_UNAVAILABLE) {
                     break;
                 }

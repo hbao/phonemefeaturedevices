@@ -160,6 +160,7 @@ class DefaultFileHandler implements BaseFileHandler {
             // cleanname is passed to the filter and does not contain trailing
             // slash denoting directory
             String cleanname;
+	    fname = fname.replace('\\', '/');
             if (fname.charAt(fname.length() - 1) == '/') {
                 cleanname = fname.substring(0, fname.length() - 1);
             } else {

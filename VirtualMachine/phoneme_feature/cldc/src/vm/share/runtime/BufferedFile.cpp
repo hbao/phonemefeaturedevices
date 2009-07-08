@@ -23,7 +23,6 @@
  * Clara, CA 95054 or visit www.sun.com if you need additional
  * information or have any questions.
  */
-
 # include "incls/_precompiled.incl"
 # include "incls/_BufferedFile.cpp.incl"
 

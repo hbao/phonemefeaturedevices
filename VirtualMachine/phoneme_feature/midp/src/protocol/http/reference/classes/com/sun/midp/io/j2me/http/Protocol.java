@@ -1662,6 +1662,28 @@ public class Protocol extends ConnectionBaseAdapter
         int numberOfKeys;
 
         /*
+           #3007: WinCE: MIDlet user-agent strings should contain System.getProperty()
+           "microedition.platform" and "Host-Version" contents
+         */
+
+        String userAgentValue = System.getProperty("microedition.platform")
+           + "/" + System.getProperty("Host-Version")
+           + " Profile/" + System.getProperty("microedition.profiles")
+           + " Configuration/" + System.getProperty("microedition.configuration");
+
+        // Test whether the are running on Windows Mobile. The Host-Version system
+        // is set to wm2003ppcarm_xxxxx for this platform
+        if (userAgentValue.indexOf("wm2003ppcarm") >= 0) {
+           userAgentValue += " Windows CE";
+           reqProperties.setPropertyIgnoreCase("User-Agent", userAgentValue);
+        }
+
+        // Set default if no User Agent string is defined 
+        // if (reqProperties.getPropertyIgnoreCase("User-Agent") == null) {
+        //    reqProperties.setPropertyIgnoreCase("User-Agent", userAgentValue);
+        // }
+
+        /*
          * JTWI security policy for untrusted MIDlets says to add a
          * user-agent field with the value "UNTRUSTED/1.0" but still include
          * the applications value. The TCP and SSL protocols will deny the

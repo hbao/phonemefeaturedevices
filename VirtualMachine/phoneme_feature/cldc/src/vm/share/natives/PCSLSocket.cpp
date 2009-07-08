@@ -41,7 +41,7 @@
 // only reason for you to compile on this file is to build a
 // stand-alone VM, without MIDP, in order to execute the CLDC-TCK.
 
-#if ENABLE_PCSL && 0
+#if ENABLE_PCSL /*&& 0 */
 /*
  * *** WARNING WARNING WARNING ***
  *
@@ -138,6 +138,11 @@ static int do_pcsl_read(void *handle, char *buffer, int length) {
   }
 }
 
+static int do_pcsl_available(void *handle,int *pBytesAvailable)
+{
+	return pcsl_socket_available(handle,pBytesAvailable);
+}
+
 static int do_pcsl_write(void *handle, char *buffer, int length) {
   void *context;
   int nwrite;
@@ -180,7 +185,7 @@ KNIEXPORT KNI_RETURNTYPE_INT
 Java_com_sun_cldc_io_j2me_socket_Protocol_readByte() {
   void *handle = (void*)KNI_GetParameterAsInt(1);
   unsigned char c;
-  if (do_pcsl_read(handle, (char*)&c, 1)) {
+  if (do_pcsl_read(handle, (char*)&c, 1) != -1) {
     KNI_ReturnInt((int)c); // Do not sign-extend: 0 - 255
   } else {
     KNI_ReturnInt(-1);
@@ -217,7 +222,11 @@ Java_com_sun_cldc_io_j2me_socket_Protocol_writeByte() {
 KNIEXPORT KNI_RETURNTYPE_INT
 Java_com_sun_cldc_io_j2me_socket_Protocol_available0() {
   // unsupported. Not used by CLDC TCK
-  KNI_ReturnInt(0);
+  int bytesAvailable = 0;
+   void *handle = (void*)KNI_GetParameterAsInt(1);
+
+  do_pcsl_available(handle,&bytesAvailable);
+  return bytesAvailable;
 }
 
 KNIEXPORT KNI_RETURNTYPE_VOID
@@ -245,6 +254,7 @@ Java_com_sun_cldc_io_j2me_socket_Protocol_close0() {
  *       caller immediately regardless of the status of the event sources.
  *  -1 = Do not timeout. Block until an event happens.
  */
+#ifdef UNDER_CE
 void JVMSPI_CheckEvents(JVMSPI_BlockedThreadInfo *blocked_threads,
                         int blocked_threads_count,
                         jlong timeout) {
@@ -254,6 +264,28 @@ void JVMSPI_CheckEvents(JVMSPI_BlockedThreadInfo *blocked_threads,
     Os::sleep(timeout);
   }
 }
+#endif
+
+
+/**
+ * Blue Whale Systems Ltd - Michael Magure - 22 Aug 2007 
+ */
+KNIEXPORT KNI_RETURNTYPE_INT
+Java_com_sun_cldc_io_j2me_socket_Protocol_getIPv4Address0()
+{
+   int ipv4AddressBytes = 0;
+   void *handle = (void*)KNI_GetParameterAsInt(1);
+
+   int ret = pcsl_socket_getremoteaddr(handle, (char *) &ipv4AddressBytes);
+   if( PCSL_NET_SUCCESS == ret )
+   {	
+	  return ipv4AddressBytes;
+   }
+   return 0;
+}
+
+
+
 
 } // extern "C"
 #endif //ENABLE_PCSL
