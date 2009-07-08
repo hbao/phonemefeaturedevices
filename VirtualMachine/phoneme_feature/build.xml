@@ -1,0 +1,573 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="http://www-106.ibm.com/developerworks/xml/library/x-antxsl/examples/example2/ant2html.xsl"?>
+<!--
+/**
+ * Copyright (c) 2004-2008 Blue Whale Systems Ltd. All Rights Reserved. 
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER 
+ *  
+ * This program is free software; you can redistribute it and/or 
+ * modify it under the terms of the GNU General Public License version 
+ * 2 only, as published by the Free Software Foundation.  
+ *  
+ * This software is provided "as is," and the copyright holder makes no representations or warranties, express or
+ * implied, including but not limited to warranties of merchantability or fitness for any particular purpose or that the
+ * use of this software or documentation will not infringe any third party patents, copyrights, trademarks or other
+ * rights.
+ * 
+ * The copyright holder will not be liable for any direct, indirect special or consequential damages arising out of any
+ * use of this software or documentation.
+ * 
+ * See the GNU  General Public License version 2 for more details 
+ * (a copy is included at /legal/license.txt).  
+ *  
+ * You should have received a copy of the GNU General Public License 
+ * version 2 along with this work; if not, write to the Free Software 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 
+ * 02110-1301 USA  
+ *  
+ * Please contact Blue Whale Systems Ltd, Suite 123, The LightBox
+ * 111 Power Road, Chiswick, London, W4 5PY, United Kingdom or visit 
+ * www.bluewhalesystems.com if you need additional 
+ * information or have any questions.  
+ */ 
+-->
+<project name="phoneme_feature" default="vm_s60v3fp0_winscw" basedir=".">
+
+	<!-- Import the WinCE targets -->
+	<import file="build-wince.xml"/>
+
+	<description>
+        An Ant script to build the phoneme_feature targets.
+    </description>
+
+	
+	<target name="usage">
+		<echo message="  Execute one of: " />
+		<echo message="      ant vm_s60v2fp2_arm" />
+		<echo message="      ant vm_s60v2fp2_winscw" />
+		<echo message="      ant vm_s60v2fp3_arm" />
+		<echo message="      ant vm_s60v2fp3_winscw" />
+		<echo message="      ant vm_uiqv3fp0_arm" />
+		<echo message="      ant vm_uiqv3fp0_winscw" />
+		<echo message="      ant vm_s60v3fp0_arm" />
+		<echo message="      ant vm_s60v3fp0_winscw    [default]" />
+		<echo message="      ant vm_wm5ppc_arm" />
+		<echo message="      ant vm_wm2003ppc_arm" />
+	</target>
+
+	<target name="help" depends="usage" />	
+
+	<path id="SVN.classpath">
+		<fileset dir="C:/java/svnant-1.0.0/lib">
+			<include name="*.jar" />
+		</fileset>
+	</path>
+	<taskdef resource="svntask.properties" classpathref="SVN.classpath" />
+
+
+	<!-- Everything depends on property ${deviceSDK}=one of S60_V1_FP2, S60_V2_FP2, S60_V2_FP2_CW, S60_V2_FP3, S60_V3_FP0, etc. -->
+
+	<!-- With Ant, property inheritance and defaults work a little differently than with e.g. make.  	-->
+	<!-- The values set at the "top most" "outer" level override those set in more specific contexts. 	-->
+	<!-- So set defaults within individual targets, and override at higher level targets or 			-->
+	<!-- override ${name} on command line used to invoke ant by specifying 'ant -Dname=val'.			-->
+	<!-- Don't set at this outer scope: <property name = "platform" value = "armi" /> -->
+	<!-- Don't set at this outer scope: <property name = "release" value = "urel" />  -->
+
+	<!-- Enables us to access the systems environment variables, e.g. ${env.Path} (note "Path" is case sensitive in Ant and must exactly "Path" in Windows 2000 and greater) -->
+	<property environment="env" />
+
+
+
+	<target name="all" depends="update,vm_s60v3fp0_arm,vm_s60v3fp0_winscw,vm_s60v2fp3_arm,vm_s60v2fp3_winscw,vm_s60v2fp2_arm,vm_s60v2fp2_winscw" />
+
+	<target name="cruisecontrol_vm_s60v3fp0_winscw" depends="update,vm_s60v3fp0_winscw" />
+
+	<target name="cruisecontrol_vm_s60v3fp0_arm" depends="update,vm_s60v3fp0_arm" />
+
+	<target name="cruisecontrol_vm_uiqv3fp0_winscw" depends="update,vm_uiqv3fp0_winscw" />
+
+	<target name="cruisecontrol_vm_uiqv3fp0_arm" depends="update,vm_uiqv3fp0_arm" />
+
+	<target name="cruisecontrol_vm_s60v2fp3_winscw" depends="update,vm_s60v2fp3_winscw" />
+
+	<target name="cruisecontrol_vm_s60v2fp3_arm" depends="update,vm_s60v2fp3_arm" />
+
+	<target name="cruisecontrol_vm_s60v2fp2_arm" depends="update,vm_s60v2fp2_arm" />
+
+	<target name="cruisecontrol_vm_s60v2fp2_winscw" depends="update,vm_s60v2fp2_winscw" />
+
+	<target name="cruisecontrol_vm_wm5ppc_arm" depends="update,vm_wm5ppc_arm" />
+
+	<target name="cruisecontrol_vm_wm2003ppc_arm" depends="update,vm_wm2003ppc_arm" />
+
+	<target name="update">
+		<svn>
+			<update dir="${basedir}" />
+		</svn>
+	</target>
+
+	<target name="vm_s60v3fp0_arm">
+
+		<!-- Build external dependencies first -->
+		<ant dir="..\ECOMPLUS" target="ecomplus_s60v3fp0_arm" inheritAll="false" />
+
+		<!-- Be nice and ensure external dependencies were built successfully early in the process -->
+		<property name="requiredECOMPLUSFile" value="C:\Symbian\9.1\S60_3rd\Epoc32\release\GCCE\UREL\ECOMPLUS.dll" />
+		<property name="requiredECOMPLUSLib" value="C:\Symbian\9.1\S60_3rd\EPOC32\RELEASE\ARMV5\LIB\ECOMPLUS.dso" />
+		<available file="${requiredECOMPLUSFile}" property="ecomplus.present" />
+		<fail unless="ecomplus.present" message="Required DLL NOT found: ${requiredECOMPLUSFile} -- be sure to check-out and build the ECOMPLUS project first." />
+		<available file="${requiredECOMPLUSLib}" property="ecompluslib.present" />
+		<fail unless="ecompluslib.present" message="Required lib dso NOT found: ${requiredECOMPLUSLib} -- be sure to check-out and build the ECOMPLUS project first." />
+
+
+		<property name="finalExpectedOutputFile" value="C:\Symbian\9.1\S60_3rd\Epoc32\release\GCCE\UREL\cldc_vm_lib.dll" />
+		<property name="finalExpectedOutputFile2" value="C:\Symbian\9.1\S60_3rd\EPOC32\RELEASE\ARMV5\LIB\cldc_vm_lib.dso" />
+		<delete includeEmptyDirs="true" quiet="true">
+			<fileset file="${finalExpectedOutputFile}" />
+			<fileset file="${finalExpectedOutputFile2}" />
+		</delete>
+
+
+		<property name="platform" value="gcce" />
+		<property name="arch" value="arm" />
+		<property name="release" value="urel" />
+
+		<property name="deviceSDK" value="S60_V3_FP0" />
+		<property name="deviceBranchFinalOutputName" value="s60v3fp0" />
+		<property name="EPOCDEVICE" value="S60_3rd:com.nokia.s60" />
+		<property name="pathAdditions" value="C:\Program Files\Common Files\SYMBIAN\Tools" />
+		<echo>dos_command[${dos_command}]    properties: [${deviceSDK}]    platform: [${platform}]   release: [${release}]   executionDirectory[${executionDirectory}]   EPOCDEVICE[${EPOCDEVICE}]   pathAdditions[${pathAdditions}]</echo>
+
+
+		<antcall target="clean_phonemefeature" />
+		<antcall target="make_project_files" />
+		<antcall target="cldc_bldmake_bldfiles" />
+		<antcall target="export_headers" />
+		<antcall target="build_pcsl" />
+		<antcall target="build_cldc" />
+
+		<available file="${finalExpectedOutputFile}" property="finaldll.present" />
+		<fail unless="finaldll.present" message="DLL NOT produced: ${finalExpectedOutputFile} -- check to see if earlier build steps failed." />
+		<available file="${finalExpectedOutputFile2}" property="finallib.present" />
+		<fail unless="finallib.present" message="LIB NOT produced: ${finalExpectedOutputFile2} -- check to see if earlier build steps failed." />
+
+	</target>
+
+	<target name="vm_uiqv3fp0_arm">
+
+		<!-- Build external dependencies first -->
+		<ant dir="..\ECOMPLUS" target="ecomplus_uiqv3fp0_arm" inheritAll="false" />
+
+		<!-- Be nice and ensure external dependencies were built successfully early in the process -->
+		<property name="requiredECOMPLUSFile" value="C:\Symbian\uiq3sdk\Epoc32\release\GCCE\UREL\ECOMPLUS.dll" />
+		<property name="requiredECOMPLUSLib" value="C:\Symbian\uiq3sdk\EPOC32\RELEASE\ARMV5\LIB\ECOMPLUS.dso" />
+		<available file="${requiredECOMPLUSFile}" property="ecomplus.present" />
+		<fail unless="ecomplus.present" message="Required DLL NOT found: ${requiredECOMPLUSFile} -- be sure to check-out and build the ECOMPLUS project first." />
+		<available file="${requiredECOMPLUSLib}" property="ecompluslib.present" />
+		<fail unless="ecompluslib.present" message="Required lib dso NOT found: ${requiredECOMPLUSLib} -- be sure to check-out and build the ECOMPLUS project first." />
+
+
+		<property name="finalExpectedOutputFile" value="C:\Symbian\uiq3sdk\Epoc32\release\GCCE\UREL\cldc_vm_lib.dll" />
+		<property name="finalExpectedOutputFile2" value="C:\Symbian\uiq3sdk\EPOC32\RELEASE\ARMV5\LIB\cldc_vm_lib.dso" />
+		<delete includeEmptyDirs="true" quiet="true">
+			<fileset file="${finalExpectedOutputFile}" />
+			<fileset file="${finalExpectedOutputFile2}" />
+		</delete>
+
+
+		<property name="platform" value="gcce" />
+		<property name="arch" value="arm" />
+		<property name="release" value="urel" />
+
+		<property name="deviceSDK" value="UIQ_V3_FP0" />
+		<property name="deviceBranchFinalOutputName" value="uiqv3fp0" />
+		<property name="EPOCDEVICE" value="UIQ3:com.symbian.UIQ" />
+		<property name="pathAdditions" value="C:\Program Files\Common Files\SYMBIAN\Tools" />
+		<echo>dos_command[${dos_command}]    properties: [${deviceSDK}]    platform: [${platform}]   release: [${release}]   executionDirectory[${executionDirectory}]   EPOCDEVICE[${EPOCDEVICE}]   pathAdditions[${pathAdditions}]</echo>
+
+
+		<antcall target="clean_phonemefeature" />
+		<antcall target="make_project_files" />
+		<antcall target="cldc_bldmake_bldfiles" />
+		<antcall target="export_headers" />
+		<antcall target="build_pcsl" />
+		<antcall target="build_cldc" />
+
+		<available file="${finalExpectedOutputFile}" property="finaldll.present" />
+		<fail unless="finaldll.present" message="DLL NOT produced: ${finalExpectedOutputFile} -- check to see if earlier build steps failed." />
+		<available file="${finalExpectedOutputFile2}" property="finallib.present" />
+		<fail unless="finallib.present" message="LIB NOT produced: ${finalExpectedOutputFile2} -- check to see if earlier build steps failed." />
+
+	</target>
+
+	<target name="vm_s60v3fp0_winscw">
+
+		<!-- Build external dependencies first -->
+		<ant dir="..\ECOMPLUS" target="ecomplus_s60v3fp0_winscw" inheritAll="false" />
+
+		<!-- Be nice and ensure external dependencies were built successfully early in the process -->
+		<property name="requiredECOMPLUSFile" value="C:\Symbian\9.1\S60_3rd\Epoc32\release\winscw\udeb\ECOMPLUS.dll" />
+		<property name="requiredECOMPLUSLib" value="C:\Symbian\9.1\S60_3rd\EPOC32\RELEASE\winscw\udeb\ECOMPLUS.lib" />
+		<available file="${requiredECOMPLUSFile}" property="ecomplus.present" />
+		<fail unless="ecomplus.present" message="Required DLL NOT found: ${requiredECOMPLUSFile} -- be sure to check-out and build the ECOMPLUS project first." />
+		<available file="${requiredECOMPLUSLib}" property="ecompluslib.present" />
+		<fail unless="ecompluslib.present" message="Required lib NOT found: ${requiredECOMPLUSLib} -- be sure to check-out and build the ECOMPLUS project first." />
+
+
+		<property name="finalExpectedOutputFile" value="C:\Symbian\9.1\S60_3rd\Epoc32\release\winscw\udeb\cldc_vm_lib.dll" />
+		<property name="finalExpectedOutputFile2" value="C:\Symbian\9.1\S60_3rd\EPOC32\RELEASE\winscw\udeb\cldc_vm_lib.lib" />
+
+		<delete includeEmptyDirs="true" quiet="true">
+			<fileset file="${finalExpectedOutputFile}" />
+			<fileset file="${finalExpectedOutputFile2}" />
+		</delete>
+
+
+		<property name="platform" value="winscw" />
+		<property name="arch" value="i386" />
+		<property name="release" value="udeb" />
+
+		<property name="deviceSDK" value="S60_V3_FP0" />
+		<property name="deviceBranchFinalOutputName" value="s60v3fp0" />
+		<property name="EPOCDEVICE" value="S60_3rd:com.nokia.s60" />
+		<property name="pathAdditions" value="C:\Program Files\Common Files\SYMBIAN\Tools" />
+		<echo>dos_command[${dos_command}]    properties: [${deviceSDK}]    platform: [${platform}]   release: [${release}]   executionDirectory[${executionDirectory}]   EPOCDEVICE[${EPOCDEVICE}]   pathAdditions[${pathAdditions}]</echo>
+
+		<antcall target="clean_phonemefeature" />
+		<antcall target="make_project_files" />
+		<antcall target="cldc_bldmake_bldfiles" />
+		<antcall target="export_headers" />
+		<antcall target="build_pcsl" />
+		<antcall target="build_cldc" />
+
+		<available file="${finalExpectedOutputFile}" property="finaldll.present" />
+		<fail unless="finaldll.present" message="DLL NOT produced: ${finalExpectedOutputFile} -- check to see if earlier build steps failed." />
+		<available file="${finalExpectedOutputFile2}" property="finallib.present" />
+		<fail unless="finallib.present" message="LIB NOT produced: ${finalExpectedOutputFile2} -- check to see if earlier build steps failed." />
+
+
+	</target>
+
+	<target name="vm_uiqv3fp0_winscw">
+
+		<!-- Build external dependencies first -->
+		<ant dir="..\ECOMPLUS" target="ecomplus_uiqv3fp0_winscw" inheritAll="false" />
+
+		<!-- Be nice and ensure external dependencies were built successfully early in the process -->
+		<property name="requiredECOMPLUSFile" value="C:\Symbian\uiq3sdk\Epoc32\release\winscw\udeb\ECOMPLUS.dll" />
+		<property name="requiredECOMPLUSLib" value="C:\Symbian\uiq3sdk\EPOC32\RELEASE\winscw\udeb\ECOMPLUS.lib" />
+		<available file="${requiredECOMPLUSFile}" property="ecomplus.present" />
+		<fail unless="ecomplus.present" message="Required DLL NOT found: ${requiredECOMPLUSFile} -- be sure to check-out and build the ECOMPLUS project first." />
+		<available file="${requiredECOMPLUSLib}" property="ecompluslib.present" />
+		<fail unless="ecompluslib.present" message="Required lib NOT found: ${requiredECOMPLUSLib} -- be sure to check-out and build the ECOMPLUS project first." />
+
+
+		<property name="finalExpectedOutputFile" value="C:\Symbian\uiq3sdk\Epoc32\release\winscw\udeb\cldc_vm_lib.dll" />
+		<property name="finalExpectedOutputFile2" value="C:\Symbian\uiq3sdk\EPOC32\RELEASE\winscw\udeb\cldc_vm_lib.lib" />
+
+		<delete includeEmptyDirs="true" quiet="true">
+			<fileset file="${finalExpectedOutputFile}" />
+			<fileset file="${finalExpectedOutputFile2}" />
+		</delete>
+
+
+		<property name="platform" value="winscw" />
+		<property name="arch" value="i386" />
+		<property name="release" value="udeb" />
+
+		<property name="deviceSDK" value="UIQ_V3_FP0" />
+		<property name="deviceBranchFinalOutputName" value="uiqv3fp0" />
+		<property name="EPOCDEVICE" value="UIQ3:com.symbian.UIQ" />
+		<property name="pathAdditions" value="C:\Program Files\Common Files\SYMBIAN\Tools" />
+		<echo>dos_command[${dos_command}]    properties: [${deviceSDK}]    platform: [${platform}]   release: [${release}]   executionDirectory[${executionDirectory}]   EPOCDEVICE[${EPOCDEVICE}]   pathAdditions[${pathAdditions}]</echo>
+
+		<antcall target="clean_phonemefeature" />
+		<antcall target="make_project_files" />
+		<antcall target="cldc_bldmake_bldfiles" />
+		<antcall target="export_headers" />
+		<antcall target="build_pcsl" />
+		<antcall target="build_cldc" />
+
+		<available file="${finalExpectedOutputFile}" property="finaldll.present" />
+		<fail unless="finaldll.present" message="DLL NOT produced: ${finalExpectedOutputFile} -- check to see if earlier build steps failed." />
+		<available file="${finalExpectedOutputFile2}" property="finallib.present" />
+		<fail unless="finallib.present" message="LIB NOT produced: ${finalExpectedOutputFile2} -- check to see if earlier build steps failed." />
+
+
+	</target>
+
+	<target name="vm_s60v2fp3_arm">
+
+		<!-- Build external dependencies first -->
+		<ant dir="..\ECOMPLUS" target="ecomplus_s60v2fp3_arm" inheritAll="false" />
+
+		<!-- Be nice and ensure external dependencies were built successfully early in the process -->
+		<property name="requiredECOMPLUSFile" value="C:\Symbian\8.1a\S60_2nd_FP3\Epoc32\release\ARMI\UREL\ECOMPLUS.dll" />
+		<property name="requiredECOMPLUSLib" value="C:\Symbian\8.1a\S60_2nd_FP3\EPOC32\RELEASE\ARMI\UREL\ECOMPLUS.lib" />
+		<available file="${requiredECOMPLUSFile}" property="ecomplus.present" />
+		<fail unless="ecomplus.present" message="Required DLL NOT found: ${requiredECOMPLUSFile} -- be sure to check-out and build the ECOMPLUS project first." />
+		<available file="${requiredECOMPLUSLib}" property="ecompluslib.present" />
+		<fail unless="ecompluslib.present" message="Required lib dso NOT found: ${requiredECOMPLUSLib} -- be sure to check-out and build the ECOMPLUS project first." />
+
+
+		<property name="finalExpectedOutputFile" value="C:\Symbian\8.1a\S60_2nd_FP3\Epoc32\release\ARMI\UREL\cldc_vm_lib.lib" />
+		<delete includeEmptyDirs="true" quiet="true">
+			<fileset file="${finalExpectedOutputFile}" />
+		</delete>
+
+
+		<property name="platform" value="armi" />
+		<property name="arch" value="arm" />
+		<property name="release" value="urel" />
+
+		<property name="deviceSDK" value="S60_V2_FP3" />
+		<property name="deviceBranchFinalOutputName" value="s60v2fp3" />
+		<property name="EPOCDEVICE" value="S60_2nd_FP3:com.nokia.series60" />
+		<property name="pathAdditions" value="C:\Program Files\Common Files\SYMBIAN\Tools" />
+		<echo>dos_command[${dos_command}]    properties: [${deviceSDK}]    platform: [${platform}]   release: [${release}]   executionDirectory[${executionDirectory}]   EPOCDEVICE[${EPOCDEVICE}]   pathAdditions[${pathAdditions}]</echo>
+
+
+		<antcall target="clean_phonemefeature" />
+		<antcall target="make_project_files" />
+		<antcall target="cldc_bldmake_bldfiles" />
+		<antcall target="export_headers" />
+		<antcall target="build_pcsl" />
+		<antcall target="build_cldc" />
+
+		<available file="${finalExpectedOutputFile}" property="finallib.present" />
+		<fail unless="finallib.present" message="LIB NOT produced: ${finalExpectedOutputFile} -- check to see if earlier build steps failed." />
+
+	</target>
+
+	<target name="vm_s60v2fp3_winscw">
+
+		<!-- Build external dependencies first -->
+		<ant dir="..\ECOMPLUS" target="ecomplus_s60v2fp3_winscw" inheritAll="false" />
+
+		<!-- Be nice and ensure external dependencies were built successfully early in the process -->
+		<property name="requiredECOMPLUSFile" value="C:\Symbian\8.1a\S60_2nd_FP3\Epoc32\release\winscw\udeb\ECOMPLUS.dll" />
+		<property name="requiredECOMPLUSLib" value="C:\Symbian\8.1a\S60_2nd_FP3\EPOC32\RELEASE\winscw\udeb\ECOMPLUS.lib" />
+		<available file="${requiredECOMPLUSFile}" property="ecomplus.present" />
+		<fail unless="ecomplus.present" message="Required DLL NOT found: ${requiredECOMPLUSFile} -- be sure to check-out and build the ECOMPLUS project first." />
+		<available file="${requiredECOMPLUSLib}" property="ecompluslib.present" />
+		<fail unless="ecompluslib.present" message="Required lib NOT found: ${requiredECOMPLUSLib} -- be sure to check-out and build the ECOMPLUS project first." />
+
+
+		<property name="finalExpectedOutputFile" value="C:\Symbian\8.1a\S60_2nd_FP3\Epoc32\release\winscw\udeb\cldc_vm_lib.dll" />
+		<property name="finalExpectedOutputFile2" value="C:\Symbian\8.1a\S60_2nd_FP3\EPOC32\RELEASE\winscw\udeb\cldc_vm_lib.lib" />
+
+		<delete includeEmptyDirs="true" quiet="true">
+			<fileset file="${finalExpectedOutputFile}" />
+			<fileset file="${finalExpectedOutputFile2}" />
+		</delete>
+
+
+		<property name="platform" value="winscw" />
+		<property name="arch" value="i386" />
+		<property name="release" value="udeb" />
+
+		<property name="deviceSDK" value="S60_V2_FP3" />
+		<property name="deviceBranchFinalOutputName" value="s60v2fp3" />
+		<property name="EPOCDEVICE" value="S60_2nd_FP3:com.nokia.series60" />
+		<property name="pathAdditions" value="C:\Program Files\Common Files\SYMBIAN\Tools" />
+		<echo>dos_command[${dos_command}]    properties: [${deviceSDK}]    platform: [${platform}]   release: [${release}]   executionDirectory[${executionDirectory}]   EPOCDEVICE[${EPOCDEVICE}]   pathAdditions[${pathAdditions}]</echo>
+
+		<antcall target="clean_phonemefeature" />
+		<antcall target="make_project_files" />
+		<antcall target="cldc_bldmake_bldfiles" />
+		<antcall target="export_headers" />
+		<antcall target="build_pcsl" />
+		<antcall target="build_cldc" />
+
+		<available file="${finalExpectedOutputFile}" property="finaldll.present" />
+		<fail unless="finaldll.present" message="DLL NOT produced: ${finalExpectedOutputFile} -- check to see if earlier build steps failed." />
+		<available file="${finalExpectedOutputFile2}" property="finallib.present" />
+		<fail unless="finallib.present" message="LIB NOT produced: ${finalExpectedOutputFile2} -- check to see if earlier build steps failed." />
+
+
+	</target>
+
+	<target name="vm_s60v2fp2_arm">
+
+		<!-- Build external dependencies first -->
+		<ant dir="..\ECOMPLUS" target="ecomplus_s60v2fp2_arm" inheritAll="false" />
+
+		<!-- Be nice and ensure external dependencies were built successfully early in the process -->
+		<property name="requiredECOMPLUSFile" value="C:\Symbian\8.0a\S60_2nd_FP2_CW\Epoc32\release\ARMI\UREL\ECOMPLUS.dll" />
+		<property name="requiredECOMPLUSLib" value="C:\Symbian\8.0a\S60_2nd_FP2_CW\EPOC32\RELEASE\ARMI\UREL\ECOMPLUS.lib" />
+		<available file="${requiredECOMPLUSFile}" property="ecomplus.present" />
+		<fail unless="ecomplus.present" message="Required DLL NOT found: ${requiredECOMPLUSFile} -- be sure to check-out and build the ECOMPLUS project first." />
+		<available file="${requiredECOMPLUSLib}" property="ecompluslib.present" />
+		<fail unless="ecompluslib.present" message="Required lib dso NOT found: ${requiredECOMPLUSLib} -- be sure to check-out and build the ECOMPLUS project first." />
+
+
+		<property name="finalExpectedOutputFile" value="C:\Symbian\8.0a\S60_2nd_FP2_CW\Epoc32\release\ARMI\UREL\cldc_vm_lib.lib" />
+		<delete includeEmptyDirs="true" quiet="true">
+			<fileset file="${finalExpectedOutputFile}" />
+		</delete>
+
+
+		<property name="platform" value="armi" />
+		<property name="arch" value="arm" />
+		<property name="release" value="urel" />
+
+		<property name="deviceSDK" value="S60_V2_FP2_CW" />
+		<property name="deviceBranchFinalOutputName" value="s60v2fp2" />
+		<property name="EPOCDEVICE" value="S60_2nd_FP2_CW:com.nokia.series60" />
+		<property name="pathAdditions" value="C:\Program Files\Common Files\SYMBIAN\Tools" />
+		<echo>dos_command[${dos_command}]    properties: [${deviceSDK}]    platform: [${platform}]   release: [${release}]   executionDirectory[${executionDirectory}]   EPOCDEVICE[${EPOCDEVICE}]   pathAdditions[${pathAdditions}]</echo>
+
+
+		<antcall target="clean_phonemefeature" />
+		<antcall target="make_project_files" />
+		<antcall target="cldc_bldmake_bldfiles" />
+		<antcall target="export_headers" />
+		<antcall target="build_pcsl" />
+		<antcall target="build_cldc" />
+
+		<available file="${finalExpectedOutputFile}" property="finallib.present" />
+		<fail unless="finallib.present" message="LIB NOT produced: ${finalExpectedOutputFile} -- check to see if earlier build steps failed." />
+
+	</target>
+
+	<target name="vm_s60v2fp2_winscw">
+
+		<!-- Build external dependencies first -->
+		<ant dir="..\ECOMPLUS" target="ecomplus_s60v2fp2_winscw" inheritAll="false" />
+
+		<!-- Be nice and ensure external dependencies were built successfully early in the process -->
+		<property name="requiredECOMPLUSFile" value="C:\Symbian\8.0a\S60_2nd_FP2_CW\Epoc32\release\winscw\udeb\ECOMPLUS.dll" />
+		<property name="requiredECOMPLUSLib" value="C:\Symbian\8.0a\S60_2nd_FP2_CW\EPOC32\RELEASE\winscw\udeb\ECOMPLUS.lib" />
+		<available file="${requiredECOMPLUSFile}" property="ecomplus.present" />
+		<fail unless="ecomplus.present" message="Required DLL NOT found: ${requiredECOMPLUSFile} -- be sure to check-out and build the ECOMPLUS project first." />
+		<available file="${requiredECOMPLUSLib}" property="ecompluslib.present" />
+		<fail unless="ecompluslib.present" message="Required lib NOT found: ${requiredECOMPLUSLib} -- be sure to check-out and build the ECOMPLUS project first." />
+
+
+		<property name="finalExpectedOutputFile" value="C:\Symbian\8.0a\S60_2nd_FP2_CW\Epoc32\release\winscw\udeb\cldc_vm_lib.dll" />
+		<property name="finalExpectedOutputFile2" value="C:\Symbian\8.0a\S60_2nd_FP2_CW\EPOC32\RELEASE\winscw\udeb\cldc_vm_lib.lib" />
+
+		<delete includeEmptyDirs="true" quiet="true">
+			<fileset file="${finalExpectedOutputFile}" />
+			<fileset file="${finalExpectedOutputFile2}" />
+		</delete>
+
+
+		<property name="platform" value="winscw" />
+		<property name="arch" value="i386" />
+		<property name="release" value="udeb" />
+
+		<property name="deviceSDK" value="S60_V2_FP3_CW" />
+		<property name="deviceBranchFinalOutputName" value="s60v2fp2" />
+		<property name="EPOCDEVICE" value="S60_2nd_FP2_CW:com.nokia.series60" />
+		<property name="pathAdditions" value="C:\Program Files\Common Files\SYMBIAN\Tools" />
+		<echo>dos_command[${dos_command}]    properties: [${deviceSDK}]    platform: [${platform}]   release: [${release}]   executionDirectory[${executionDirectory}]   EPOCDEVICE[${EPOCDEVICE}]   pathAdditions[${pathAdditions}]</echo>
+
+		<antcall target="clean_phonemefeature" />
+		<antcall target="make_project_files" />
+		<antcall target="cldc_bldmake_bldfiles" />
+		<antcall target="export_headers" />
+		<antcall target="build_pcsl" />
+		<antcall target="build_cldc" />
+
+		<available file="${finalExpectedOutputFile}" property="finaldll.present" />
+		<fail unless="finaldll.present" message="DLL NOT produced: ${finalExpectedOutputFile} -- check to see if earlier build steps failed." />
+		<available file="${finalExpectedOutputFile2}" property="finallib.present" />
+		<fail unless="finallib.present" message="LIB NOT produced: ${finalExpectedOutputFile2} -- check to see if earlier build steps failed." />
+
+
+	</target>
+
+	<target name="make_project_files">
+		<property name="executionDirectory" value="cldc\build\symbian_project" />
+		<property name="dos_command" value="call idetool create ${arch}" />
+		<exec executable="cmd" dir="${executionDirectory}" failonerror="true">
+			<arg value="/c" />
+			<arg value="${dos_command}" />
+		</exec>
+	</target>
+
+	<target name="clean_phonemefeature">
+		<delete dir="cldc\build\sym_${arch}" />
+	</target>
+
+	<target name="build_cldc">
+		<property name="executionDirectory" value="cldc\build\sym_${arch}\group_${deviceBranchFinalOutputName}" />
+		<property name="project" value="vm_${deviceBranchFinalOutputName}" />
+		<antcall target="reallyclean" />
+		<antcall target="build" />
+	</target>
+
+	<target name="build_pcsl">
+		<antcall target="pcsl_bldmake_bldfiles" />
+		<antcall target="pcsl_build" />
+	</target>
+
+	<target name="pcsl_build">
+		<property name="executionDirectory" value="pcsl\makefiles\group" />
+		<antcall target="reallyclean" />
+		<antcall target="build" />
+	</target>
+
+	<target name="pcsl_bldmake_bldfiles">
+		<property name="executionDirectory" value="pcsl\makefiles\group" />
+		<antcall target="bldmake_bldfiles" />
+	</target>
+
+	<target name="cldc_bldmake_bldfiles">
+		<property name="executionDirectory" value="cldc\build\sym_${arch}\group_${deviceBranchFinalOutputName}" />
+		<antcall target="bldmake_bldfiles" />
+	</target>
+
+	<target name="bldmake_bldfiles">
+		<property name="dos_command" value="call bldmake bldfiles" />
+		<echo>dos_command[${dos_command}]    properties: [${deviceSDK}]    platform: [${platform}]   release: [${release}]   executionDirectory[${executionDirectory}]   EPOCDEVICE[${EPOCDEVICE}]   pathAdditions[${pathAdditions}]</echo>
+		<antcall target="execute_Symbian_build_command_in_correct_environment" />
+	</target>
+
+	<target name="build">
+		<property name="dos_command" value="call abld build ${platform} ${release}" />
+		<echo>dos_command[${dos_command}]    properties: [${deviceSDK}]    platform: [${platform}]   release: [${release}]   executionDirectory[${executionDirectory}]   EPOCDEVICE[${EPOCDEVICE}]   pathAdditions[${pathAdditions}]</echo>
+		<antcall target="execute_Symbian_build_command_in_correct_environment" />
+	</target>
+
+	<target name="export_headers">
+		<property name="executionDirectory" value="cldc\build\sym_${arch}\group_${deviceBranchFinalOutputName}" />
+		<property name="dos_command" value="call abld export" />
+		<antcall target="execute_Symbian_build_command_in_correct_environment" />
+	</target>
+
+	<target name="execute_Symbian_build_command_in_correct_environment">
+
+		<!-- Set default platform and release.  These are overriden by specifying  	-->
+		<!-- different values in a calling task, or using command line overrides 	-->
+		<!-- of the form e.g. 'ant -platform=winscw'								-->
+		<property name="platform" value="armi" />
+		<property name="release" value="urel" />
+
+		<echo>dos_command[${dos_command}]    properties: [${deviceSDK}]    platform: [${platform}]   release: [${release}]   executionDirectory[${executionDirectory}]   EPOCDEVICE[${EPOCDEVICE}]   pathAdditions[${pathAdditions}]</echo>
+		<exec executable="cmd" dir="${executionDirectory}" failonerror="true">
+			<arg value="/c" />
+
+			<!-- The antcall'er shoudl have set this property before antcall'ing us -->
+			<arg value="${dos_command}" />
+
+			<!-- Setting this environment variable is equivalent to performing "devices -setdefault @${EPOCDEVICE}" -->
+			<!-- but is valid only for the duration of this execution. -->
+			<!-- See http://newlc.com/Use-of-the-devices-command.html -->
+			<env key="EPOCDEVICE" value="${EPOCDEVICE}" />
+
+			<env key="Path" path="${env.Path};${pathAdditions}" />
+		</exec>
+	</target>
+
+	<target name="reallyclean">
+		<property name="project" value="" />
+		<property name="dos_command" value="call abld reallyclean ${platform} ${release} ${project}" />
+		<echo>dos_command[${dos_command}]    properties: [${deviceSDK}]    platform: [${platform}]   release: [${release}]   executionDirectory[${executionDirectory}]   EPOCDEVICE[${EPOCDEVICE}]   pathAdditions[${pathAdditions}]</echo>
+		<antcall target="execute_Symbian_build_command_in_correct_environment" />
+	</target>
+
+
+</project>
