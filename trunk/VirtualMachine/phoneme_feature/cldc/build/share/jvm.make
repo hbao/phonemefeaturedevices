@@ -29,6 +29,14 @@
 #!c>
 #
 
+# 
+# NOTICE: Portions Copyright (c) 2007-2009 Davy Preuveneers.
+# This file has been modified by Davy Preuveneers on 2009/01/11. The
+# changes are licensed under the terms of the GNU General Public
+# License version 2. This notice was added to meet the conditions of
+# Section 3.a of the GNU General Public License version 2.
+# 
+
 IncludeDB            = $(WorkSpace)/src/vm/includeDB
 BIN_DIR              = ../bin
 DIST_DIR             = ../../dist
@@ -449,6 +457,10 @@ ifeq ($(compiler), visCPP)
 export ENABLE_SEGMENTED_ROM_TEXT_BLOCK     := true
 export ENABLE_SEGMENTED_ROM_TEXT_BLOCK__BY := jvm.make
 endif
+ifeq ($(compiler), evc)
+export ENABLE_SEGMENTED_ROM_TEXT_BLOCK     := true
+export ENABLE_SEGMENTED_ROM_TEXT_BLOCK__BY := jvm.make
+endif
 endif
 
 ifeq ($(IsTarget)+$(ROMIZING)+$(ENABLE_SEGMENTED_ROM_TEXT_BLOCK), true+true+true)
@@ -851,9 +863,7 @@ CPP_DEF_FLAGS_debug     = -D_DEBUG -DAZZERT
 CPP_DEF_FLAGS_release   = 
 CPP_DEF_FLAGS_product   = -DPRODUCT
 
-ifeq ($(USE_VS2005), true)
 CPP_DEF_FLAGS          += -D_CRT_SECURE_NO_DEPRECATE
-endif
 
 CPP_DEF_FLAGS          += -DWIN32 -D_WINDOWS
 CPP_DEF_FLAGS          += $(CPP_DEF_FLAGS_$(BUILD))
@@ -1166,20 +1176,24 @@ else
     define fixcygpath
     cygpath -w $(1)
     endef
+
+    define fixcygpath_u
+    cygpath -u $(1)
+    endef
 endif
 
 ifeq ($(USE_VS2005), true)
     ifeq ($(arch), arm)
 	EVC_LIB_PATH    = $(VS2005_CE_ARM_LIB)
 	EVC_INCLUDE_PATH= $(VS2005_CE_ARM_INCLUDE)
-	EVC_ARCH_PATH   = $(VS2005_CE_ARM_PATH)
+	EVC_ARCH_PATH   = `$(call fixcygpath_u, $(VS2005_CE_ARM_PATH))`
         ARCH_ASM        = armasm.exe
     else
         # i386 build of WinCE is no longer supported for Visual Studio 2005.
         # this is just a place holder.
 	EVC_LIB_PATH    = $(VS2005_CE_I386_LIB)
 	EVC_INCLUDE_PATH= $(VS2005_CE_I386_INCLUDE)
-	EVC_ARCH_PATH   = $(VS2005_CE_I386_PATH)
+	EVC_ARCH_PATH   = `$(call fixcygpath_u, $(VS2005_CE_I386_PATH))`
         ARCH_ASM        = ml.exe
     endif
 
@@ -1188,7 +1202,7 @@ ifeq ($(USE_VS2005), true)
     ASM                := $(EVC_ARCH_PATH)/$(ARCH_ASM)
     LINK               := $(EVC_ARCH_PATH)/link.exe
     LIB                := $(EVC_ARCH_PATH)/lib.exe
-    RC                 := $(VS2005_COMMON_PATH)/rc.exe
+    RC                 := `$(call fixcygpath_u, $(VS2005_COMMON_PATH)/rc.exe)`
 
     CESubsystem         = windowsce,5.01
     CEVersion           = 0x501
@@ -1197,11 +1211,11 @@ else
     ifeq ($(arch), arm)
 	EVC_LIB_PATH    = $(EVC_ARM_LIB)
 	EVC_INCLUDE_PATH= $(EVC_ARM_INCLUDE)
-	EVC_ARCH_PATH   = $(EVC_ARM_PATH)
+	EVC_ARCH_PATH   =  `$(call fixcygpath_u, $(EVC_ARM_PATH))`
     else
 	EVC_LIB_PATH    = $(EVC_I386_LIB)
 	EVC_INCLUDE_PATH= $(EVC_I386_INCLUDE)
-	EVC_ARCH_PATH   = $(EVC_I386_PATH)
+	EVC_ARCH_PATH   = `$(call fixcygpath_u, $(EVC_I386_PATH))`
     endif
 
     CPP                := $(EVC_ARCH_PATH)/$(CPP)
@@ -1209,7 +1223,7 @@ else
     LINK               := $(EVC_ARCH_PATH)/$(LINK)
     ASM                := $(EVC_ARCH_PATH)/$(ASM)
     LIB                := $(EVC_ARCH_PATH)/$(LIB)
-    RC                 := $(EVC_COMMON_PATH)/rc.exe
+    RC                 := `$(call fixcygpath_u, $(EVC_COMMON_PATH)/rc.exe)`
 
     LINK_ARCH_FLAGS_arm+= /MACHINE:ARM /base:"0x00010000" /stack:0x10000,0x1000
 
@@ -1219,11 +1233,11 @@ else
 endif
 
 LIBS                    = commctrl.lib coredll.lib  \
-                          winsock.lib
+                          winsock.lib $(JAVACALL_LIBS)
 
-CPP_OPT_FLAGS_debug     = /Zi /Od
-CPP_OPT_FLAGS_release   = /Oxs
-CPP_OPT_FLAGS_product   = /Oxs
+CPP_OPT_FLAGS_debug     = /Zi /Od /Zm200
+CPP_OPT_FLAGS_release   = /Oxs /Zm200
+CPP_OPT_FLAGS_product   = /Oxs /Zm200
 CPP_OPT_FLAGS           =
 CPP_OPT_FLAGS          += $(CPP_OPT_FLAGS_$(BUILD))
 

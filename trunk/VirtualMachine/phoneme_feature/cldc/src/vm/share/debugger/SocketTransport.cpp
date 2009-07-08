@@ -362,11 +362,24 @@ void SocketTransport::init_transport(void *t JVM_TRAPS)
       return;
     }
 #endif
+#ifndef USE_SYMBIAN_SOCKETS
     _listen_socket = ::socket(AF_INET, SOCK_STREAM, 0);
     if (_listen_socket < 0) {
       jvm_fprintf(stdout, "Could not open listen socket");
       return;
     }
+    // Symbian specific
+    // start the networking stack
+    RDebug::Print(_L("_listen_socket %d"),_listen_socket);
+    strcpy(ifr.ifr_name, "Winsock");
+
+    RDebug::Print(_L("Setting apn name"));
+    errno = -100;
+    ioctl(_listen_socket, SIOCSIFNAME, &ifr); 
+    RDebug::Print(_L("Starting network"));
+    ioctl(_listen_socket, SIOCIFSTART, &ifr);
+    
+    RDebug::Print(_L("Opening socket on port %d"),debugger_port);
     local_addr.sin_family = AF_INET;
     local_addr.sin_addr.s_addr = INADDR_ANY;
     local_addr.sin_port = htons(debugger_port);
@@ -377,13 +390,15 @@ void SocketTransport::init_transport(void *t JVM_TRAPS)
     socket_err = ::bind(_listen_socket,
                         (struct sockaddr *)((void*)&local_addr),
                         sizeof(local_addr));
+    RDebug::Print(_L("Bind %d"),socket_err);
     if (socket_err < 0) {
       ::closesocket(_listen_socket);
       _listen_socket = -1;
       jvm_fprintf(stdout, "Could not bind to listen socket");
       return;
     }
-    socket_err = ::listen(_listen_socket, 1);
+    socket_err = ::listen(_listen_socket, 10);
+    RDebug::Print(_L("listen %d"),socket_err);
     if (socket_err < 0) {
       ::closesocket(_listen_socket);
       _listen_socket = -1;
@@ -391,6 +406,19 @@ void SocketTransport::init_transport(void *t JVM_TRAPS)
       return;
     }
   }
+ #else
+    iTransport = new CDebugTransport;
+    if(iTransport)
+    {
+        TInt err = iTransport->Construct(debugger_port);
+        if(err != KErrNone)
+        {
+            _listen_socket = -1;
+        }
+    }
+    return;
+  }
+ #endif
 }
 
 ReturnOop SocketTransport::new_transport(JVM_SINGLE_ARG_TRAPS)
@@ -421,6 +449,7 @@ bool SocketTransport::connect_transport(Transport *t, ConnectionType ct, int tim
     return false;
   }
   if (ct == SERVER) {
+  #ifndef USE_SYMBIAN_SOCKETS
     /*listen =*/ st->listener_socket();
     if (timeout != -1) {
       tv.tv_sec = timeout;
@@ -465,7 +494,20 @@ bool SocketTransport::connect_transport(Transport *t, ConnectionType ct, int tim
       return (true);
 
     } else
-      return (false);
+    return (false);
+  
+#else
+    if(iTransport->AcceptConnection() == KErrNone)
+    {
+        st->set_debugger_socket(1);
+        return (true);
+    }
+    else
+    {
+        return false;
+    }
+    
+  #endif
   } else {
     return (false);
   }
@@ -519,6 +561,7 @@ void SocketTransport::destroy_transport(Transport *t) {
 
 bool SocketTransport::char_avail(Transport *t, int timeout)
 {
+#ifndef USE_SYMBIAN_SOCKETS
   UsingFastOops fastoops;
   fd_set readFDs, writeFDs, exceptFDs;
   int numFDs = 0;
@@ -551,20 +594,29 @@ bool SocketTransport::char_avail(Transport *t, int timeout)
   } else {
     return (true);
   }
+#else
+    return iTransport->Available(timeout);
+#endif
 }
 
 int SocketTransport::write_bytes(Transport *t, void *buf, int len)
 {
+#ifndef USE_SYMBIAN_SOCKETS
   UsingFastOops fastoops;
   SocketTransport *st = (SocketTransport *)t;
   int dbg_socket = st->debugger_socket();
   if (dbg_socket == -1)
     return 0;
   return (send(dbg_socket, (char *)buf, len, 0));
+#else
+    iTransport->Send(buf,len);
+    return len;
+#endif
 }
 
 int SocketTransport::peek_bytes(Transport *t, void *buf, int len)
 {
+#ifndef USE_SYMBIAN_SOCKETS
   UsingFastOops fastoops;
   int nread;
   SocketTransport *st = (SocketTransport *)t;
@@ -591,10 +643,14 @@ int SocketTransport::peek_bytes(Transport *t, void *buf, int len)
   }
   // nread > 0
   return nread;
+#else
+    return iTransport->Peek(buf,len);
+#endif
 }
 
 int SocketTransport::read_bytes(Transport *t, void *buf, int len, bool blockflag)
 {
+#ifndef USE_SYMBIAN_SOCKETS
   UsingFastOops fastoops;
   int nread;
   unsigned int nleft = len;
@@ -646,6 +702,10 @@ int SocketTransport::read_bytes(Transport *t, void *buf, int len, bool blockflag
   } while (nleft);
 
   return total;
+#else
+    return iTransport->Read(buf,len,blockflag);
+#endif
+
 }
 
 void SocketTransport::flush(Transport *t)
@@ -685,6 +745,244 @@ extern "C" int JVM_GetDebuggerSocketFd() {
   SocketTransport::Raw st = t().obj();
   return (st().debugger_socket());
 }
+#ifdef USE_SYMBIAN_SOCKETS
+
+class CDebugTransport : public CActive
+{
+public:
+    CDebugTransport() : CActive(0)
+    {
+        CActiveScheduler::Add(this);
+    }
+    TInt Construct(TInt aPort)
+    {
+        /* Connecting to the socket server */
+        RDebug::Print(_L("iRSockServ.Connect"));
+        int retval = iRSockServ.Connect();
+        if(retval != KErrNone)
+        {
+            RDebug::Print(_L("iRSockServ.Connect() %d"),retval);
+            return retval;
+        }
+        RDebug::Print(_L("iListenSocket.Open"));
+        retval = iListenSocket.Open(iRSockServ, KAfInet, KSockStream, KProtocolInetTcp);
+        if(retval != KErrNone)
+        {
+            RDebug::Print(_L("iListenSocket.Open() %d"),retval);
+            return retval;
+        }
+        RDebug::Print(_L("iListenSocket.SetLocalPort()"));
+        retval = iListenSocket.SetLocalPort(aPort);
+        if(retval != KErrNone)
+        {
+            RDebug::Print(_L("iListenSocket.SetLocalPort() %d"),retval);
+            return retval;
+        }
+        RDebug::Print(_L("iListenSocket.Listen"));
+        retval = iListenSocket.Listen(5);
+        if(retval != KErrNone)
+        {
+            RDebug::Print(_L("iListenSocket.Listen() %d"),retval);
+            return retval;
+        }
+        iSemaphore.CreateLocal(0);
+        iReader = new CSocketReader;
+        iReader->Construct();
+        return KErrNone;
+    }
+    
+    TInt AcceptConnection()
+    {
+        TInt ret = KErrNone;
+        ret = iRxSocket.Open(iRSockServ);
+        if(ret != KErrNone)
+        {
+            RDebug::Print(_L("iRxSocket.Open %d"),ret);
+            return ret;
+        }
+        TRequestStatus status;
+        status = KRequestPending;
+        while(status == KRequestPending)
+        {
+            RDebug::Print(_L("iListenSocket.Accept"));
+            iListenSocket.Accept(iRxSocket, status);
+            User::WaitForRequest(status);
+        }
+        RDebug::Print(_L("Connection made %d"),iStatus.Int());
+        iReader->Start(iRxSocket);
+        return ret;
+    }
+    
+    TBool Available(TInt aTimeout)
+    {
+        return iReader->Available(aTimeout);
+    }
+    void Send(void *aBuf, int aLen)
+    {
+        TPtrC8 ptr((TUint8*)aBuf,aLen);
+        TBuf<1024> buffer;
+        for(TInt i=0;i<aLen;i++)
+        {
+            buffer.AppendFormat(_L("0x%02x "), ptr[i]);
+        }
+        RDebug::Print(_L("buffer %S"),&buffer);
+
+        TRequestStatus status;
+        status = KRequestPending;
+        iRxSocket.Send(ptr,0,status);
+        while(status == KRequestPending)
+        {
+            User::WaitForRequest(status);
+        }
+        RDebug::Print(_L("sent %d"),status.Int());
+    }
+    
+    TInt Peek(void* aBuf,TInt aLen)
+    {
+        return iReader->Peek(aBuf,aLen);
+    }
+    TInt Read(void* aBuf,TInt aLen,TBool aBlock)
+    {
+        return iReader->Read(aBuf,aLen,aBlock);
+    }
+    void RunL()
+    {
+    }
+        
+    void DoCancel()
+    {}
+    TInt RunError(TInt aError)
+    {
+        return KErrNone;
+    }
+    class CSocketReader : public CActive
+    {
+    public:
+        CSocketReader() : CActive(0)
+        {
+            CActiveScheduler::Add(this);
+        }
+        TInt Construct()
+        {
+            iRxBuffer = HBufC8::New(2048);
+        }
+        
+        void Start(RSocket& aSocket)
+        {
+            RDebug::Print(_L("reader start"));
+            iSocket = aSocket;
+            iSocket.SetOpt(KSONonBlockingIO, KSOLSocket);
+//            iBuffer.FillZ();
+ //           iBuffer.Zero();
+  //          iSocket.RecvOneOrMore(iBuffer, 0, iStatus, iDummyLength);
+   //         SetActive();
+        }
+        
+        TBool Available(TInt aTimeout)
+        {
+            RDebug::Print(_L("Avail %d"),aTimeout);
+            RDebug::Print(_L("Rx buffer len %d"),iRxBuffer->Des().Length());
+            if(aTimeout == -1)
+            {
+                TRequestStatus status;
+                status = KRequestPending;
+                while(iRxBuffer->Des().Length() == 0)
+                {
+                    iBuffer.FillZ();
+                    iBuffer.Zero();
+                    iSocket.RecvOneOrMore(iBuffer, 0, status, iDummyLength);
+                    User::WaitForRequest(status);
+                    iRxBuffer->Des().Append(iBuffer);
+                }
+            }
+            RDebug::Print(_L("Rx buffer len %d"),iRxBuffer->Des().Length());
+            TInt count = iRxBuffer->Des().Length();
+            TBuf<1024> buffer;
+            for(TInt i=0;i<count;i++)
+            {
+                buffer.AppendFormat(_L("0x%02x "), iRxBuffer->Des()[i]);
+            }
+            RDebug::Print(_L("buffer %S"),&buffer);
+            return iRxBuffer->Des().Length() > 0;
+        }
+        
+        TInt Peek(void* aBuf,TInt aLen)
+        {
+            TRequestStatus status;
+            status = KRequestPending;
+            RDebug::Print(_L("peek %d"),aLen);
+            TPtr8 ptr((TUint8*)aBuf,aLen);
+            while(aLen > iRxBuffer->Des().Length())
+            {
+                iBuffer.FillZ();
+                iBuffer.Zero();
+                iSocket.Read(iBuffer,status);
+                User::WaitForRequest(status);
+                iRxBuffer->Des().Append(iBuffer);
+            }
+            ptr.Copy(iRxBuffer->Des().Left(aLen));
+        }
+        TInt Read(void* aBuf,TInt aLen,TBool aBlock)
+        {
+            RDebug::Print(_L("read %d"),aLen);
+            RDebug::Print(_L("rx len %d"),iRxBuffer->Des().Length());
+            TPtr8 ptr((TUint8*)aBuf,aLen);
+            if(aBlock)
+            {
+                TRequestStatus status;
+                status = KRequestPending;
+                while(aLen > iRxBuffer->Des().Length())
+                {
+                    iBuffer.FillZ();
+                    iBuffer.Zero();
+                    iSocket.Read(iBuffer,status);
+                    User::WaitForRequest(status);
+                    iRxBuffer->Des().Append(iBuffer);
+                }
+            }
+            TInt toCopy = iRxBuffer->Des().Length() <= aLen ? iRxBuffer->Des().Length() : aLen;
+            RDebug::Print(_L("copying %d"),toCopy);
+            ptr.Copy(iRxBuffer->Des().Left(toCopy));
+            iRxBuffer->Des().Delete(0,toCopy);
+            RDebug::Print(_L("got %d"),ptr.Length());
+            return ptr.Length();
+        }
+        void RunL()
+        {
+            if(iStatus.Int() == KErrNone)
+            {
+                iRxBuffer->Des().Append(iBuffer);
+            }
+            RDebug::Print(_L("Rx buffer len %d"),iRxBuffer->Des().Length());
+            iBuffer.FillZ();
+    		iBuffer.Zero();
+    		iSocket.RecvOneOrMore(iBuffer, 0, iStatus, iDummyLength);
+    		SetActive();
+        }
+        void DoCancel()
+        {}
+        TInt RunError(TInt aError)
+        {
+            return KErrNone;
+        }
+        TBuf8<32> iBuffer;
+        TSockXfrLength iDummyLength;
+        HBufC8* iRxBuffer;
+        RSocket iSocket;
+    };
+    RSemaphore iSemaphore;
+    CSocketReader* iReader;
+    RSocketServ iRSockServ; 
+    RSocket iListenSocket;
+    RSocket iRxSocket;
+    
+};
+struct sockaddr_in local_addr;
+CDebugTransport* iTransport;
+
+
+#endif
+
 
 #if defined(__SYMBIAN32__) || UNDER_ADS
 

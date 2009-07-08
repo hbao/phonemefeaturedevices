@@ -388,7 +388,7 @@ read_file(char** ppszError, const pcsl_string* pFileName,
         *outBufferLen = fileSize;
     }
 
-    return status;
+    return (MIDPError)status;
 }
 
 /**
@@ -455,7 +455,7 @@ write_file(char** ppszError, const pcsl_string* pFileName,
 
     pcsl_string_free(&tmpFileName);
 
-    return status;
+    return (MIDPError)status;
 }
 
 #define ADJUST_POS_IN_BUF(pos, bufferLen, n) \
@@ -557,7 +557,7 @@ read_suites_data(char** ppszError) {
 
         /* setup pJarHash */
         if (pData->jarHashLen > 0) {
-            pData->varSuiteData.pJarHash = pcsl_mem_malloc(pData->jarHashLen);
+            pData->varSuiteData.pJarHash = (unsigned char*)pcsl_mem_malloc(pData->jarHashLen);
             if (pData->varSuiteData.pJarHash == NULL) {
                 status = OUT_OF_MEMORY;
                 break;
@@ -685,7 +685,7 @@ write_suites_data(char** ppszError) {
         MAX_VAR_SUITE_DATA_LEN);
     /* space to store the number of suites */
     bufferLen += sizeof(int);
-    buffer = pcsl_mem_malloc(bufferLen);
+    buffer = (char*)pcsl_mem_malloc(bufferLen);
     if (buffer == NULL) {
         pcsl_string_free(&suitesDataFile);
         return OUT_OF_MEMORY;
@@ -1276,7 +1276,7 @@ check_for_corrupted_suite(SuiteIdType suiteId) {
 
     for (i = 0; i < NUM_SUITE_FILES; i++) {
         if (arc[i] != ALL_OK) {
-            status = arc[i];
+            status = (MIDPError)arc[i];
             break;
         }
 

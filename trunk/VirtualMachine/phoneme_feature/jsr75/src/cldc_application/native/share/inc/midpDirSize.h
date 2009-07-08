@@ -28,6 +28,7 @@
 #define _MIDP_DIR_SIZE_H_
 
 #include <pcsl_memory.h>
+#include <java_types.h>
 
 /**
  * Get size in bytes of all files and possibly subdirectories contained

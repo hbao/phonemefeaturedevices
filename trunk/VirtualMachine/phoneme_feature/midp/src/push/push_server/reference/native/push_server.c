@@ -24,6 +24,14 @@
  * information or have any questions.
  */
 
+/*
+ * NOTICE: Portions Copyright (c) 2007-2009 Davy Preuveneers.
+ * This file has been modified by Davy Preuveneers on 2009/01/11. The
+ * changes are licensed under the terms of the GNU General Public
+ * License version 2. This notice was added to meet the conditions of
+ * Section 3.a of the GNU General Public License version 2.
+ */
+
 /**
  * @file
  * Push Registry Persistent File Management module.
@@ -37,7 +45,7 @@
  */
 
 #include <string.h>
-#include <errno.h>
+// #include <errno.h>
 #include <java_types.h>
 
 #include <kni.h>
@@ -421,7 +429,7 @@ static void pushAddNetworkNotifier(PushEntry* pe) {
  * @return <tt>0</tt> for success, non-zero if there is a resource problem
  */
 int pushopen() {
-#if ENABLE_JSR_82
+#if ENABLE_JSR_82_
     bt_push_startup();
 #endif
     return pushOpenInternal(1);
@@ -515,7 +523,7 @@ static int pushOpenInternal(int startListening) {
 void pushclose() {
     pushListFree();
     alarmListFree();
-#if ENABLE_JSR_82
+#if ENABLE_JSR_82_
     bt_push_shutdown();
 #endif
     pcsl_string_free(&pushpathname);
@@ -758,7 +766,7 @@ int pushdel(char *str, char *store) {
             if (strcmp(store, p->storagename) != 0) {
                 return -2 ;
             }
-#if ENABLE_JSR_82
+#if ENABLE_JSR_82_
             bt_push_unregister_url(str);
 #endif
             pushDeleteEntry(p, pPrevNext);
@@ -944,13 +952,13 @@ int pushcheckout(char* protocol, int port, char * store) {
     int fd;
     jboolean wmaProtocol = KNI_FALSE;
     jboolean standardProtocol = KNI_FALSE;
-#if ENABLE_JSR_82
+#if ENABLE_JSR_82_
     bt_bool_t is_bluetooth = bt_is_bluetooth_url(protocol);
 #endif
 
     /* Find the entry to pass off the open file descriptor. */
     for (p = pushlist; p != NULL ; p = p->next) {
-#if ENABLE_JSR_82
+#if ENABLE_JSR_82_
         if (is_bluetooth == BT_BOOL_TRUE &&
                 !strncmp(p->value, protocol, strlen(protocol))) {
             if (strcmp(store, p->storagename)) {
@@ -1091,7 +1099,7 @@ pushcheckinbymidlet(SuiteIdType suiteId, char* pszClassName) {
     const char* pszSuiteId = (char*)pcsl_string_get_utf8_data(strId);
 
     for (p = pushlist; p != NULL ; p = p->next) {
-#ifdef ENABLE_JSR_82
+#ifdef ENABLE_JSR_82_
         /* IMPL_NOTE: Provide a separate function for this functionality.
          * This function is called when a MIDlet terminates, and we use it to
          * re-activate services closed by the MIDlet. This bears no connection
@@ -1165,7 +1173,7 @@ static void pushcheckinentry(PushEntry *pe) {
  * @param p The push entry to clean up
  */
 static void pushcleanupentry(PushEntry *p) {
-#if ENABLE_JSR_82
+#if ENABLE_JSR_82_
     if (bt_is_bluetooth_url(p->value)) {
         bt_push_reject(bt_push_find_server((bt_handle_t)p->fd));
         p->fdsock = -1;
@@ -1501,7 +1509,7 @@ char *pushfindfd(int fd) {
             temp_state = pushp->state;
             pushp->state = LAUNCH_PENDING;
 
-#ifdef ENABLE_JSR_82
+#ifdef ENABLE_JSR_82_
             if (bt_is_bluetooth_url(pushp->value)) {
                 bt_pushid_t id = bt_push_find_server((bt_handle_t)fd);
                 if (id != BT_INVALID_PUSH_HANDLE) {
@@ -1993,7 +2001,7 @@ static int pushProcessPort(char *buffer, PushEntry* pe) {
     p = buffer;
     pe->port = -1;
 
-#if ENABLE_JSR_82
+#if ENABLE_JSR_82_
     {
         bt_port_t port;
         if (bt_push_parse_url(buffer, &port, NULL) == BT_RESULT_SUCCESS) {
@@ -2311,7 +2319,7 @@ int findPushTimerBlockedHandle(int handle) {
 
     for (alarmp = alarmlist; alarmp != NULL ; alarmp = alarmtmp) {
         alarmtmp = alarmp->next;
-        ASSERT((alarmp->state == CHECKED_IN) || (alarmp->state == AVAILABLE));
+        //ASSERT((alarmp->state == CHECKED_IN) || (alarmp->state == AVAILABLE));
         
         /* alarmp->state == AVAILABLE iff timer has been canceled or updated */
         if ((handle == alarmp->timerHandle) && (alarmp->state == CHECKED_IN)) {

@@ -424,3 +424,7 @@ int alarmadd(char* str, jlong alarm, jlong* lastalarm){
     (void)lastalarm;
     return -2;
 }
+int pushcacheddatasize(int fd)
+{
+	return -1;
+}

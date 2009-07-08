@@ -19,6 +19,12 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA
  * 
+ * NOTICE: Portions Copyright (c) 2007-2009 Blue Whale Systems.
+ * This file has been modified by Blue Whale Systems on 04May2009.
+ * The changes are licensed under the terms of the GNU General Public
+ * License version 2. This notice was added to meet the conditions of
+ * Section 3.a of the GNU General Public License version 2.
+ * 
  * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa
  * Clara, CA 95054 or visit www.sun.com if you need additional
  * information or have any questions.
@@ -42,6 +48,9 @@ class String : public Instance {
   }
   static int count_offset(){
     return header_size() + sizeof(jobject) + sizeof(jint);
+  }
+  static int hashCodeValue_offset(){
+    return header_size() + sizeof(jobject) + sizeof(jint) + sizeof(jint);
   }
 
  public:
@@ -71,13 +80,23 @@ class String : public Instance {
     set_count(value);
   }
 
+  jint hashCodeValue() {
+    return int_field(hashCodeValue_offset());
+  }
+  void set_hashCodeValue(jint value) {
+    int_field_put(hashCodeValue_offset(), value);
+  }
+
   bool matches(String *other_string);
+  jint compareTo(String *other_string);
   juint hash();
 
   // Return the content of the string as a NUL-terminated "C" string
   // (the upper byte of each character is stripped, and a NUL character
   // is appended to the end).
   ReturnOop to_cstring(JVM_SINGLE_ARG_TRAPS);
+
+  ReturnOop replace(jchar aOldChar, jchar aNewChar JVM_TRAPS);
 
   void print_string_on(Stream* st, int max_len=-1);
 #if !defined(PRODUCT) || ENABLE_TTY_TRACE
@@ -87,4 +106,6 @@ class String : public Instance {
   jchar char_at(int index);
 
   jint last_index_of(jchar ch, jint fromIndex);
+
+  jint indexOf(String *other_string, jint fromIndex);
 };

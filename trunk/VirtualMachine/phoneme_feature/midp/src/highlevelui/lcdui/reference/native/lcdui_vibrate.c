@@ -54,18 +54,17 @@
  *                KNI_FALSE otherwise
  * @endverbatim
  */
-
 KNIEXPORT KNI_RETURNTYPE_BOOLEAN
 KNIDECL(com_sun_midp_lcdui_DisplayDeviceAccess_vibrate0) {
     jboolean onoff = KNI_GetParameterAsBoolean(2);
     int displayId = KNI_GetParameterAsInt(1);
-
-    if(!midpHasForeground(displayId) || anc_stop_vibrate() == KNI_FALSE){
+	
+	if(/*!midpHasForeground(displayId) || */anc_stop_vibrate() == KNI_FALSE){
         KNI_ReturnBoolean(KNI_FALSE);
     } else if (KNI_FALSE == onoff) {
         KNI_ReturnBoolean(anc_stop_vibrate());
     } else {
         KNI_ReturnBoolean(anc_start_vibrate());
     }
+	
 }
-

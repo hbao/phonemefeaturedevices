@@ -24,39 +24,62 @@
  * information or have any questions.
  */
 
+/*
+ * NOTICE: Portions Copyright (c) 2007-2009 Davy Preuveneers.
+ * This file has been modified by Davy Preuveneers on 2009/01/11. The
+ * changes are licensed under the terms of the GNU General Public
+ * License version 2. This notice was added to meet the conditions of
+ * Section 3.a of the GNU General Public License version 2.
+ */
+
 #include <windows.h>
 #include <windowsx.h>
 #include <aygshell.h>
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
-#include <logging.h>
+#include <midp_logging.h>
 #include <midpAMS.h>
-#include <midpexport_suite_storage.h>
+#include <suitestore_task_manager.h>
 #include <midpMalloc.h>
 #include <jvm.h>
 #include <findMidlet.h>
+#include <midpUtilKni.h>
 #include <commandLineUtil.h>
 #include <commandLineUtil_md.h>
 #include <winceapp_export.h>
 
 #if ENABLE_MULTIPLE_ISOLATES
-#define MIDP_HEAP_REQUIREMENT (3 * 1024 * 1024)
+#define MIDP_HEAP_REQUIREMENT (8 * 1024 * 1024)
 #else
-#define MIDP_HEAP_REQUIREMENT (1 * 1024 * 1024)
+#define MIDP_HEAP_REQUIREMENT (4 * 1024 * 1024)
 #endif
 
 /** Maximum number of command line arguments. */
 #define RUNMIDLET_MAX_ARGS 32
 
+/*
+ #2996: WinCE: Clicking on BlueWhale TodayItem when the process is already 
+ running does nothing 
+
+ #2993 WinCE: App title bar shows "phoneME" instead of "BlueWhale" 
+
+ Putting the first instance of the process back in the foreground failed 
+ because the title of the VM window did not match in the
+ ActivatePreviousInstance() call below. 
+
+ When rebranding also change the name in:
+ midp/src/highlevelui/wince_application/reference/native/winceapp_export.cpp
+ */
 
 #if ENABLE_MULTIPLE_ISOLATES
-static PTCHAR      _szAppName    = TEXT("jwc1.1.3 (mvm)");
-static PTCHAR      _szTitle      = TEXT("jwc1.1.3 (mvm)");
+static PTCHAR      _szAppName    = TEXT("BlueWhale");
+static PTCHAR      _szTitle      = TEXT("BlueWhale");
 #else
-static PTCHAR      _szAppName    = TEXT("jwc1.1.3 (svm)");
-static PTCHAR      _szTitle      = TEXT("jwc1.1.3 (svm)");
+static PTCHAR      _szAppName    = TEXT("BlueWhale");
+static PTCHAR      _szTitle      = TEXT("BlueWhale");
 #endif
+
 static HINSTANCE   _hAppInstance = NULL;
 static HWND        _hwndMain     = NULL;
 static char*       _argv[RUNMIDLET_MAX_ARGS];
@@ -174,13 +197,13 @@ HRESULT ActivatePreviousInstance(const TCHAR* lptszClass,
            * running.  Try to bring it to the foreground.
            */
 
-          hwnd = FindWindow(lptszClass, lptszTitle);
+          hwnd = FindWindow(NULL, lptszTitle);
           if (NULL == hwnd) {
               /* It's possible that the other window is in the process of
                * being created...
                */
               Sleep(500);
-              hwnd = FindWindow(lptszClass, lptszTitle);
+              hwnd = FindWindow(NULL, lptszTitle);
           }
 
           if (NULL != hwnd) {
@@ -222,55 +245,7 @@ Exit:
     return(hr);
 }
 
-static BOOL InitApplication(HINSTANCE hInstance) {
-    WNDCLASS wc;
-
-    wc.style = CS_HREDRAW | CS_VREDRAW ;
-    wc.lpfnWndProc = (WNDPROC)winceapp_wndproc;
-    wc.cbClsExtra = 0;
-    wc.cbWndExtra = 0;
-    wc.hIcon = NULL;
-    wc.hInstance = hInstance;
-    wc.hCursor = NULL;
-    wc.hbrBackground = (HBRUSH) GetStockObject( WHITE_BRUSH );
-    wc.lpszMenuName = NULL;
-    wc.lpszClassName = _szAppName;
-
-    return RegisterClass(&wc);
-}
-
-static BOOL InitInstance(HINSTANCE hInstance, int CmdShow) {
-    _hwndMain = CreateWindowEx(WS_EX_CAPTIONOKBTN,
-                               _szAppName,
-                               _szTitle,
-                               WS_VISIBLE,
-                               CW_USEDEFAULT,
-                               CW_USEDEFAULT,
-                               CW_USEDEFAULT,
-                               CW_USEDEFAULT,
-                               NULL, NULL, hInstance, NULL);
-
-    if (!_hwndMain) {
-        return FALSE;
-    }
-
-    winceapp_set_window_handle(_hwndMain);
-    ShowWindow(_hwndMain, CmdShow );
-    UpdateWindow(_hwndMain);
-    return TRUE;
-}
-
-static BOOL init_gui(HINSTANCE hInstance, HINSTANCE hPrevInstance,
-                     int nShowCmd) {
-    if (!InitApplication(hInstance)) {
-        return FALSE;
-    }
-    if (!InitInstance(hInstance, nShowCmd)) {
-        return FALSE;
-    }
-    return TRUE;
-}
-
+extern BOOL initWindows(HINSTANCE hInstance, int nShowCmd);
 
 /**
  * Runs a MIDlet from an installed MIDlet suite. This is an example of
@@ -292,11 +267,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
     char** commandlineArgs;
     BOOL fActivated;
     int status = -1;
-    MidpString suiteID = NULL_MIDP_STRING;
-    MidpString classname = NULL_MIDP_STRING;
-    MidpString arg0 = NULL_MIDP_STRING;
-    MidpString arg1 = NULL_MIDP_STRING;
-    MidpString arg2 = NULL_MIDP_STRING;
+    SuiteIdType suiteId = UNUSED_SUITE_ID;
+    pcsl_string classname = PCSL_STRING_NULL;
+    pcsl_string arg0 = PCSL_STRING_NULL;
+    pcsl_string arg1 = PCSL_STRING_NULL;
+    pcsl_string arg2 = PCSL_STRING_NULL;
     int repeatMidlet = 0;
     char* argv[RUNMIDLET_MAX_ARGS];
     int i, used;
@@ -305,8 +280,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
     char* appDir = NULL;
     char* confDir = NULL;
     char* additionalPath;
-    MidpString* pSuites = NULL;
+    SuiteIdType* pSuites = NULL;
     int numberOfSuites = 0;
+    int ordinalSuiteNumber = -1;
+    char* chSuiteNum = NULL;
 
     if (FAILED(ActivatePreviousInstance(_szAppName, _szTitle, &fActivated)) ||
         fActivated) {
@@ -316,7 +293,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 
     _hAppInstance = hInstance;
     process_command_line(lpCmdLine);
-    if (!init_gui(hInstance, hPrevInstance, nShowCmd)) {
+    if (!initWindows(hInstance, nShowCmd)) {
         REPORT_ERROR(LC_AMS, "init_gui() failed");
         MessageBox(NULL, TEXT("Failed to start JWC"), TEXT("Bye"), MB_OK);
         return 0;
@@ -376,6 +353,17 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
         repeatMidlet = 1;
     }
 
+    /* run the midlet suite by its ordinal number */
+    if ((chSuiteNum = midpRemoveCommandOption("-ordinal",
+                                              argv, &argc)) != NULL) {
+        /* the format of the string is "number:" */
+        if (sscanf(chSuiteNum, "%d", &ordinalSuiteNumber) != 1) {
+            REPORT_ERROR(LC_AMS, "Invalid suite number format");
+            fprintf(stderr, "Invalid suite number format: %s\n", chSuiteNum);
+            return -1;
+        }
+    }
+
     /* additionalPath gets appended to the classpath */
     additionalPath = midpRemoveCommandOption("-classpathext", argv, &argc);
 
@@ -423,8 +411,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
         int i;
 
         if (argc > 5) {
-            arg2 = midpCharsToJchars(argv[5]);
-            if (arg2.len == OUT_OF_MEM_LEN) {
+            if (PCSL_STRING_OK != pcsl_string_from_chars(argv[5], &arg2)) {
                 REPORT_ERROR(LC_AMS, "Out of Memory");
                 fprintf(stderr, "Out Of Memory\n");
                 break;
@@ -432,17 +419,15 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
         }
 
         if (argc > 4) {
-            arg1 = midpCharsToJchars(argv[4]);
-            if (arg1.len == OUT_OF_MEM_LEN) {
-            REPORT_ERROR(LC_AMS, "Out of Memory");
+            if (PCSL_STRING_OK != pcsl_string_from_chars(argv[4], &arg1)) {
+                REPORT_ERROR(LC_AMS, "Out of Memory");
                 fprintf(stderr, "Out Of Memory\n");
                 break;
             }
         }
 
         if (argc > 3) {
-            arg0 = midpCharsToJchars(argv[3]);
-            if (arg0.len == OUT_OF_MEM_LEN) {
+            if (PCSL_STRING_OK != pcsl_string_from_chars(argv[3], &arg0)) {
                 REPORT_ERROR(LC_AMS, "Out of Memory");
                 fprintf(stderr, "Out Of Memory\n");
                 break;
@@ -450,8 +435,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
         }
 
         if (argc > 2) {
-            classname = midpCharsToJchars(argv[2]);
-            if (classname.len == OUT_OF_MEM_LEN) {
+            if (PCSL_STRING_OK != pcsl_string_from_chars(argv[2], &classname)) {
                 REPORT_ERROR(LC_AMS, "Out of Memory");
                 fprintf(stderr, "Out Of Memory\n");
                 break;
@@ -469,52 +453,76 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
             }
         }
 
-        if (onlyDigits) {
-            /* Run by number */
-            int suiteNumber;
-
-            /* the format of the string is "number:" */
-            if (sscanf(argv[1], "%d", &suiteNumber) != 1) {
-                REPORT_ERROR(LC_AMS, "Invalid suite number format");
-                fprintf(stderr, "Invalid suite number format\n");
-                break;
-            }
-
-            numberOfSuites = midpGetSuiteIDs(&pSuites);
-            if (numberOfSuites < 0) {
-                REPORT_ERROR(LC_AMS, "Out of Memory");
-                fprintf(stderr, "Out Of Memory\n");
-                break;
-            }
-
-            if (suiteNumber > numberOfSuites || suiteNumber < 1) {
-                REPORT_ERROR(LC_AMS, "Suite number out of range");
-                fprintf(stderr, "Suite number out of range\n");
-                midpFreeSuiteIDs(pSuites, numberOfSuites);
-                break;
-            }
-
-            suiteID = pSuites[suiteNumber - 1];
-        } else {
-            /* Run by ID */
-            suiteID = midpCharsToJchars(argv[1]);
-
-            if (suiteID.data == NULL) {
-                REPORT_ERROR(LC_AMS, "Out of Memory");
-                fprintf(stderr, "Out Of Memory\n");
+        if (ordinalSuiteNumber != -1 || onlyDigits) {
+            /* load IDs of the installed suites */
+            MIDPError err = midp_get_suite_ids(&pSuites, &numberOfSuites);
+            if (err != ALL_OK) {
+                REPORT_ERROR1(LC_AMS, "Error in midp_get_suite_ids(), code %d",
+                              err);
+                fprintf(stderr, "Error in midp_get_suite_ids(), code %d.\n",
+                        err);
                 break;
             }
         }
 
-        if (classname.len == NULL_LEN) {
-            classname = findMidletClass(suiteID, 1);
-            if (classname.len == OUT_OF_MEM_LEN) {
-                REPORT_ERROR(LC_AMS, "Out of Memory");
-                fprintf(stderr, "Out Of Memory 7\n");
+        if (ordinalSuiteNumber != -1) {
+            /* run the midlet suite by its ordinal number */
+            if (ordinalSuiteNumber > numberOfSuites || ordinalSuiteNumber < 1) {
+                REPORT_ERROR(LC_AMS, "Suite number out of range");
+                fprintf(stderr, "Suite number out of range\n");
+                midp_free_suite_ids(pSuites, numberOfSuites);
                 break;
             }
 
-            if (classname.len == NULL_LEN) {
+            suiteId = pSuites[ordinalSuiteNumber - 1];
+        } else if (onlyDigits) {
+            /* run the midlet suite by its ID */
+            int i;
+
+            /* the format of the string is "number:" */
+            if (sscanf(argv[1], "%d", &suiteId) != 1) {
+                REPORT_ERROR(LC_AMS, "Invalid suite ID format");
+                fprintf(stderr, "Invalid suite ID format\n");
+                break;
+            }
+
+            for (i = 0; i < numberOfSuites; i++) {
+                if (suiteId == pSuites[i]) {
+                    break;
+                }
+            }
+
+            if (i == numberOfSuites) {
+                REPORT_ERROR(LC_AMS, "Suite with the given ID was not found");
+                fprintf(stderr, "Suite with the given ID was not found\n");
+                break;
+            }
+        } else {
+            /* Run by ID */
+            suiteId = INTERNAL_SUITE_ID;
+
+            if (strcmp(argv[1], "internal") &&
+                strcmp(argv[1], "-1") && additionalPath == NULL) {
+                /*
+                 * If the argument is not a suite ID, it might be a full
+                 * path to the midlet suite's jar file.
+                 * In this case this path is added to the classpath and
+                 * the suite is run without installation (it is useful
+                 * for internal test and development purposes).
+                 */
+                additionalPath = argv[1];
+            }
+        }
+
+        if (pcsl_string_is_null(&classname)) {
+            int res = find_midlet_class(suiteId, 1, &classname);
+            if (OUT_OF_MEM_LEN == res) {
+                REPORT_ERROR(LC_AMS, "Out of Memory");
+                fprintf(stderr, "Out Of Memory\n");
+                break;
+            }
+
+            if (NULL_LEN == res) {
                 REPORT_ERROR(LC_AMS, "Could not find the first MIDlet");
                 fprintf(stderr, "Could not find the first MIDlet\n");
                 break;
@@ -522,23 +530,21 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
         }
 
         do {
-            status = midpRunMidletWithArgsCp(suiteID, classname,
-                                             arg0, arg1, arg2,
-                                             debugOption, additionalPath);
+            status = midp_run_midlet_with_args_cp(suiteId, &classname,
+                                                  &arg0, &arg1, &arg2,
+                                                  debugOption, additionalPath);
         } while (repeatMidlet && status != MIDP_SHUTDOWN_STATUS);
 
         if (pSuites != NULL) {
-            midpFreeSuiteIDs(pSuites, numberOfSuites);
-            suiteID = NULL_MIDP_STRING;
-        } else {
-            midpFreeString(suiteID);
+            midp_free_suite_ids(pSuites, numberOfSuites);
+            suiteId = UNUSED_SUITE_ID;
         }
     } while (0);
 
-    midpFreeString(arg0);
-    midpFreeString(arg1);
-    midpFreeString(arg2);
-    midpFreeString(classname);
+    pcsl_string_free(&arg0);
+    pcsl_string_free(&arg1);
+    pcsl_string_free(&arg2);
+    pcsl_string_free(&classname);
 
     switch (status) {
     case MIDP_SHUTDOWN_STATUS:

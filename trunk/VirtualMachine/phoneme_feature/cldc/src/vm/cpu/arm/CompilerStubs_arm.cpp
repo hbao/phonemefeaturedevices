@@ -23,7 +23,13 @@
  * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa
  * Clara, CA 95054 or visit www.sun.com if you need additional
  * information or have any questions.
- *
+ *   
+ * NOTICE: Portions Copyright (c) 2007-2009 Blue Whale Systems.  
+ * This file has been modified by Blue Whale Systems on 07Feb2009. 
+ * The changes are licensed under the terms of the GNU General Public  
+ * License version 2. This notice was added to meet the conditions of  
+ * Section 3.a of the GNU General Public License version 2.  
+ * 
  *!c<
  * Copyright 2006 Intel Corporation. All rights reserved.
  *!c>
@@ -704,7 +710,9 @@ bind(found);
   eol_comment("class.subtype_cache_2 = old class.subtype_cache_1");
   str(tmp1, imm_index(tmp2, JavaClass::subtype_cache_2_offset()));
 
-  comment("no need for write barrier if we're pointing to a lower address");
+  // Blue Whale Systems 07Feb2009: Single quotes upset the Symbian armi compiler and break s60v2fp2 and s60v2fp3 builds.
+  //comment("no need for write barrier if we're pointing to a lower address"); 
+  comment("no need for write barrier if we are pointing to a lower address");
   cmp(tmp1, reg(tmp2));
   cmp(tmp0, reg(tmp2), lo);
   eol_comment("return if %s < %s && %s < %s",

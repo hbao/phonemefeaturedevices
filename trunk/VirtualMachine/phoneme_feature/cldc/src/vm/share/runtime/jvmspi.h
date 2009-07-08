@@ -101,6 +101,7 @@ void JVMSPI_DisplayUsage(char *message);
 char *JVMSPI_GetSystemProperty(char *property_name);
 void  JVMSPI_FreeSystemProperty(char *property_value);
 void  JVMSPI_SetSystemProperty(char *property_name, char *property_value);
+void  JVMSPI_FreeAllSystemProperties();
 
 #if ENABLE_JAVA_DEBUGGER
 void JVMSPI_DebuggerNotification(jboolean);

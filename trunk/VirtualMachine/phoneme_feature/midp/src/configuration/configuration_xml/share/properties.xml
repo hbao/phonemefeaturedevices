@@ -173,15 +173,16 @@
 		Value="en-US"
 		Scope="system"
 		Comment="System locale."/>
+  <!--
   <property Key="microedition.platform" 
-		Value="j2me" 
+		Value="bluewhale_platform_wm2003ppcarm" 
 		Scope="system"
-		Comment="Platform name."/>
+		Comment="Platform name."/> -->
   <!-- property Key="microedition.encoding" 
 		Value="ISO8859_1" 
 		Scope="system"/ -->
   <property Key="microedition.commports" 
-	    Value="COM1" 
+	    Value="COM0,COM1,COM2,COM3,COM4,COM5,COM6,COM7,COM8,COM9" 
 		Scope="system"/>
   <property Key="microedition.jtwi.version" 
 		Value="1.0" 

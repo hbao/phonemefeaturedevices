@@ -22,6 +22,14 @@
 # information or have any questions. 
 #
 
+# 
+# NOTICE: Portions Copyright (c) 2007-2009 Davy Preuveneers.
+# This file has been modified by Davy Preuveneers on 2009/01/11. The
+# changes are licensed under the terms of the GNU General Public
+# License version 2. This notice was added to meet the conditions of
+# Section 3.a of the GNU General Public License version 2.
+# 
+
 # abstractions main directory
 JSROP_ABSTRACTS_DIR=$(ABSTRACTIONS_DIR)
 
@@ -31,7 +39,6 @@ vpath % $(JSROP_ABSTRACTS_DIR)/src/cldc_application/native/$(TARGET_PLATFORM)
 
 # names of native source files (like 'file.c')
 ABSTRACTIONS_NATIVES += \
-	kni_utils.c \
 	jsrop_suitestore.c
 
 # extra libraries needed (like '-lpthread' or '-lm')

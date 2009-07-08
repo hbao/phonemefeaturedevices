@@ -23,6 +23,15 @@
 # Clara, CA 95054 or visit www.sun.com if you need additional
 # information or have any questions.
 #
+
+# 
+# NOTICE: Portions Copyright (c) 2007-2009 Davy Preuveneers.
+# This file has been modified by Davy Preuveneers on 2009/01/11. The
+# changes are licensed under the terms of the GNU General Public
+# License version 2. This notice was added to meet the conditions of
+# Section 3.a of the GNU General Public License version 2.
+# 
+
 ######################################################################
 #
 # Subsystem's Platform Configuration file
@@ -35,14 +44,10 @@ vpath % $(SUBSYSTEM_DIR)/push/push_timer/$(PLATFORM)/native
 
 # Additional native files for the platform
 #
-SUBSYSTEM_PUSH_NATIVE_FILES += \
+SUBSYSTEM_PUSH_TIMER_NATIVE_FILES += \
     midp_alarm_timer_md.c
 
 # Header files for the platform
 SUBSYSTEM_PUSH_TIMER_EXTRA_INCLUDES += \
     -I$(SUBSYSTEM_DIR)/push/push_timer/$(PLATFORM)/include
-
-
-
-
 

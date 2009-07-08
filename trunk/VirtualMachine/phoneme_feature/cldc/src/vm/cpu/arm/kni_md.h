@@ -41,7 +41,11 @@ typedef long long   jlong;
 #elif defined(UNDER_ADS)
 typedef long long   jlong;
 #else
+#ifdef __SYMBIAN32__
+typedef long long int jlong;
+#else
 typedef __int64     jlong;
+#endif
 #endif
 
 #endif /* !_JAVASOFT_KNI_MD_H_ */

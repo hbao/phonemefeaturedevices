@@ -31,6 +31,9 @@
  * support the winsock API.
  *
  */
+#ifndef UNDER_CE
+#define _CRT_SECURE_NO_DEPRECATE
+#endif
 
 #include <stdio.h>
 #include <winsock2.h>

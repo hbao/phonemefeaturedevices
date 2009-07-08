@@ -70,7 +70,7 @@ abstract class FileSystemEventHandlerBase implements EventListener {
      * Removes current isolate from the list of isolates interested in
      * receiving mount/unmount events.
      */
-    private native void finalize();
+    protected native void finalize();
 
     /**
      * Registers current isolate as interested in receiving mount/unmount

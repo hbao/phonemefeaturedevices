@@ -19,6 +19,12 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA
  * 
+ * NOTICE: Portions Copyright (c) 2007-2009 Blue Whale Systems.
+ * This file has been modified by Blue Whale Systems on 04May2009.
+ * The changes are licensed under the terms of the GNU General Public
+ * License version 2. This notice was added to meet the conditions of
+ * Section 3.a of the GNU General Public License version 2.
+ * 
  * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa
  * Clara, CA 95054 or visit www.sun.com if you need additional
  * information or have any questions.
@@ -419,6 +425,28 @@ ReturnOop Java_java_lang_System_getProperty0(JVM_SINGLE_ARG_TRAPS) {
   TypeArray::Fast cstring = string().to_cstring(JVM_SINGLE_ARG_CHECK_0);
 
   char *name = (char *) cstring().base_address();
+
+#ifdef _WIN32_WCE
+#ifdef JVM_BUILD_VERSION
+
+  /*
+  #3013 Client: Seeing 'internal' rather than the vm version number whenever this information 
+  is displayed in the UI. For example, on the Help screen
+
+  #3005 WinCE: VM should return a version string from System.getProperty("Host-Version") 
+  of the form "wm2003ppcarm_11843"
+
+  Make sure that the BUILD_VERSION way of setting the JVM_BUILD_VERSION compiler flag
+  and consequently the 'Host-Version' property is only used on WinCE. The Symbian build uses
+  another way to set this property.
+  */
+
+  if (jvm_strcmp(name, "Host-Version") == 0) {
+    return Universe::new_string(JVM_BUILD_VERSION, jvm_strlen(JVM_BUILD_VERSION) JVM_CHECK_0);
+  }
+#endif
+#endif
+
   const char *value = JVMSPI_GetSystemProperty(name);
 
 #if ENABLE_PRODUCT_PRINT_STACK || !defined(PRODUCT)
@@ -684,8 +712,12 @@ void Java_java_lang_Runtime_gc(JVM_SINGLE_ARG_TRAPS) {
   ObjectHeap::full_collect(JVM_SINGLE_ARG_NO_CHECK_AT_BOTTOM);
 }
 
-jlong Java_java_lang_Runtime_freeMemory() {
-  return ObjectHeap::available_for_current_task();
+jlong Java_java_lang_Runtime_freeMemory( void ) {
+  OopDesc** const allocation_end = ObjectHeap::disable_allocation_trap();
+  ObjectHeap::accumulate_current_task_memory_usage();
+  const int available = ObjectHeap::available_for_current_task();
+  ObjectHeap::enable_allocation_trap(allocation_end);
+  return available;
 }
 
 jlong Java_java_lang_Runtime_totalMemory() {
@@ -1035,6 +1067,59 @@ jint Java_java_lang_String_hashCode() {
   String::Raw this_obj = GET_PARAMETER_AS_OOP(0);
 
   return this_obj().hash();
+}
+
+jint Java_java_lang_String_equals()
+{
+  String::Raw this_obj = GET_PARAMETER_AS_OOP(0);
+  String::Raw arg_obj = GET_PARAMETER_AS_OOP(1);
+  if (arg_obj.is_null())
+  {
+    return 0;
+  }
+  if (this_obj == arg_obj)
+  {
+    return 1;
+  }
+  if (arg_obj.is_string())
+  {
+    return this_obj().matches(&arg_obj());
+  }
+  return 0;
+}
+
+jint Java_java_lang_String_compareTo(JVM_SINGLE_ARG_TRAPS)
+{
+  String::Raw this_obj = GET_PARAMETER_AS_OOP(0);
+  String::Raw arg_obj = GET_PARAMETER_AS_OOP(1);
+  if (arg_obj.is_null())
+  {
+	  Throw::null_pointer_exception(empty_message JVM_THROW_0);
+  }
+  jint result = this_obj().compareTo(&arg_obj());
+  return result;
+}
+
+jint Java_java_lang_String_indexOf__Ljava_lang_String_2I(JVM_SINGLE_ARG_TRAPS)
+{
+  String::Raw this_obj = GET_PARAMETER_AS_OOP(0);
+  String::Raw arg_obj = GET_PARAMETER_AS_OOP(1);
+  if (arg_obj.is_null())
+  {
+	  Throw::null_pointer_exception(empty_message JVM_THROW_0);
+  }
+  jint fromIndex = KNI_GetParameterAsInt(2);
+  jint result = this_obj().indexOf(&arg_obj(), fromIndex);
+  return result;
+}
+
+ReturnOop Java_java_lang_String_replace(JVM_SINGLE_ARG_TRAPS)
+{
+	String::Raw this_obj = GET_PARAMETER_AS_OOP(0);
+	jint oldChar = KNI_GetParameterAsInt(1);
+	jint newChar = KNI_GetParameterAsInt(2);
+	String::Raw result = this_obj().replace((jchar)oldChar, (jchar)newChar JVM_CHECK_0);
+	return result;
 }
 
 jint Java_java_lang_String_lastIndexOf__I() {

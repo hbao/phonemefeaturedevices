@@ -178,7 +178,7 @@ static int inflateStored(InflaterState *state) {
 
         if (state->outBufferIsAHandle) {
             /* This is to support heaps with memory compaction. */
-            outBuffer = state->addrFromHandle(state->heapState,
+            outBuffer = (unsigned char*)state->addrFromHandle(state->heapState,
                                               state->outBuffer);
         }
 
@@ -232,9 +232,9 @@ static int inflateHuffman(InflaterState *state, int fixedHuffman) {
         }
 
         /* This is to support heaps with memory compaction. */
-        lcodes = state->addrFromHandle(state->heapState,
+        lcodes = (HuffmanCodeTable*)state->addrFromHandle(state->heapState,
                                        lcodesMemHandle);
-        dcodes = state->addrFromHandle(state->heapState,
+        dcodes = (HuffmanCodeTable*)state->addrFromHandle(state->heapState,
                                        dcodesMemHandle);
 
         quickDataSize = lcodes->h.quickBits;
@@ -246,7 +246,7 @@ static int inflateHuffman(InflaterState *state, int fixedHuffman) {
 
     if (state->outBufferIsAHandle) {
         /* This is to support heaps with memory compaction. */
-        outBuffer = state->addrFromHandle(state->heapState,
+        outBuffer = (unsigned char*)state->addrFromHandle(state->heapState,
                                           state->outBuffer);
     }
 
@@ -430,7 +430,7 @@ static int decodeDynamicHuffmanTables(InflaterState *state,
     }
 
     /* This is to support heaps with memory compaction. */
-    ccodes = state->addrFromHandle(state->heapState, ccodesMemHandle);
+    ccodes =(HuffmanCodeTable*) state->addrFromHandle(state->heapState, ccodesMemHandle);
 
     quickBits = ccodes->h.quickBits;
 
@@ -620,7 +620,7 @@ static int makeCodeTable(InflaterState *state,
     }
 
     /* This is to support heaps with memory compaction. */
-    table = state->addrFromHandle(state->heapState, tableMemHandle);
+    table = (HuffmanCodeTable*)state->addrFromHandle(state->heapState, tableMemHandle);
 
     nextLongTable = &table->entries[mainTableLength];
 

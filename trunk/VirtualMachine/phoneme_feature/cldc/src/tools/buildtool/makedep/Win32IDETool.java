@@ -1100,7 +1100,7 @@ class VMSourceHandler {
         return vpaths;
     }
 
-    private void addVpath(String vpath) {
+    public void addVpath(String vpath) {
         String workspace = tool.getWorkSpaceArg();
         vpath = workspace + vpath;
         vpath = vpath.replace('/', File.separatorChar);

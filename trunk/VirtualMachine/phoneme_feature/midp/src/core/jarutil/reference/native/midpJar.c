@@ -215,7 +215,7 @@ midpGetJarEntry(void* handle, const pcsl_string * name,
     }
 
     nameLen = pcsl_string_utf8_length(name);
-    pCompBuffer = midpMalloc(nameLen);
+    pCompBuffer = (unsigned char*)midpMalloc(nameLen);
     if (pCompBuffer == NULL) {
         pcsl_string_release_utf8_data((jbyte*)pName, name);
         return MIDP_JAR_OUT_OF_MEM_ERROR;
@@ -233,7 +233,7 @@ midpGetJarEntry(void* handle, const pcsl_string * name,
         return MIDP_JAR_CORRUPT_ERROR;
     }
 
-    entryData = midpMalloc((size_t)entryInfo.decompLen);
+    entryData = (char*)midpMalloc((size_t)entryInfo.decompLen);
     if (entryData == NULL) {
         return MIDP_JAR_OUT_OF_MEM_ERROR;
     }
@@ -264,7 +264,7 @@ midpJarEntryExists(void* handle, const pcsl_string * name) {
     }
 
     nameLen = pcsl_string_utf8_length(name);
-    pCompBuffer = midpMalloc(nameLen);
+    pCompBuffer = (unsigned char*)midpMalloc(nameLen);
     if (NULL == pCompBuffer) {
         pcsl_string_release_utf8_data((jbyte*)pName, name);
         return MIDP_JAR_OUT_OF_MEM_ERROR;

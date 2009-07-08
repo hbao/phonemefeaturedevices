@@ -740,7 +740,7 @@ public class Protocol extends NetworkConnectionBase
     /**
      * Native finalizer
      */
-    private native void finalize();
+    protected native void finalize();
 
     /**
      * Gets a byte array that represents an IPv4 or IPv6 address 

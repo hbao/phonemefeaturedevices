@@ -1,7 +1,7 @@
 #
 #  
 #
-# Copyright  1990-2008 Sun Microsystems, Inc. All Rights Reserved.
+# Copyright  1990-2007 Sun Microsystems, Inc. All Rights Reserved.
 # DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER
 # 
 # This program is free software; you can redistribute it and/or
@@ -97,7 +97,7 @@ $(OUTPUT_LIB_DIR)/libpcsl_print$(LIB_EXT) :
 
 # define ''clean' target
 
-clean: verify_for_clean
+clean: verify
 	rm -rf $(OUTPUT_OBJ_DIR)/pcsl_win32.o
 	rm -rf $(OUTPUT_OBJ_DIR)/pcsl_dir_win32.o
 	rm -rf $(OUTPUT_INC_DIR)/pcsl_file.h

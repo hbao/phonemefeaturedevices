@@ -24,6 +24,14 @@
  * information or have any questions.
  */
 
+/*
+ * NOTICE: Portions Copyright (c) 2007-2009 Davy Preuveneers.
+ * This file has been modified by Davy Preuveneers on 2009/01/11. The
+ * changes are licensed under the terms of the GNU General Public
+ * License version 2. This notice was added to meet the conditions of
+ * Section 3.a of the GNU General Public License version 2.
+ */
+
 package com.sun.midp.io.j2me.comm;
 
 import java.io.*;
@@ -253,6 +261,7 @@ public class Protocol extends BufferedConnectionAdapter
 
         if (Character.isDigit(name.charAt(0))) {
             portNumber = Integer.parseInt(name.substring(0, 1));
+            deviceName = "COM" + portNumber;
             pos++;
         } else {
             pos = name.indexOf(";");
@@ -300,7 +309,7 @@ public class Protocol extends BufferedConnectionAdapter
                 port = ports.substring(0, comma);
                 ports = ports.substring(comma + 1);
             }
-            if (port.equals(deviceName)) {
+            if (port.equalsIgnoreCase(deviceName)) {
                 found = true;
             }
         }
@@ -455,7 +464,7 @@ public class Protocol extends BufferedConnectionAdapter
                 }
             }
 
-            if (bytesRead < 1) {
+            if (bytesRead == -1) {
                 eof = true;
                 return -1;
             }
@@ -497,7 +506,7 @@ public class Protocol extends BufferedConnectionAdapter
             }
         }
 
-        if (bytesRead < 1) {
+        if (bytesRead == -1) {
             eof = true;
         }
 

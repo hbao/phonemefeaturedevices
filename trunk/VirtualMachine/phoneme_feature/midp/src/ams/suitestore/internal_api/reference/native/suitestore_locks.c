@@ -84,10 +84,13 @@ void unlock_storage(SuiteIdType suiteId) {
  */
 void remove_all_storage_lock() {
     lockStorageList* currentNodePtr;
+    lockStorageList* nextNodePtr;
 
-    for (currentNodePtr = lockStorageListPtr; currentNodePtr != NULL;
-         currentNodePtr = currentNodePtr->next) {
-        remove_storage_lock(currentNodePtr->suiteId);
+    for (currentNodePtr = lockStorageListPtr; currentNodePtr != NULL;) 
+    {
+    	nextNodePtr = currentNodePtr->next;
+    	remove_storage_lock(currentNodePtr->suiteId);
+    	currentNodePtr = nextNodePtr; 
     }
 }
 

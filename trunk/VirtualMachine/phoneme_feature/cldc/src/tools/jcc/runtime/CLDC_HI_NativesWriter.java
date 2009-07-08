@@ -18,6 +18,12 @@
  * version 2 along with this work; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA
+ *
+ * NOTICE: Portions Copyright (c) 2007-2009 Blue Whale Systems.
+ * This file has been modified by Blue Whale Systems on 04May2009.
+ * The changes are licensed under the terms of the GNU General Public
+ * License version 2. This notice was added to meet the conditions of
+ * Section 3.a of the GNU General Public License version 2.
  * 
  * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa
  * Clara, CA 95054 or visit www.sun.com if you need additional
@@ -69,9 +75,6 @@ public class CLDC_HI_NativesWriter
         {STRING, "charAt",      null,   "native_string_charAt_entry"},
         {STRING, "<init>",     "(Ljava/lang/StringBuffer;)V",   
                                         "native_string_init_entry"},
-        {STRING, "equals",      null,   "native_string_equals_entry"},
-        {STRING, "indexOf",    "(Ljava/lang/String;I)I", 
-                                        "native_string_indexof_string_entry"},
         {STRING, "indexOf",    "(Ljava/lang/String;)I",  
                                         "native_string_indexof0_string_entry"},
         {STRING, "indexOf",    "(II)I", "native_string_indexof_entry"},

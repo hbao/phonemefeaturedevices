@@ -24,12 +24,19 @@
  * information or have any questions.
  */
 
+/*
+ * NOTICE: Portions Copyright (c) 2007-2009 Davy Preuveneers.
+ * This file has been modified by Davy Preuveneers on 2009/01/11. The
+ * changes are licensed under the terms of the GNU General Public
+ * License version 2. This notice was added to meet the conditions of
+ * Section 3.a of the GNU General Public License version 2.
+ */
+
 #include <windows.h>
 #include <string.h>
 #include <midlet.h>
 #include <midp_properties_port.h>
 #include <midpMalloc.h>
-#include <logging.h>
 
 /**
  * @file
@@ -52,9 +59,11 @@ static const char* const PLATFORM_REQUEST_KEY =
  * @return true if the platform request is configured
  */
 int platformRequest(char* pszUrl) {
-    char *execargs[3];
+    char *pszCommand;
     STARTUPINFO si;
     PROCESS_INFORMATION pi;
+    TCHAR command[MAX_PATH+1];
+    TCHAR commandLine[1024];
 
     if (strlen(pszUrl) == 0) {
         /*
@@ -64,24 +73,26 @@ int platformRequest(char* pszUrl) {
         return 1;
     }
 
-    execargs[0] = (char *)getInternalProperty(PLATFORM_REQUEST_KEY);
-    if (execargs[0] == NULL) {
+    /*
+     * #3202: Symbian: platformRequest for things beginning 
+     * with "x-bw-" should be harmlessly ignored    
+     */
+    if (strncmp(pszUrl, "x-bw-", 5) == 0) {
+        return 1;
+    }
+
+    /*
+     * #2997: WinCE: platformRequest (e.g. from Help menu)
+     * does not appear to be supported
+     */
+    pszCommand = (char *)getInternalProperty(PLATFORM_REQUEST_KEY);
+    if (pszCommand == NULL) {
         REPORT_WARN(LC_AMS, "PlatformRequest is not configured.");
-  return 0;
+        return 0;
     }
 
-    execargs[1] = pszUrl;
-    /* leave room for a space and zero terminator */
-    execargs[2] = (char*)midpMalloc(strlen(execargs[0]) +
-                     strlen(execargs[1]) + 2);
-    if (execargs[2] == NULL) {
-        REPORT_WARN(LC_AMS, "PlatformRequest ran out of memory.");
-  return 0;
-    }
-
-    strcpy(execargs[2], execargs[0]);
-    strcat(execargs[2], " ");
-    strcat(execargs[2], execargs[1]);
+    MultiByteToWideChar(CP_ACP, 0, pszCommand, -1, command, MAX_PATH);
+    MultiByteToWideChar(CP_ACP, 0, pszUrl, -1, commandLine, 1023);
 
     memset(&si, 0, sizeof(si));
     si.cb = sizeof(si);
@@ -89,17 +100,12 @@ int platformRequest(char* pszUrl) {
     /* spawn the request using the configured URL handler and URL parameter
      * do not inherit handles
      */
-    if (CreateProcess(NULL, execargs[2], NULL, NULL, FALSE, 0,
-  NULL, NULL, &si, &pi)) {
+    if (CreateProcess(command, commandLine, NULL, NULL, FALSE, 0, NULL, NULL, &si, &pi)) {
         CloseHandle(pi.hProcess);
-  CloseHandle(pi.hThread);
+        CloseHandle(pi.hThread);
     } else {
         REPORT_WARN(LC_AMS, "Spawning a handler process failed. Check the platformRequest configuration. ");
     }
 
-    midpFree(execargs[2]);
-
     return 1;
 }
-
-

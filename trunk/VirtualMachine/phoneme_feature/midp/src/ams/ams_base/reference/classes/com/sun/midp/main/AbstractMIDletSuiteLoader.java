@@ -120,7 +120,10 @@ abstract class AbstractMIDletSuiteLoader
     protected boolean allocateReservedResources() {
         return true;
     }
-
+    
+    protected void releaseReservedResources()
+    {}
+    
     /**
      * Sets MIDlet suite arguments as temporary suite properties.
      * Subclasses can override the method to export any other needed
@@ -328,6 +331,7 @@ abstract class AbstractMIDletSuiteLoader
         } finally {
             closeSuite();
             done();
+            releaseReservedResources();
             exitLoader();
         }
     }

@@ -44,7 +44,7 @@ typedef unsigned char uchar;
 #define FALSE (0)
 #endif
 
-#ifndef bool
+#ifndef __cplusplus
 typedef int bool;
 #endif
 

@@ -35,7 +35,11 @@ typedef signed char jbyte;
 typedef int         jint;
 
 #ifdef _MSC_VER
+#ifdef __SYMBIAN32__
+typedef long long int jlong;
+#else
 typedef __int64     jlong;
+#endif
 #endif
 
 #ifdef __GNUC__

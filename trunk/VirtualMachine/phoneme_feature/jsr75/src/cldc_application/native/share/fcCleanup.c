@@ -153,6 +153,7 @@ void jsr75_suite_remove_cleanup(SuiteIdType suiteId)
  */
 char* getLocalizedPrivateDir()
 {
+#if 0
     const int disks_num = getValidDisksSize();
     int i = 0;
 
@@ -169,4 +170,6 @@ char* getLocalizedPrivateDir()
         }
     }
     return localizedPrivate;
+ #endif
+ return NULL;
 }

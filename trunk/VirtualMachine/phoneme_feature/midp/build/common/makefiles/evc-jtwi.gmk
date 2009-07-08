@@ -23,6 +23,15 @@
 # Clara, CA 95054 or visit www.sun.com if you need additional
 # information or have any questions.
 #
+
+# 
+# NOTICE: Portions Copyright (c) 2007-2009 Davy Preuveneers.
+# This file has been modified by Davy Preuveneers on 2009/01/11. The
+# changes are licensed under the terms of the GNU General Public
+# License version 2. This notice was added to meet the conditions of
+# Section 3.a of the GNU General Public License version 2.
+# 
+
 ######################################################################
 #
 # JTWI specific defines for compiler
@@ -46,14 +55,33 @@ endif
 endif
 endif
 
+#
+# CLDC_VM
+#
+ifeq ($(TARGET_VM), cldc_vm)
+  LIBS		+= $(CLDC_DIST_DIR)/lib/cldc_vm$(g)$(r)$(LIB_SUFFIX)
+  MIDP_DEPS	+= $(CLDC_DIST_DIR)/lib/cldc_vm$(g)$(r)$(LIB_SUFFIX)
+endif
+
+#
+# CDC_VM
+#
+ifeq ($(TARGET_VM), cdc_vm)
+  ifneq ($(CVM_PRELOAD_LIB), true)
+    LIBS	+= $(CDC_DIST_DIR)/bin/cvmi.lib
+    MIDP_DEPS	+= $(CDC_DIST_DIR)/bin/cvmi.lib
+  endif
+endif
+
+
 PCSL_TARGET_DIR ?= $(PCSL_OUTPUT_DIR)/$(TARGET_OS)_$(TARGET_CPU)
 LD_FLAGS	      += -libpath:$(EVC_LIB_PATH) \
                    -libpath:`$(call fixcygpath, $(PCSL_TARGET_DIR)/lib)` \
                    -libpath:`$(call fixcygpath, $(CDC_DIST_DIR)/bin)`
 EXTRA_INCLUDES	+= -I$(PCSL_TARGET_DIR)/inc
 LIBS		        += libpcsl_file.lib libpcsl_memory.lib libpcsl_print.lib \
-                   libpcsl_string.lib libpcsl_network.lib cvmi.lib       \
-                   Ws2.lib gx.lib aygshell.lib
+                   libpcsl_string.lib libpcsl_network.lib \
+                   Ws2.lib aygshell.lib
 
 MIDP_DEPS       += $(PCSL_TARGET_DIR)/lib/libpcsl_file.lib
 MIDP_DEPS       += $(PCSL_TARGET_DIR)/lib/libpcsl_memory.lib

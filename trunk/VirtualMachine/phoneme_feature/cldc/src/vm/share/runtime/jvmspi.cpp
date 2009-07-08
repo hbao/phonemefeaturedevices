@@ -56,6 +56,7 @@ jboolean JVMSPI_CheckExit(void) {
  */
 
 struct SystemProperty {
+   SystemProperty * prev;
    SystemProperty * next;
    char *name;
    char *value;
@@ -63,21 +64,33 @@ struct SystemProperty {
 
 static SystemProperty * system_properties = NULL;
 
-void JVMSPI_SetSystemProperty(char *property_name, char *property_value) {
-  if (property_name == NULL || property_value == NULL) {
-    // IMPL_NOTE: need to report an error
-    return;
-  }
+static SystemProperty * find_property(char *property_name)
+{
+	SystemProperty *prop;
 
-  SystemProperty *prop =
-      (SystemProperty*)OsMemory_allocate(sizeof(SystemProperty));
-  prop->next = system_properties;
-  system_properties = prop;
+	 for (prop = system_properties; prop; prop = prop->next) {
+	    if (jvm_strcmp(property_name, prop->name) == 0) {
+	      return prop;
+	    }
+	  }
+	  return NULL;
+}
 
-  prop->name  = (char*)OsMemory_allocate(jvm_strlen(property_name) + 1);
-  prop->value = (char*)OsMemory_allocate(jvm_strlen(property_value) + 1);
-  jvm_strcpy(prop->name,  property_name);
-  jvm_strcpy(prop->value, property_value);
+void JVMSPI_SetSystemProperty(char *property_name, char *property_value) 
+{
+	SystemProperty *prop = (SystemProperty*)OsMemory_allocate(sizeof(SystemProperty));
+	prop->prev = NULL;
+	prop->next = system_properties;
+	if(system_properties)
+	{
+		system_properties->prev = prop;
+	}
+	system_properties = prop;
+	
+	prop->name  = (char*)OsMemory_allocate(jvm_strlen(property_name) + 1);
+	prop->value = (char*)OsMemory_allocate(jvm_strlen(property_value ) + 1);
+	jvm_strcpy(prop->name,  property_name);
+	jvm_strcpy(prop->value, property_value);
 }
 
 char *JVMSPI_GetSystemProperty(char *property_name) {
@@ -91,8 +104,48 @@ char *JVMSPI_GetSystemProperty(char *property_name) {
   return NULL;
 }
 
-void JVMSPI_FreeSystemProperty(char * /*prop_value*/) {
-  // do nothing
+void JVMSPI_FreeSystemProperty(char *property_name) 
+{
+	SystemProperty *prop;
+
+	prop = find_property(property_name);
+	if(prop)
+	{
+		// remove node from list
+		if(prop->prev)
+		{
+			prop->prev->next = prop->next;
+		}
+		if(prop->next)
+		{
+			prop->next->prev = prop->prev;
+		}
+		if(prop == system_properties)
+		{
+			system_properties = prop->next;
+		}
+		OsMemory_free(prop->name);
+		OsMemory_free(prop->value);
+		OsMemory_free(prop);
+	}
+}
+
+void  JVMSPI_FreeAllSystemProperties()
+{
+	SystemProperty *prop;
+	SystemProperty *clear;
+	prop = system_properties;
+	while(prop)
+	{
+		clear = prop;
+		prop = prop->next;
+		clear->next = NULL;
+		clear->prev = NULL;
+		OsMemory_free(clear->name);
+		OsMemory_free(clear->value);
+		OsMemory_free(clear);
+	}
+	system_properties = NULL;
 }
 
 #if ENABLE_JAVA_DEBUGGER

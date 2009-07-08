@@ -24,6 +24,14 @@
  * information or have any questions.
  */
 
+/*
+ * NOTICE: Portions Copyright (c) 2007-2009 Davy Preuveneers.
+ * This file has been modified by Davy Preuveneers on 2009/01/11. The
+ * changes are licensed under the terms of the GNU General Public
+ * License version 2. This notice was added to meet the conditions of
+ * Section 3.a of the GNU General Public License version 2.
+ */
+
 package javax.microedition.lcdui;
 
 /* This is used to implement the communication between MIDlet and Display */
@@ -1900,6 +1908,7 @@ public class Display {
                 return false;
             }
             return true;
+
 // #else
             Class managerClass = null;
             Class toneControlClass = null;
@@ -1919,6 +1928,9 @@ public class Display {
             } catch (IllegalArgumentException iare) {
             } catch (IllegalAccessException iace) {
 	    } 
+
+           playTone0(60 + note, duration, volume);
+           return true;
 
 // #endif ENABLE_CDC
         }
@@ -2400,7 +2412,6 @@ public class Display {
 
     static native int getScreenHeight0();
 
-// #ifdef ENABLE_CDC
     /**
      * Play an Alert sound.
      *
@@ -2410,8 +2421,7 @@ public class Display {
      * @return <code>true</code>, if sound was played.
      */
     private native boolean playAlertSound0(int displayId, int alertType);
-// #endif ENABLE_CDC
-
+    private native boolean playTone0(int note, int duration, int volume);
 
     /**
      * Sets full screen on the device.

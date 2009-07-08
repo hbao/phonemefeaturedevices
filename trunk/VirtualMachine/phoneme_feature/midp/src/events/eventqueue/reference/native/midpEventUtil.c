@@ -62,5 +62,11 @@ void midpStoreEventAndSignalAms(MidpEvent evt) {
  */
 void midpStoreEventAndSignalForeground(MidpEvent evt) {
     evt.DISPLAY = gForegroundDisplayId;
+#if ENABLE_ISOLATES
+	if (gForegroundIsolateId == 0)
+	{
+		gForegroundIsolateId = midpGetAmsIsolateId();
+	}
+#endif
     StoreMIDPEventInVmThread(evt, gForegroundIsolateId);
 }

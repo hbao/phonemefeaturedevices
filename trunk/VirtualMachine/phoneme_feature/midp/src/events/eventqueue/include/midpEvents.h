@@ -162,6 +162,13 @@ extern "C" {
  */
 #define AUTOTESTER_EVENT                53
 
+/* platform request */
+
+#define PUSH_REGISTER_EVENT			54
+
+#define PLATFORM_REQUEST_INSTALL_EVENT 55
+
+
 /** @} */
 
 /**

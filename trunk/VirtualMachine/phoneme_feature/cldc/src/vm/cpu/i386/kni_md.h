@@ -37,7 +37,11 @@ typedef signed char jbyte;
 typedef int         jint;
 
 #ifndef LINUX
+#ifdef __SYMBIAN32__
+typedef long long int jlong;
+#else
 typedef __int64     jlong;
+#endif
 #else
 typedef long long jlong;
 #endif

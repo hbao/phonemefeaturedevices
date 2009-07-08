@@ -445,7 +445,7 @@ class TimerThread extends Thread {
                 if (taskFired) { // Task fired; run it, holding no locks
 		    try {
 			task.run();
-		    } catch (Exception e) {
+			} catch (/*Exception e*/ Throwable e) {
 			// Cancel tasks that cause exceptions
 			task.cancel();
 		    }

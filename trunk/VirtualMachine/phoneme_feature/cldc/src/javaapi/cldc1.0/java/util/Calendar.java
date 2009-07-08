@@ -24,6 +24,14 @@
  * information or have any questions.
  */
 
+/*
+ * NOTICE: Portions Copyright (c) 2007-2009 Davy Preuveneers.
+ * This file has been modified by Davy Preuveneers on 2009/01/11. The
+ * changes are licensed under the terms of the GNU General Public
+ * License version 2. This notice was added to meet the conditions of
+ * Section 3.a of the GNU General Public License version 2.
+ */
+
 package java.util;
 
 /**
@@ -459,7 +467,9 @@ public abstract class Calendar {
       Class clazz = Class.forName(classRoot+".util."+platform+".CalendarImpl");
 
       /* Construct a new instance */
-      return (Calendar)clazz.newInstance();
+      Calendar cal = (Calendar)clazz.newInstance();
+      cal.setTimeInMillis(System.currentTimeMillis());
+      return cal;
     }
     catch (Exception x) {}
 
