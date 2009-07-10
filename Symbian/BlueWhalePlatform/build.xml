@@ -50,14 +50,6 @@
 
 	<target name="help" depends="usage" />
 
-	<path id="SVN.classpath">
-		<fileset dir="C:/java/svnant-1.0.0/lib">
-			<include name="*.jar" />
-		</fileset>
-	</path>
-	<taskdef resource="svntask.properties" classpathref="SVN.classpath" />
-
-
 	<!-- Everything depends on property ${deviceSDK}=one of s60v1fp2, s60v2fp2, s60v2fp2_CW, s60v2fp3, s60v3fp0, etc. -->
 
 	<!-- With Ant, property inheritance and defaults work a little differently than with e.g. make.  	-->
@@ -69,6 +61,15 @@
 
 	<!-- Enables us to access the systems environment variables, e.g. ${env.Path} (note "Path" is case sensitive in Ant and must exactly "Path" in Windows 2000 and greater) -->
 	<property environment="env" />
+	
+
+	<path id="svnant.classpath">
+		<fileset dir="${env.BLUEWHALE_JAVA}/svnant-1.1.0-RC2/lib">
+			<include name="*.jar" />
+		</fileset>
+	</path>
+	<typedef resource="org/tigris/subversion/svnant/svnantlib.xml" classpathref="svnant.classpath" />
+	
 
 	<target name="all" depends="update,bluewhaleplatform_uiqv3fp0_winscw,bluewhaleplatform_uiqv3fp0_arm,bluewhaleplatform_s60v3fp0_winscw,bluewhaleplatform_s60v3fp0_arm,bluewhaleplatform_s60v2fp3_winscw,bluewhaleplatform_s60v2fp3_arm,bluewhaleplatform_s60v2fp2_winscw,bluewhaleplatform_s60v2fp2_arm" />
 
@@ -89,19 +90,19 @@
 	<target name="cruisecontrol_bluewhaleplatform_s60v2fp2_winscw" depends="update,update_tests,bluewhaleplatform_s60v2fp2_winscw" />
 
 	<target name="update">
-		<svn>
+		<svn javasvn="no">
 			<update dir="${basedir}" />
 		</svn>
-		<svn>
+		<svn javasvn="no">
 			<update dir="${basedir}\..\ECOMPLUS" />
 		</svn>
-		<svn>
+		<svn javasvn="no">
 			<update dir="${basedir}\..\certificates" />
 		</svn>
 	</target>
 
 	<target name="update_tests">
-		<svn>
+		<svn javasvn="no">
 			<update dir="${basedir}\..\TestEmailServer" />
 		</svn>
 	</target>
@@ -110,7 +111,7 @@
 
 	<target name="revertbuildnumber">
 		<echo>${deviceSDK}</echo>
-		<svn>
+		<svn javasvn="no">
 			<revert dir="${basedir}/sis/bluewhale_${deviceSDK}.pkg" />
 		</svn>
 	</target>
@@ -243,9 +244,10 @@
 		<property name="executionDirectory" value="sis" />
 
 		<!-- Generate name for the final SIS file based on deviceSDK and Subversion revision.		-->
-		<svn>
-			<status path="${basedir}" revisionProperty="src.revision" />
+		<svn javasvn="no">
+			<info target="https://svn1.hosted-projects.com/bluewhalesystems/mail/trunk" />
 		</svn>
+		<property name ="src.revision" value="${svn.info.rev}" />
 
 		<!-- In general we'll have to have a SIS file name that will reflect the SDK with which it 		-->
 		<!-- it was built but may be slightly different from the names we use internally in our 		-->
@@ -286,9 +288,10 @@
 	<target name="signsis">
 
 		<property name="executionDirectory" value="..\certificates\" />
-		<svn>
-			<status path="${basedir}" revisionProperty="src.revision" />
+		<svn javasvn="no">
+			<info target="https://svn1.hosted-projects.com/bluewhalesystems/mail/trunk" />
 		</svn>
+		<property name ="src.revision" value="${svn.info.rev}" />
 		<!-- sign the .sis file to create installers for the various dev devices we have -->
 
 
