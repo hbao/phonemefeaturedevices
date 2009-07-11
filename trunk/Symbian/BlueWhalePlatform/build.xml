@@ -31,6 +31,7 @@
  * information or have any questions.  
  */
 -->
+
 <project name="bluewhaleplatform" default="bluewhaleplatform_s60v3fp0_winscw" basedir=".">
 	<description>
         An Ant script to build the Symbian targets.
