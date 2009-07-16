@@ -7,14 +7,14 @@
         An Ant script to build the phoneme_feature WinCE targets.
     </description>
 
-	<path id="SVN.classpath">
-		<fileset dir="C:/java/svnant-1.0.0/lib">
+	<property environment="env" />
+	
+	<path id="svnant.classpath">
+		<fileset dir="${env.BLUEWHALE_JAVA}/svnant-1.1.0-RC2/lib">
 			<include name="*.jar" />
 		</fileset>
 	</path>
-	<taskdef resource="svntask.properties" classpathref="SVN.classpath" />
-
-	<property environment="env" />
+	<typedef resource="org/tigris/subversion/svnant/svnantlib.xml" classpathref="svnant.classpath" />
 	
 	<target name="vm_wm5ppc_arm" description="Windows Mobile 5 PocketPC SDK - ARM">
 
@@ -55,9 +55,10 @@
 		<echo>Windows Mobile 2003 PocketPC - ARM - eVC++ 4.0</echo>
 		<echo>---------------------------------------------------</echo>
 
-                <svn>
-                        <status path="${basedir}" revisionProperty="src.revision" />
-                </svn>
+		<svn javasvn="no">
+			<info target="https://svn1.hosted-projects.com/bluewhalesystems/mail/trunk" />
+		</svn>
+		<property name ="src.revision" value="${svn.info.rev}" />
 
 		<!-- Be nice and ensure external dependencies were built successfully early in the process -->
 		<property name="finalExpectedOutputFile" value="C:\wince_vm\wm2003_ppc\midp\bin\arm\runMidlet.exe" />
