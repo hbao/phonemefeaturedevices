@@ -44,6 +44,12 @@
 class MSocketManager;
 class MIAPSession;
 
+class CCirBufferPlus : public CCirBuffer
+{
+public:
+	CCirBufferPlus* ExpandL(TInt aNewLength);
+};
+
 class CSocket : public CEComPlusRefCountedBase, MConnectionCallback, public MSocket
 {
 	friend class CSocketFactory;
@@ -120,7 +126,7 @@ class CSocket : public CEComPlusRefCountedBase, MConnectionCallback, public MSoc
 		TInt iTxIndex;
 		TInt iCurrentLen;
 		TSendState iSending;
-		CBufBase* iBuffer;
+		CCirBufferPlus* iBuffer;
 		RMutex iMutex;
 		TInt iErrorStatus;
 		TUint iTxBytes;
