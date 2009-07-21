@@ -43,9 +43,55 @@
 #include "DataAccess.h"
 #include "DebugUtilities.h"
 #include "SocketDebug.h"
+#include "OSVersion.h"
 
 #define KReadBufferSize 2048
+#define KCircularBufferSize 1048
 
+CCirBufferPlus* CCirBufferPlus::ExpandL(TInt aNewLength)
+{
+	if (Count() == 0)
+	{
+		SetLengthL(aNewLength);
+		return this;
+	}
+#if (__S60_VERSION__ >= __S60_V3_FP0_VERSION_NUMBER__) || (__UIQ_VERSION_NUMBER__ >= __UIQ_V3_FP0_VERSION_NUMBER__)
+	// try to expand in place
+	TUint8* newPtr = (TUint8*)User::ReAlloc(iPtr, aNewLength, RAllocator::ENeverMove);
+	if (newPtr != NULL)
+	{
+		if (iHead <= iTail)
+		{
+			Mem::Copy(iTail + (aNewLength - iLength), iTail, iPtrE - iTail);
+			iTail += (aNewLength - iLength);
+		}
+		iPtrE = iPtr + aNewLength;
+		iLength = aNewLength;
+		return this;
+	}
+#endif
+	CCirBufferPlus* newBuffer = new (ELeave) CCirBufferPlus;
+	CleanupStack::PushL(newBuffer);
+	newBuffer->SetLengthL(aNewLength);
+	if (iTail < iHead)
+	{
+		newBuffer->Add(iTail, iHead - iTail);
+	}
+	else if (iHead <= iTail)
+	{
+		if (iPtrE - iTail)
+		{
+			newBuffer->Add(iTail, iPtrE - iTail);
+		}
+		if (iHead - iPtr)
+		{
+			newBuffer->Add(iPtr, iHead - iPtr);
+		}
+	}
+	CleanupStack::Pop(newBuffer);
+	delete this;
+	return newBuffer;
+}
 
 CSocket::CSocket(TAny * aConstructionParameters,MSocketManager* aFactory,MThread& aThread,CThreadRunner& aThreadRunner) 
 	: CEComPlusRefCountedBase(aConstructionParameters),iFactory(aFactory),iThread(aThread),iThreadRunner(aThreadRunner)
@@ -81,7 +127,8 @@ CSocket::~CSocket()
 void CSocket::ConstructL()
 {
 	User::LeaveIfError(iMutex.CreateLocal());
-	iBuffer = CBufFlat::NewL(1024);
+	iBuffer = new (ELeave) CCirBufferPlus;
+	iBuffer->SetLengthL(KCircularBufferSize);
 	iProperties = DiL( MProperties );
 	MConnectionCallback * connectionCallback = QiL(this,MConnectionCallback);
 	CleanupReleasePushL(*connectionCallback);
@@ -176,9 +223,12 @@ void CSocket::CallbackCommandL( MStateMachine::TCommand aCommand )
 			iWaitingOnRead = EFalse;
 		}
 		HBufC8* buffer = iProperties->GetStringBuffer8L(KPropertyString8ConnectionReadBuffer);
-		TInt pos = iBuffer->Ptr(0).Length();
-		iBuffer->InsertL(pos, buffer->Des());
-		iRxBytes += buffer->Des().Length(); 
+		if (iBuffer->Length() - iBuffer->Count() < buffer->Length())
+		{
+			iBuffer = iBuffer->ExpandL(iBuffer->Count() + buffer->Length());
+		}
+		iBuffer->Add(buffer->Des().Ptr(), buffer->Length());
+		iRxBytes += buffer->Length(); 
 	}
 	CleanupStack::PopAndDestroy();	// cleanupItem
 }
@@ -359,7 +409,7 @@ void CSocket::DebugSocket()
 	TUint32 add = iAddr.Address();
 	if(iBuffer)
 	{
-		RDebug::Print(_L("Socket 0x%08x connected %d %d to %d.%d.%d.%d port %d Rx %d Tx %d RX buffer len %d"),static_cast<MSocket*>(this),iConnected,iErrorStatus,(add>>24)&0xff,(add>>16)&0xff,(add>>8)&0xff,add&0xff,iAddr.Port(),iRxBytes,iTxBytes,iBuffer->Ptr(0).Length());
+		RDebug::Print(_L("Socket 0x%08x connected %d %d to %d.%d.%d.%d port %d Rx %d Tx %d RX buffer len %d"),static_cast<MSocket*>(this),iConnected,iErrorStatus,(add>>24)&0xff,(add>>16)&0xff,(add>>8)&0xff,add&0xff,iAddr.Port(),iRxBytes,iTxBytes,iBuffer->Count());
 	}
 	else
 	{
@@ -405,7 +455,7 @@ TInt CSocket::Available()
 	DEBUGFAIL
 	if(iErrorStatus == KErrNone)
 	{
-		return iBuffer->Ptr(0).Length();
+		return iBuffer->Count();
 	}
 	else
 	{
@@ -423,7 +473,7 @@ TInt CSocket::Read(TPtr8 aData,TInt* aBytesRead)
 	TCleanupItem cleanupItem(SignalMutex, &iMutex);
 	CleanupStack::PushL(cleanupItem);
 		
-	*aBytesRead = Min(iBuffer->Ptr(0).Length(), aData.MaxLength());
+	*aBytesRead = Min(iBuffer->Count(), aData.MaxLength());
 	
 	if(iErrorStatus != KErrNone)
 	{
@@ -433,28 +483,30 @@ TInt CSocket::Read(TPtr8 aData,TInt* aBytesRead)
 		}
 		else
 		{
-			TPtr8 buffer(iBuffer->Ptr(0));
-			buffer.SetLength(*aBytesRead);
-			aData.Copy(buffer);
-			iBuffer->Delete(0, *aBytesRead);
-			iBuffer->Compress();
+			iBuffer->Remove((TUint8*)aData.Ptr(), *aBytesRead);
+			if (iBuffer->Count() == 0 && iBuffer->Length() > KCircularBufferSize)
+			{
+				iBuffer->SetLengthL(KReadBufferSize);
+			}
+			aData.SetLength(*aBytesRead);
 			ret = PCSL_NET_SUCCESS;
 		}
 	}
 	else
 	{
-		if(aData.MaxLength() > 0 && iBuffer->Ptr(0).Length() == 0)
+		if(aData.MaxLength() > 0 && iBuffer->Count() == 0)
 		{
 			ret = PCSL_NET_WOULDBLOCK;
 			iWaitingOnRead = ETrue;
 		}
 		else
 		{
-			TPtr8 buffer(iBuffer->Ptr(0));
-			buffer.SetLength(*aBytesRead);
-			aData.Copy(buffer);
-			iBuffer->Delete(0, *aBytesRead);
-			iBuffer->Compress();
+			iBuffer->Remove((TUint8*)aData.Ptr(), *aBytesRead);
+			if (iBuffer->Count() == 0 && iBuffer->Length() > KCircularBufferSize)
+			{
+				iBuffer->SetLengthL(KReadBufferSize);
+			}
+			aData.SetLength(*aBytesRead);
 			ret = PCSL_NET_SUCCESS;		
 		}
 	}
