@@ -1133,16 +1133,22 @@ CMIDPFontManager::CMIDPFontManager()
 CMIDPFontManager::~CMIDPFontManager()
 {
 	while (iTextWidthCache.Count())
-		{
+	{
 		delete iTextWidthCache[0];
 		iTextWidthCache.Remove(0);
-		}
+	}
 	iTextWidthCache.Close();
 	if (iCurrentFont)
 	{
 		iGc->DiscardFont();
-		iDevice->ReleaseFont(iCurrentFont);
 	}
+	while (iFontCache.Count())
+	{
+		CFont* font = iFontCache[0].Font();
+		iDevice->ReleaseFont(font);
+		iFontCache.Remove(0);
+	}
+	iFontCache.Close();
 	delete iGc;
 	delete iDevice;
 	delete iBitmap;
@@ -1258,7 +1264,6 @@ void CMIDPFontManager::EnsureBitmap()
 		iGc = NULL;
 		if (iDevice && iCurrentFont)
 		{
-			iDevice->ReleaseFont(iCurrentFont);
 			iCurrentFont = NULL;
 		}
 		delete iDevice;
@@ -1341,6 +1346,16 @@ TInt CMIDPFontManager::TextWidthInPixels(const TDesC &aText)
 	return findObject->Width();
 }
 
+TCachedFont::TCachedFont(CFont* aFont, TFontSpec aFontSpec)
+: iFont(aFont), iFontSpec(aFontSpec)
+{	
+}
+
+TBool TCachedFont::IdentityRelation(const TCachedFont& aObject1, const TCachedFont& aObject2)
+{
+	return (aObject1.iFontSpec == aObject2.iFontSpec);
+}
+
 void CMIDPFontManager::UpdateFont()
 {
 	if (!iCurrentFont || iCurrentFontSpecHasChanged)
@@ -1348,7 +1363,6 @@ void CMIDPFontManager::UpdateFont()
 		if (iCurrentFont)
 		{
 			iGc->DiscardFont();
-			iDevice->ReleaseFont(iCurrentFont);
 			iCurrentFont = NULL;
 		}
 	
@@ -1376,7 +1390,22 @@ void CMIDPFontManager::UpdateFont()
 		spec.iFontStyle.SetPosture(iStyle & STYLE_ITALIC ? EPostureItalic : EPostureUpright);
 
 #if (__S60_VERSION__ >= __S60_V3_FP0_VERSION_NUMBER__) || (__UIQ_VERSION_NUMBER__ >= __UIQ_V3_FP0_VERSION_NUMBER__)
-		TInt ret = iDevice->GetNearestFontToDesignHeightInTwips(iCurrentFont,spec);
+		TCachedFont findObject(NULL, spec);
+		TIdentityRelation<TCachedFont> identityRelation(TCachedFont::IdentityRelation);
+		TInt index = iFontCache.Find(findObject, identityRelation);
+		if (index == KErrNotFound)
+		{
+			TInt ret = iDevice->GetNearestFontToDesignHeightInTwips(iCurrentFont,spec);
+			if (ret == KErrNone)
+			{
+				TCachedFont newObject(iCurrentFont, spec);
+				iFontCache.Append(newObject);
+			}
+		}
+		else
+		{
+			iCurrentFont = iFontCache[index].Font();
+		}
 #else
 		TInt ret = iDevice->GetNearestFontInTwips(iCurrentFont,spec);
 #endif

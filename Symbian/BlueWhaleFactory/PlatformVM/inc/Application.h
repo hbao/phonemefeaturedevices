@@ -298,6 +298,17 @@ private:
 	TInt iWidth;
 };
 
+class TCachedFont
+{
+public:
+	TCachedFont(CFont* aFont, TFontSpec aFontSpec);
+	static TBool IdentityRelation(const TCachedFont& aObject1, const TCachedFont& aObject2);
+	CFont* Font() {return iFont;};
+private:
+	CFont* iFont;
+	TFontSpec iFontSpec;
+};
+
 class CMIDPFontManager : public CBase
 {
 public:
@@ -373,6 +384,7 @@ private:
 	} TFontSize;
 	TBool iCurrentFontSpecHasChanged;
 	RPointerArray<CTextWidthCacheEntry> iTextWidthCache;
+	RArray<TCachedFont> iFontCache;
 };
 
 class CImageConverter : public CActive
