@@ -555,7 +555,6 @@ void CMIDPCanvas::BeginEditSessionCallback(TAny* aThis)
 void CMIDPCanvas::EndEditSessionCallback(TAny* aThis)
 {
 	CMIDPCanvas* This = static_cast<CMIDPCanvas*>(aThis);
-	This->iFEPControl->CancelFep();
 	This->iTextEdit = EFalse;
 	This->iAddLookup = EFalse;
 	delete This->iFEPControl;
