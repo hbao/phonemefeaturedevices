@@ -319,6 +319,7 @@ EXPORT_DECL void CFEPInputCore::DoCommitFepInlineEditL()
 	}
 #endif
 	iInSession = EFalse;
+	SendTextUpdateEvent();
 	iMutex.Signal();
 }
 
@@ -329,6 +330,7 @@ EXPORT_DECL void CFEPInputCore::CancelFepInlineEdit()
 	iText->TextPtr()->Des().Delete(iCursorForFEP.LowerPos(), iCursorForFEP.Length());
 	iCursorForFEP.iCursorPos = iCursorForFEP.iAnchorPos;
 	iInSession = EFalse;
+	SendTextUpdateEvent();
 	iMutex.Signal();
 }
 
