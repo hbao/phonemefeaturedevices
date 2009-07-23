@@ -672,6 +672,13 @@ void CFEPInputControl::SetCapabilities(TInt aCapabilities)
 	iState->SetPermittedInputModes(PermittedModes[iCapabilities & 0xffff]);
 	iState->SetCurrentInputMode(Mode[iCapabilities & 0xffff]);
 	iState->ReportAknEdStateEventL(MAknEdStateObserver::EAknEdwinStateInputModeUpdate);
+	if(iCapabilities & MIDP_MODIFIER_INITIAL_CAPS_SENTENCE)
+	{
+		iState->SetPermittedCases(EAknEditorAllCaseModes);
+		iState->SetDefaultCase(EAknEditorTextCase);
+		iState->SetCurrentCase(EAknEditorTextCase);
+		iState->ReportAknEdStateEventL(MAknEdStateObserver::EAknEdwinStateCaseModeUpdate);
+	}
 	if(iCapabilities & MIDP_MODIFIER_NON_PREDICTIVE)
 	{
 		flags |= EAknEditorFlagNoT9;
