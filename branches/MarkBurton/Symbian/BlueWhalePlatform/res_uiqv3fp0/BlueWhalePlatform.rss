@@ -1,0 +1,200 @@
+/**
+ * Copyright (c) 2004-2008 Blue Whale Systems Ltd. All Rights Reserved. 
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER 
+ *  
+ * This program is free software; you can redistribute it and/or 
+ * modify it under the terms of the GNU General Public License version 
+ * 2 only, as published by the Free Software Foundation.  
+ *  
+ * This software is provided "as is," and the copyright holder makes no representations or warranties, express or
+ * implied, including but not limited to warranties of merchantability or fitness for any particular purpose or that the
+ * use of this software or documentation will not infringe any third party patents, copyrights, trademarks or other
+ * rights.
+ * 
+ * The copyright holder will not be liable for any direct, indirect special or consequential damages arising out of any
+ * use of this software or documentation.
+ * 
+ * See the GNU  General Public License version 2 for more details 
+ * (a copy is included at /legal/license.txt).  
+ *  
+ * You should have received a copy of the GNU General Public License 
+ * version 2 along with this work; if not, write to the Free Software 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 
+ * 02110-1301 USA  
+ *  
+ * Please contact Blue Whale Systems Ltd, Suite 123, The LightBox
+ * 111 Power Road, Chiswick, London, W4 5PY, United Kingdom or visit 
+ * www.bluewhalesystems.com if you need additional 
+ * information or have any questions.  
+ */ 
+
+#include <eikon.rh>
+#include <eikon.rsg>
+#include <qikon.rh>
+#include <qikon.hrh>
+#include <uikon.rh>
+#include <uikon.hrh>
+
+#include <QikCommand.rh>
+
+#include "BlueWhalePlatform.hrh" // Application specific commands
+
+// Use this statement to ensure that the resources in the file have a unique ID
+// so that an application can use multiple resource files without resource ID
+// conflict. This statement must be the first non-comment statement in the file.
+NAME BWPL
+
+// The three following resources are mandatory fields and need to be the 
+// first resource fields in the resource file. Need to be defined in this order.
+// These resources don't need to contain any useful info, just need to be there.
+
+// RSS_SIGNATURE can be used to specify version information
+RESOURCE RSS_SIGNATURE { }
+
+// Defines the name of the default file the application framework creates.
+// This resource must always be the second resource in the resource file.
+RESOURCE TBUF { buf = "BlueWhalePlatform"; }
+
+// This resource is NOT used by UIQ.
+// Otherwise this resources is used to define an application's GUI.
+RESOURCE EIK_APP_INFO {	}
+
+//----------------------------------------------------
+//-------------- CONFIGURATION FOR VIEW --------------
+//----------------------------------------------------
+// A view shall use the QIK_VIEW_CONFIGURATIONS resource struct to define which 
+// UI configurations it supports. Can also use QIK_VIEW_CONFIGURATIONS to setup 
+// the view to switch layout and command list automatically when changes of UI 
+// configuration occur. This is done with the view and command_list members of 
+// the QIK_VIEW_CONFIGURATIONS.
+
+// The application supports the reference UI Configurations that are supported
+// in the UIQ 3 SDK. Use the UiqEnv tool, to change the UI Configuration in the
+// emulator in order to develop and test the application with varying phone styles.
+/*
+RESOURCE QIK_VIEW_CONFIGURATIONS r_ui_configurations
+	{
+	configurations = 
+		{
+		QIK_VIEW_CONFIGURATION
+			{
+			ui_config_mode = KQikPenStyleTouchPortrait;
+			command_list = r_BlueWhalePlatform_commands;
+			view = r_BlueWhalePlatform_layout;
+			},
+		QIK_VIEW_CONFIGURATION
+			{
+			ui_config_mode = KQikPenStyleTouchLandscape;
+			command_list = r_BlueWhalePlatform_commands;
+			view = r_BlueWhalePlatform_layout;
+			},
+		QIK_VIEW_CONFIGURATION
+			{
+			ui_config_mode = KQikSoftkeyStyleTouchPortrait;
+			command_list = r_BlueWhalePlatform_commands;
+			view = r_BlueWhalePlatform_layout;
+			},
+		QIK_VIEW_CONFIGURATION
+			{
+			ui_config_mode = KQikSoftkeyStylePortrait;
+			command_list = r_BlueWhalePlatform_commands;
+			view = r_BlueWhalePlatform_layout;
+			},
+		QIK_VIEW_CONFIGURATION
+			{
+			ui_config_mode = KQikSoftkeyStyleSmallPortrait;
+			command_list = r_BlueWhalePlatform_commands;
+			view = r_BlueWhalePlatform_layout;
+			}
+		};
+	}
+*/
+//----------------------------------------------------
+//------------------ VIEW COMMANDS -------------------
+//----------------------------------------------------
+// Commands are defined with the QIK_COMMAND_LIST struct, 
+// commands can also be created in code by instantiating CQikCommand.
+// The control command id for debug command is a reserved id from uikon.hrh.
+// The id for each infoprint command is defined in the BlueWhalePlatform.hrh file.
+// The string for each command is defined in the BlueWhalePlatform.rls file, 
+// due to localisation.
+RESOURCE QIK_COMMAND_LIST r_BlueWhalePlatform_commands
+	{
+	items =
+		{
+		QIK_COMMAND
+			{
+			id = EEikCmdExit;
+			type = EQikCommandTypeScreen;
+			text = "Exit";
+			}
+		};
+	}
+/*
+//----------------------------------------------------
+//------------------- VIEW LAYOUT --------------------
+//----------------------------------------------------
+// Defines the view by linking to the pages.
+RESOURCE QIK_VIEW r_BlueWhalePlatform_layout
+	{
+	pages = r_BlueWhalePlatform_layout_pages;
+	}
+
+// Defines the pages of a view. 
+// In this application there only exist one page for the label to be displayed in.
+RESOURCE QIK_VIEW_PAGES r_BlueWhalePlatform_layout_pages
+	{
+	pages = 
+		{
+		QIK_VIEW_PAGE
+			{
+			page_id = EBlueWhalePlatformViewPage;
+			page_content = r_BlueWhalePlatform_page_control;
+			}
+		};
+	}
+
+//----------------------------------------------------
+//------------------ VIEW CONTROLS -------------------
+//----------------------------------------------------
+// Defines the content of the page.
+// The page consist of one label that is displayed in the middle of the view.
+RESOURCE QIK_CONTAINER_SETTINGS r_BlueWhalePlatform_page_control
+	{
+	layout_manager_type = EQikGridLayoutManager;
+	layout_manager = r_grid_layout_manager;
+	controls =
+		{
+		QIK_CONTAINER_ITEM_CI_LI
+			{
+			unique_handle = EBlueWhalePlatformLabelCtrl;
+			type = EEikCtLabel;
+			control = r_BlueWhalePlatform_label;
+			}
+		};
+	}
+	
+//----------------------------------------------------
+//---------------------- LABEL -----------------------
+//----------------------------------------------------
+// Defines the label and specifies the labels font and text.
+RESOURCE LABEL r_BlueWhalePlatform_label
+	{
+	standard_font = EEikLabelFontLegend;
+	txt = STRING_r_BlueWhalePlatform_text;
+	}
+
+//----------------------------------------------------
+//-------------- GRID LAYOUT MANAGER -----------------
+//----------------------------------------------------
+// Defines the grid layout manager that places the label control in the middle 
+// of the view.
+RESOURCE QIK_GRID_LAYOUT_MANAGER r_grid_layout_manager
+	{
+	default_layout_data = QIK_GRID_LAYOUT_DATA 
+		{
+		horizontal_alignment = EQikLayoutHAlignCenter;
+		vertical_alignment = EQikLayoutVAlignCenter;	
+		};
+	}
+*/
