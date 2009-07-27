@@ -1,0 +1,36 @@
+/**
+*
+* Copyright © 2005 Blue Whale Systems Ltd.
+* 
+* This software is provided "as is," and the copyright holder 
+* makes no representations or warranties, express or implied,
+* including but not limited to warranties of merchantability or 
+* fitness for any particular purpose or that the use of this software
+* or documentation will not infringe any third party patents, 
+* copyrights, trademarks or other rights.
+*
+* The copyright holder will not be liable for any direct, indirect
+* special or consequential damages arising out of any use of this
+* software or documentation.
+*
+*/
+
+#include <aiftool.rh>
+
+RESOURCE AIF_DATA
+    {
+    app_uid=0x2000E27A;
+    caption_list=
+        {
+        CAPTION
+            {
+            code = ELangEnglish;
+            caption = "BlueWhale";
+            }
+        };
+    num_icons=2;
+    embeddability=KAppNotEmbeddable;
+    newfile=KAppDoesNotSupportNewFile;
+    }
+
+// End of File
