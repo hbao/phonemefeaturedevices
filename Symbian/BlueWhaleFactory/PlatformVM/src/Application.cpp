@@ -83,6 +83,10 @@
 
 const TInt KUIQStopVibrationDelay = 1000000; // 1s
 
+const TInt KSmallFontSizeInTwips = 140;
+const TInt KMediumFontSizeInTwips = 158;
+const TInt KLargeFontSizeInTwips = 176;
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 MApplication* CVMManager::NewL()
 {
@@ -1159,9 +1163,10 @@ void CMIDPFontManager::ConstructL()
 {
 	iThreadRunner = new (ELeave) CThreadRunner();
 	iThreadRunner->ConstructL();
-#if __UIQ_VERSION_NUMBER__ >= __UIQ_V3_FP0_VERSION_NUMBER__
+
 	iNormalFontSpec = CCoeEnv::Static()->NormalFont()->FontSpecInTwips();
-#endif
+	iNormalFontSpec.iFontStyle.SetStrokeWeight(EStrokeWeightBold);
+	iNormalFontSpec.iFontStyle.SetBitmapType(EAntiAliasedGlyphBitmap);
 }
 
 void CMIDPFontManager::SetCanvas(MMIDPCanvas* aCanvas)
@@ -1179,33 +1184,19 @@ TBool CMIDPFontManager::SetupFont(TInt aFace,TInt aStyle,TInt aSize)
 		switch(aSize)
 		{
 		case SIZE_SMALL:
-#if __S60_VERSION__ >= __S60_V2_FP3_VERSION_NUMBER__
-			iFontId = EAknLogicalFontPrimarySmallFont;
-#elif __S60_VERSION__ >= __S60_V2_FP1_VERSION_NUMBER__
-			iFontId = EAknLogicalFontPrimaryFont;
-#elif __UIQ_VERSION_NUMBER__ >= __UIQ_V3_FP0_VERSION_NUMBER__
 			iCurrentFontSpec = iNormalFontSpec;
-			iCurrentFontSpec.iHeight -= 100;
-#endif
+			iCurrentFontSpec.iHeight = KSmallFontSizeInTwips;
 			iPoints = 0;
 			break;
 		case SIZE_LARGE:
-#if __S60_VERSION__ >= __S60_V2_FP3_VERSION_NUMBER__
-			iFontId = EAknLogicalFontTitleFont;
-#elif __UIQ_VERSION_NUMBER__ >= __UIQ_V3_FP0_VERSION_NUMBER__
 			iCurrentFontSpec = iNormalFontSpec;
-			iCurrentFontSpec.iHeight += 20;
-#endif
+			iCurrentFontSpec.iHeight = KLargeFontSizeInTwips;
 			iPoints = 0;
 			break;
 		case SIZE_MEDIUM:
 		default:
-#if __S60_VERSION__ >= __S60_V2_FP3_VERSION_NUMBER__
-			iFontId = EAknLogicalFontPrimaryFont;
-#elif __UIQ_VERSION_NUMBER__ >= __UIQ_V3_FP0_VERSION_NUMBER__
 			iCurrentFontSpec = iNormalFontSpec;
-			iCurrentFontSpec.iHeight -= 40;
-#endif
+			iCurrentFontSpec.iHeight = KMediumFontSizeInTwips;
 			iPoints = 0;
 			break;
 		}
@@ -1366,22 +1357,7 @@ void CMIDPFontManager::UpdateFont()
 			iCurrentFont = NULL;
 		}
 	
-#if __S60_VERSION__ >= __S60_V2_FP1_VERSION_NUMBER__
-		const CFont* logicalFont = AknLayoutUtils::FontFromId(iFontId);
-		TFontSpec spec = logicalFont->FontSpecInTwips();
-		// adjust S60 fonts to match native vm
-		if (iSize == SIZE_MEDIUM)
-		{
-			spec.iHeight -= 22;
-		}
-		else if (iSize == SIZE_SMALL)
-		{
-			spec.iHeight += 10;
-		}
-#elif __UIQ_VERSION_NUMBER__ >= __UIQ_V3_FP0_VERSION_NUMBER__
 		TFontSpec spec = iCurrentFontSpec;
-#endif
-	
 		if(iPoints != 0)
 		{
 			spec.iHeight = iPoints;
