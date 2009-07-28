@@ -445,7 +445,7 @@
 
   <integer
         Key="TITLE_COLOR_FG"
-      Value="0xFFFFFF"/>
+      Value="0x000000"/>
 
   <integer
         Key="TITLE_COLOR_FG_SHD"
