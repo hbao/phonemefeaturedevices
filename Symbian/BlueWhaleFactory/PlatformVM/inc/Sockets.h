@@ -44,10 +44,34 @@
 class MSocketManager;
 class MIAPSession;
 
+// Custom extension of CCirBuffer that gives us granular expand/compress functionality
+// The data (ddd...) in CCirBuf is internally layed out in one of two ways:
+//
+// Contiguous
+// |		|ddddddddddd|			|
+// iPtr		iTail		iHead		iPtrE
+//
+// Wrapped
+// |dddddddd|			|ddddddddddd|
+// iPtr		iHead		iTail		iPtrE
+//
+// In both cases iTail is the start (oldest data) of the buffer and new data is added at iHead
+// iPtrE is the end of allocated memory and the point at which data wraps around to iPtr
+// When iHead catches iTail the buffer is full
+// When iTail catches iHead the buffer is empty
+// (the only way to tell the difference (since iHead == iTail) is to check Count())
+
 class CCirBufferPlus : public CCirBuffer
 {
 public:
-	CCirBufferPlus* ExpandL(TInt aNewLength);
+	static CCirBufferPlus* NewL(TInt aExpandSize);
+	void AppendL(const TDesC8& aData);
+	void Compress();
+protected:
+	void ExpandL(TInt aNewLength);
+	CCirBufferPlus(TInt aExpandSize);
+private:
+	TInt iExpandSize;
 };
 
 class CSocket : public CEComPlusRefCountedBase, MConnectionCallback, public MSocket
