@@ -801,7 +801,8 @@ class ChoiceGroupLFImpl extends ItemLFImpl implements ChoiceGroupLF {
 
         // start for
         for (int iX, iY, iW, iH, i = 0; i < cg.numOfEls; i++) {
-
+			if (g.getClipY() < elHeights[i] && g.getClipY() + g.getClipHeight() > 0)
+			{
             // note that background was cleared
             // we will need to repaint background only for
             // hilighted portion
@@ -883,6 +884,11 @@ class ChoiceGroupLFImpl extends ItemLFImpl implements ChoiceGroupLF {
                        contentW, elHeights[i], textOffset, 
                        (hilighted) ? mode | Text.INVERT : mode, null);
             g.translate(-offSetX, elHeights[i] + 1);
+			}
+			else
+			{
+				g.translate(0, elHeights[i]);
+			}
             translatedY += elHeights[i];
 
         } // end for
