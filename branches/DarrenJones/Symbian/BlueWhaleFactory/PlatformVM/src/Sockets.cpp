@@ -46,51 +46,102 @@
 #include "OSVersion.h"
 
 #define KReadBufferSize 2048
-#define KCircularBufferSize 1048
+#define KCircularBufferSize 2048
 
-CCirBufferPlus* CCirBufferPlus::ExpandL(TInt aNewLength)
+CCirBufferPlus* CCirBufferPlus::NewL(TInt aExpandSize)
 {
-	if (Count() == 0)
+	CCirBufferPlus* self = new (ELeave) CCirBufferPlus(aExpandSize);
+	return self;
+}
+
+CCirBufferPlus::CCirBufferPlus(TInt aExpandSize)
+: iExpandSize(aExpandSize)
+{
+}
+
+void CCirBufferPlus::Compress()
+{
+	if (iCount == 0)
 	{
-		SetLengthL(aNewLength);
-		return this;
+		User::Free(iPtr);
+		iPtr = NULL;
+		iLength = 0;
+		return;
 	}
-#if (__S60_VERSION__ >= __S60_V3_FP0_VERSION_NUMBER__) || (__UIQ_VERSION_NUMBER__ >= __UIQ_V3_FP0_VERSION_NUMBER__)
-	// try to expand in place
-	TUint8* newPtr = (TUint8*)User::ReAlloc(iPtr, aNewLength, RAllocator::ENeverMove);
-	if (newPtr != NULL)
+	if (iLength - iCount > iExpandSize)
 	{
-		if (iHead <= iTail)
+		// we can compress by at least one block of size iExpandSize
+		TInt newLength = ((iCount + iExpandSize - 1) / iExpandSize) * iExpandSize;
+		TUint8* newPtrE = iPtr + newLength;
+		
+		if (iTail < iHead)
 		{
-			Mem::Copy(iTail + (aNewLength - iLength), iTail, iPtrE - iTail);
-			iTail += (aNewLength - iLength);
+			// data in the buffer is contiguous
+			// wrap any overspill data around to iPtr
+			if (iHead >= newPtrE)
+			{
+				TUint8* spillStart = Max(iTail, newPtrE);
+				TInt spillLength = iHead - spillStart;
+				Mem::Copy(iPtr, spillStart, spillLength);
+				if (iTail >= newPtrE)
+				{
+					iTail = iPtr;
+				}
+				iHead = iPtr + spillLength;
+			}
 		}
-		iPtrE = iPtr + aNewLength;
-		iLength = aNewLength;
-		return this;
-	}
-#endif
-	CCirBufferPlus* newBuffer = new (ELeave) CCirBufferPlus;
-	CleanupStack::PushL(newBuffer);
-	newBuffer->SetLengthL(aNewLength);
-	if (iTail < iHead)
-	{
-		newBuffer->Add(iTail, iHead - iTail);
-	}
-	else if (iHead <= iTail)
-	{
-		if (iPtrE - iTail)
+		else if (iHead <= iTail)
 		{
-			newBuffer->Add(iTail, iPtrE - iTail);
+			// data in the buffer is wrapped
+			// shift the right block to the left
+			TInt deltaLength = iLength - newLength;
+			Mem::Copy(iTail - deltaLength, iTail, iPtrE - iTail);
+			iTail -= deltaLength;
 		}
-		if (iHead - iPtr)
-		{
-			newBuffer->Add(iPtr, iHead - iPtr);
-		}
+		User::ReAlloc(iPtr, newLength);
+		iPtrE = newPtrE;
+		iLength = newLength;
 	}
-	CleanupStack::Pop(newBuffer);
-	delete this;
-	return newBuffer;
+}
+
+void CCirBufferPlus::AppendL(const TDesC8& aData)
+{
+	if (iLength - iCount < aData.Length())
+	{
+		ExpandL(iCount + aData.Length());
+	}
+	Add(aData.Ptr(), aData.Length());
+}
+
+void CCirBufferPlus::ExpandL(TInt aNewLength)
+{
+	ASSERT(aNewLength > iLength);
+
+	// expand in multiples of iExpandSize
+	TInt newLength = ((aNewLength + iExpandSize - 1) / iExpandSize) * iExpandSize;
+	if (iCount == 0)
+	{
+		SetLengthL(newLength);
+		return;
+	}
+
+	TUint8* newPtr = (TUint8*)User::ReAlloc(iPtr, newLength);
+	User::LeaveIfNull(newPtr);
+	TInt delta = newPtr - iPtr; // may be 0 if ReAlloc has occurred in-place
+	iHead += delta;
+	iTail += delta;
+	iPtrE += delta;
+	iPtr = newPtr;
+	
+	if (iHead <= iTail)
+	{
+		// data in the buffer is wrapped
+		// shift the right hand block of data up
+		Mem::Copy(iTail + (newLength - iLength), iTail, iPtrE - iTail);
+		iTail += (newLength - iLength);
+	}
+	iPtrE = iPtr + newLength;
+	iLength = newLength;
 }
 
 CSocket::CSocket(TAny * aConstructionParameters,MSocketManager* aFactory,MThread& aThread,CThreadRunner& aThreadRunner) 
@@ -127,8 +178,7 @@ CSocket::~CSocket()
 void CSocket::ConstructL()
 {
 	User::LeaveIfError(iMutex.CreateLocal());
-	iBuffer = new (ELeave) CCirBufferPlus;
-	iBuffer->SetLengthL(KCircularBufferSize);
+	iBuffer = CCirBufferPlus::NewL(KCircularBufferSize);
 	iProperties = DiL( MProperties );
 	MConnectionCallback * connectionCallback = QiL(this,MConnectionCallback);
 	CleanupReleasePushL(*connectionCallback);
@@ -223,12 +273,8 @@ void CSocket::CallbackCommandL( MStateMachine::TCommand aCommand )
 			iWaitingOnRead = EFalse;
 		}
 		HBufC8* buffer = iProperties->GetStringBuffer8L(KPropertyString8ConnectionReadBuffer);
-		if (iBuffer->Length() - iBuffer->Count() < buffer->Length())
-		{
-			iBuffer = iBuffer->ExpandL(iBuffer->Count() + buffer->Length());
-		}
-		iBuffer->Add(buffer->Des().Ptr(), buffer->Length());
-		iRxBytes += buffer->Length(); 
+		iBuffer->AppendL(*buffer);
+		iRxBytes += buffer->Length();
 	}
 	CleanupStack::PopAndDestroy();	// cleanupItem
 }
@@ -484,10 +530,7 @@ TInt CSocket::Read(TPtr8 aData,TInt* aBytesRead)
 		else
 		{
 			iBuffer->Remove((TUint8*)aData.Ptr(), *aBytesRead);
-			if (iBuffer->Count() == 0 && iBuffer->Length() > KCircularBufferSize)
-			{
-				iBuffer->SetLengthL(KReadBufferSize);
-			}
+			iBuffer->Compress();
 			aData.SetLength(*aBytesRead);
 			ret = PCSL_NET_SUCCESS;
 		}
@@ -502,10 +545,7 @@ TInt CSocket::Read(TPtr8 aData,TInt* aBytesRead)
 		else
 		{
 			iBuffer->Remove((TUint8*)aData.Ptr(), *aBytesRead);
-			if (iBuffer->Count() == 0 && iBuffer->Length() > KCircularBufferSize)
-			{
-				iBuffer->SetLengthL(KReadBufferSize);
-			}
+			iBuffer->Compress();
 			aData.SetLength(*aBytesRead);
 			ret = PCSL_NET_SUCCESS;		
 		}
