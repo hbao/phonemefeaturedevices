@@ -83,9 +83,21 @@
 
 const TInt KUIQStopVibrationDelay = 1000000; // 1s
 
-const TInt KSmallFontSizeInTwips = 140;
-const TInt KMediumFontSizeInTwips = 158;
-const TInt KLargeFontSizeInTwips = 176;
+#define KSmallFontHeightInTwipsValue 140
+#define KMediumFontHeightInTwipsValue 158
+#define KLargeFontHeightInTwipsValue 176
+
+#if __S60_VERSION__ >= __S60_V2_FP1_VERSION_NUMBER__
+const TInt KSmallFontHeightInTwips = KSmallFontHeightInTwipsValue;
+const TInt KMediumFontHeightInTwips = KMediumFontHeightInTwipsValue;
+const TInt KLargeFontHeightInTwips = KLargeFontHeightInTwipsValue;
+#elif __UIQ_VERSION_NUMBER__ >= __UIQ_V3_FP0_VERSION_NUMBER__
+// UIQ thinks a twip is 100th of a mm (rather than 1/1440th of an inch)
+// So, twipsUIQ = twips * (25.4 / 1440) * 100 
+const TInt KSmallFontHeightInTwips = (KSmallFontHeightInTwipsValue * 2540) / 1440;
+const TInt KMediumFontHeightInTwips = (KMediumFontHeightInTwipsValue * 2540) / 1440;
+const TInt KLargeFontHeightInTwips = (KLargeFontHeightInTwipsValue * 2540) / 1440;
+#endif
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 MApplication* CVMManager::NewL()
@@ -1185,18 +1197,18 @@ TBool CMIDPFontManager::SetupFont(TInt aFace,TInt aStyle,TInt aSize)
 		{
 		case SIZE_SMALL:
 			iCurrentFontSpec = iNormalFontSpec;
-			iCurrentFontSpec.iHeight = KSmallFontSizeInTwips;
+			iCurrentFontSpec.iHeight = KSmallFontHeightInTwips;
 			iPoints = 0;
 			break;
 		case SIZE_LARGE:
 			iCurrentFontSpec = iNormalFontSpec;
-			iCurrentFontSpec.iHeight = KLargeFontSizeInTwips;
+			iCurrentFontSpec.iHeight = KLargeFontHeightInTwips;
 			iPoints = 0;
 			break;
 		case SIZE_MEDIUM:
 		default:
 			iCurrentFontSpec = iNormalFontSpec;
-			iCurrentFontSpec.iHeight = KMediumFontSizeInTwips;
+			iCurrentFontSpec.iHeight = KMediumFontHeightInTwips;
 			iPoints = 0;
 			break;
 		}
