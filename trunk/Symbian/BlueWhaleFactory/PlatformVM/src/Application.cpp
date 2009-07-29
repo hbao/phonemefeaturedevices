@@ -83,6 +83,22 @@
 
 const TInt KUIQStopVibrationDelay = 1000000; // 1s
 
+#define KSmallFontHeightInTwipsValue 140
+#define KMediumFontHeightInTwipsValue 158
+#define KLargeFontHeightInTwipsValue 176
+
+#if __S60_VERSION__ >= __S60_V2_FP1_VERSION_NUMBER__
+const TInt KSmallFontHeightInTwips = KSmallFontHeightInTwipsValue;
+const TInt KMediumFontHeightInTwips = KMediumFontHeightInTwipsValue;
+const TInt KLargeFontHeightInTwips = KLargeFontHeightInTwipsValue;
+#elif __UIQ_VERSION_NUMBER__ >= __UIQ_V3_FP0_VERSION_NUMBER__
+// UIQ thinks a twip is 100th of a mm (rather than 1/1440th of an inch)
+// So, twipsUIQ = twips * (25.4 / 1440) * 100 
+const TInt KSmallFontHeightInTwips = (KSmallFontHeightInTwipsValue * 2540) / 1440;
+const TInt KMediumFontHeightInTwips = (KMediumFontHeightInTwipsValue * 2540) / 1440;
+const TInt KLargeFontHeightInTwips = (KLargeFontHeightInTwipsValue * 2540) / 1440;
+#endif
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 MApplication* CVMManager::NewL()
 {
@@ -1153,9 +1169,10 @@ void CMIDPFontManager::ConstructL()
 {
 	iThreadRunner = new (ELeave) CThreadRunner();
 	iThreadRunner->ConstructL();
-#if __UIQ_VERSION_NUMBER__ >= __UIQ_V3_FP0_VERSION_NUMBER__
+
 	iNormalFontSpec = CCoeEnv::Static()->NormalFont()->FontSpecInTwips();
-#endif
+	iNormalFontSpec.iFontStyle.SetStrokeWeight(EStrokeWeightBold);
+	iNormalFontSpec.iFontStyle.SetBitmapType(EAntiAliasedGlyphBitmap);
 }
 
 void CMIDPFontManager::SetCanvas(MMIDPCanvas* aCanvas)
@@ -1173,33 +1190,19 @@ TBool CMIDPFontManager::SetupFont(TInt aFace,TInt aStyle,TInt aSize)
 		switch(aSize)
 		{
 		case SIZE_SMALL:
-#if __S60_VERSION__ >= __S60_V2_FP3_VERSION_NUMBER__
-			iFontId = EAknLogicalFontPrimarySmallFont;
-#elif __S60_VERSION__ >= __S60_V2_FP1_VERSION_NUMBER__
-			iFontId = EAknLogicalFontPrimaryFont;
-#elif __UIQ_VERSION_NUMBER__ >= __UIQ_V3_FP0_VERSION_NUMBER__
 			iCurrentFontSpec = iNormalFontSpec;
-			iCurrentFontSpec.iHeight -= 100;
-#endif
+			iCurrentFontSpec.iHeight = KSmallFontHeightInTwips;
 			iPoints = 0;
 			break;
 		case SIZE_LARGE:
-#if __S60_VERSION__ >= __S60_V2_FP3_VERSION_NUMBER__
-			iFontId = EAknLogicalFontTitleFont;
-#elif __UIQ_VERSION_NUMBER__ >= __UIQ_V3_FP0_VERSION_NUMBER__
 			iCurrentFontSpec = iNormalFontSpec;
-			iCurrentFontSpec.iHeight += 20;
-#endif
+			iCurrentFontSpec.iHeight = KLargeFontHeightInTwips;
 			iPoints = 0;
 			break;
 		case SIZE_MEDIUM:
 		default:
-#if __S60_VERSION__ >= __S60_V2_FP3_VERSION_NUMBER__
-			iFontId = EAknLogicalFontPrimaryFont;
-#elif __UIQ_VERSION_NUMBER__ >= __UIQ_V3_FP0_VERSION_NUMBER__
 			iCurrentFontSpec = iNormalFontSpec;
-			iCurrentFontSpec.iHeight -= 40;
-#endif
+			iCurrentFontSpec.iHeight = KMediumFontHeightInTwips;
 			iPoints = 0;
 			break;
 		}
@@ -1352,22 +1355,7 @@ void CMIDPFontManager::UpdateFont()
 			iCurrentFont = NULL;
 		}
 	
-#if __S60_VERSION__ >= __S60_V2_FP1_VERSION_NUMBER__
-		const CFont* logicalFont = AknLayoutUtils::FontFromId(iFontId);
-		TFontSpec spec = logicalFont->FontSpecInTwips();
-		// adjust S60 fonts to match native vm
-		if (iSize == SIZE_MEDIUM)
-		{
-			spec.iHeight -= 22;
-		}
-		else if (iSize == SIZE_SMALL)
-		{
-			spec.iHeight += 10;
-		}
-#elif __UIQ_VERSION_NUMBER__ >= __UIQ_V3_FP0_VERSION_NUMBER__
 		TFontSpec spec = iCurrentFontSpec;
-#endif
-	
 		if(iPoints != 0)
 		{
 			spec.iHeight = iPoints;
