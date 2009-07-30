@@ -324,12 +324,8 @@ private:
 	CFbsBitmap* iBitmap;
 	CFbsBitmapDevice* iDevice;
 	CFbsBitGc* iGc;
-#if __S60_VERSION__ >= __S60_V2_FP1_VERSION_NUMBER__
-	TAknLogicalFontId iFontId;
-#elif __UIQ_VERSION_NUMBER__ >= __UIQ_V3_FP0_VERSION_NUMBER__
 	TFontSpec iCurrentFontSpec;
 	TFontSpec iNormalFontSpec;
-#endif
 	TInt iFace;
 	TInt iStyle;
 	TInt iSize;
