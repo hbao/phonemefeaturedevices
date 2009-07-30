@@ -1158,13 +1158,15 @@ CMIDPFontManager::~CMIDPFontManager()
 	{
 		iGc->DiscardFont();
 	}
-	while (iFontCache.Count())
+	if (iFontCache)
 	{
-		CFont* font = iFontCache[0].Font();
-		iDevice->ReleaseFont(font);
-		iFontCache.Remove(0);
+		CFont* font = NULL;
+		while ((font = iFontCache->RemoveFirstEntry()) != NULL)
+		{
+			iDevice->ReleaseFont(font);
+		}
 	}
-	iFontCache.Close();
+	delete iFontCache;
 	delete iGc;
 	delete iDevice;
 	delete iBitmap;
@@ -1173,6 +1175,7 @@ CMIDPFontManager::~CMIDPFontManager()
 
 void CMIDPFontManager::ConstructL()
 {
+	iFontCache = new (ELeave) CFontCache();
 	iThreadRunner = new (ELeave) CThreadRunner();
 	iThreadRunner->ConstructL();
 
@@ -1363,12 +1366,6 @@ void CMIDPFontManager::UpdateFont()
 {
 	if (!iCurrentFont || iCurrentFontSpecHasChanged)
 	{
-		if (iCurrentFont)
-		{
-			iGc->DiscardFont();
-			iCurrentFont = NULL;
-		}
-	
 		TFontSpec spec = iCurrentFontSpec;
 		if(iPoints != 0)
 		{
@@ -1377,30 +1374,36 @@ void CMIDPFontManager::UpdateFont()
 		spec.iFontStyle.SetStrokeWeight(iStyle & STYLE_BOLD ? EStrokeWeightBold : EStrokeWeightNormal);
 		spec.iFontStyle.SetPosture(iStyle & STYLE_ITALIC ? EPostureItalic : EPostureUpright);
 
-#if (__S60_VERSION__ >= __S60_V3_FP0_VERSION_NUMBER__) || (__UIQ_VERSION_NUMBER__ >= __UIQ_V3_FP0_VERSION_NUMBER__)
-		TCachedFont findObject(NULL, spec);
-		TIdentityRelation<TCachedFont> identityRelation(TCachedFont::IdentityRelation);
-		TInt index = iFontCache.Find(findObject, identityRelation);
-		if (index == KErrNotFound)
+		CFont* newFont = iFontCache->Search(spec);
+		if (!newFont)
 		{
-			TInt ret = iDevice->GetNearestFontToDesignHeightInTwips(iCurrentFont,spec);
+#if (__S60_VERSION__ >= __S60_V3_FP0_VERSION_NUMBER__) || (__UIQ_VERSION_NUMBER__ >= __UIQ_V3_FP0_VERSION_NUMBER__)
+			TInt ret = iDevice->GetNearestFontToDesignHeightInTwips(newFont,spec);
+#else
+			TInt ret = iDevice->GetNearestFontInTwips(newFont,spec);
+#endif
 			if (ret == KErrNone)
 			{
-				TCachedFont newObject(iCurrentFont, spec);
-				iFontCache.Append(newObject);
+				CFont* displacedFont = NULL;
+				TRAPD(ignore, displacedFont = iFontCache->AddEntryL(newFont, spec));
+				if (displacedFont)
+				{
+					iDevice->ReleaseFont(displacedFont);
+				}
 			}
 		}
-		else
+		if (newFont && newFont != iCurrentFont)
 		{
-			iCurrentFont = iFontCache[index].Font();
+			if (iCurrentFont)
+			{
+				iGc->DiscardFont();
+			}
+			iCurrentFont = newFont;
+			iGc->UseFont(iCurrentFont);
+			iAscent = iCurrentFont->AscentInPixels();
+			iDescent = iCurrentFont->DescentInPixels();
+			iHeight = iCurrentFont->HeightInPixels();
 		}
-#else
-		TInt ret = iDevice->GetNearestFontInTwips(iCurrentFont,spec);
-#endif
-		iGc->UseFont(iCurrentFont);
-		iAscent = iCurrentFont->AscentInPixels();
-		iDescent = iCurrentFont->DescentInPixels();
-		iHeight = iCurrentFont->HeightInPixels();
 		iLeading = spec.iHeight / 50;
 		iGc->SetUnderlineStyle(iStyle & STYLE_UNDERLINED ? EUnderlineOn : EUnderlineOff);
 	}

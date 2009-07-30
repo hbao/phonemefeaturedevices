@@ -380,7 +380,7 @@ private:
 	} TFontSize;
 	TBool iCurrentFontSpecHasChanged;
 	RPointerArray<CTextWidthCacheEntry> iTextWidthCache;
-	RArray<TCachedFont> iFontCache;
+	CFontCache* iFontCache;
 };
 
 class CImageConverter : public CActive
