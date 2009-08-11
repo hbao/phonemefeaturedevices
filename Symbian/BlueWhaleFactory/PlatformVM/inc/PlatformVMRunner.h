@@ -34,6 +34,38 @@
 #include "thread.h"
 #include <os_symbian.hpp>
 
+// See Symbian FAQ 1333
+const TInt KUidValueManufacturer_SonyEricsson	= 0x101F6CED;
+const TInt KUidValueManufacturer_ARM			= 0x101F4ED9;
+const TInt KUidValueManufacturer_Samsung		= 0x101F7E7B;
+const TInt KUidValueManufacturer_Siemens		= 0x101F9072;
+const TInt KUidValueManufacturer_Sendo			= 0x101FA032;
+const TInt KUidValueManufacturer_BENQ			= 0x101FD278;
+const TInt KUidValueManufacturer_LG				= 0x10200A8C;
+const TInt KUidValueManufacturer_Lenovo			= 0x1020E440;
+const TInt KUidValueManufacturer_NEC			= 0x102740C4;
+
+_LIT8(KManufacturerEricsson,			"Ericsson");
+_LIT8(KManufacturerMotorola,			"Motorola");
+_LIT8(KManufacturerNokia,				"Nokia");
+_LIT8(KManufacturerPanasonic,			"Panasonic");
+_LIT8(KManufacturerPsion,				"Psion");
+_LIT8(KManufacturerIntel,				"Intel");
+_LIT8(KManufacturerCogent,				"Cogent");
+_LIT8(KManufacturerCirrus,				"Cirrus");
+_LIT8(KManufacturerLinkup,				"Linkup");
+_LIT8(KManufacturerTexasInstruments,	"TexasInstruments");
+_LIT8(KManufacturerSonyEricsson,		"SonyEricsson");
+_LIT8(KManufacturerARM,					"ARM");
+_LIT8(KManufacturerSamsung,				"Samsung");
+_LIT8(KManufacturerSiemens,				"Siemens");
+_LIT8(KManufacturerSendo,				"Sendo");
+_LIT8(KManufacturerBENQ,				"BENQ");
+_LIT8(KManufacturerLG,					"LG");
+_LIT8(KManufacturerLenovo,				"Lenovo");
+_LIT8(KManufacturerNEC,					"NEC");
+_LIT8(KManufacturerUnknown,				"Unknown");
+
 class CMyUndertaker;
 
 class TThreadInfo
@@ -63,6 +95,7 @@ class CJVMRunner : public CActive, public MRunnable
 	protected:
 		TFileName VMInstallFileName();
 		TBuf8<128> QuitReasonText();
+		TBuf8<32> ManufacturerName(TInt aManufacturer);
 
 	protected:
 		TInt RunVML();
