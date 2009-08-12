@@ -32,6 +32,7 @@
 #include <e32base.h>
 #include <e32property.h>
 #include <hal.h>
+#include <hal_data.h>
 #include <os_symbian.hpp>
 #include "debugutilities.h"
 #include <unknown.h>
@@ -505,13 +506,12 @@ _LIT8(KTestRMS,"javax.microedition.lcdui.TestGraphics");
 
 _LIT8(KUserAgentKey,"user-agent");
 #if __S60_VERSION__ >= __S60_V2_FP1_VERSION_NUMBER__
-_LIT8(KUserAgentBase,"0x%08x-0x%08x/%S BlueWhale SymbianOS/ ");
+_LIT8(KUserAgentBase,"bluewhale_%S Profile/MIDP-2.1 Configuration/CLDC-1.1 SymbianOS/ %S 0x%08x-0x%08x bluewhale_platform");
 #elif __UIQ_VERSION_NUMBER__ >= __UIQ_V3_FP0_VERSION_NUMBER__
-_LIT8(KUserAgentBase,"0x%08x-0x%08x/%S BlueWhale Symbian OS; ");
+_LIT8(KUserAgentBase,"bluewhale_%S Profile/MIDP-2.1 Configuration/CLDC-1.1 Symbian OS; %S 0x%08x-0x%08x bluewhale_platform");
 #endif
 
 _LIT8(KPlatformKey,"microedition.platform");
-_LIT8(KPlatformValue,"bluewhale_platform_%S");
 
 _LIT8(KprotocolpathKey ,"javax.microedition.io.Connector.protocolpath");
 _LIT8(KprotocolpathValue ,"com.sun.midp.io");
@@ -595,12 +595,80 @@ TBuf8<128> CJVMRunner::QuitReasonText()
 	return result;
 }
 
+TBuf8<32> CJVMRunner::ManufacturerName(TInt aManufacturer)
+{
+	TBuf8<32> result;
+	switch (aManufacturer)
+	{
+		case HALData::EManufacturer_Ericsson:
+			result = KManufacturerEricsson;
+			break;
+		case HALData::EManufacturer_Motorola:
+			result = KManufacturerMotorola;
+			break;
+		case HALData::EManufacturer_Nokia:
+			result = KManufacturerNokia;
+			break;
+		case HALData::EManufacturer_Panasonic:
+			result = KManufacturerPanasonic;
+			break;
+		case HALData::EManufacturer_Psion:
+			result = KManufacturerPsion;
+			break;
+		case HALData::EManufacturer_Intel:
+			result = KManufacturerIntel;
+			break;
+		case HALData::EManufacturer_Cogent:
+			result = KManufacturerCogent;
+			break;
+		case HALData::EManufacturer_Cirrus:
+			result = KManufacturerCirrus;
+			break;
+		case HALData::EManufacturer_Linkup:
+			result = KManufacturerLinkup;
+			break;
+		case HALData::EManufacturer_TexasInstruments:
+			result = KManufacturerTexasInstruments;
+			break;
+		case KUidValueManufacturer_SonyEricsson:
+			result = KManufacturerSonyEricsson;
+			break;
+		case KUidValueManufacturer_ARM:
+			result = KManufacturerARM;
+			break;
+		case KUidValueManufacturer_Samsung:
+			result = KManufacturerSamsung;
+			break;
+		case KUidValueManufacturer_Siemens:
+			result = KManufacturerSiemens;
+			break;
+		case KUidValueManufacturer_Sendo:
+			result = KManufacturerSendo;
+			break;
+		case KUidValueManufacturer_BENQ:
+			result = KManufacturerBENQ;
+			break;
+		case KUidValueManufacturer_LG:
+			result = KManufacturerLG;
+			break;
+		case KUidValueManufacturer_Lenovo:
+			result = KManufacturerLenovo;
+			break;
+		case KUidValueManufacturer_NEC:
+			result = KManufacturerNEC;
+			break;
+		default:
+			result = KManufacturerUnknown;
+			break;
+	}
+	return result;
+}
+
 TInt CJVMRunner::RunVML()
 {
 	DEBUGMESSAGE(_L("Starting VM"));
 	TBuf8<128> mainClass;
-	TBuf8<96> userAgent;
-	TBuf8<128> platform;
+	TBuf8<160> userAgent;
 	CVMProperties* properties = CVMProperties::NewLC();
 	CVMArguments* arguments = CVMArguments::NewLC();
 	mainClass =  KAMSRunner;
@@ -609,11 +677,11 @@ TInt CJVMRunner::RunVML()
 	TInt manufacturer = 0;
 	HAL::Get(HALData::EMachineUid, uid);
 	HAL::Get(HALData::EManufacturer, manufacturer);
-	userAgent.Format(KUserAgentBase, manufacturer, uid, &BLUEWHALEPLATFORM_SOFTWARE_BUILD_VERSION());
-	platform.Format(KPlatformValue,&BLUEWHALEPLATFORM_SOFTWARE_BUILD_VERSION());
-	
+	TBuf8<32> manufacturerName(ManufacturerName(manufacturer));
+	userAgent.Format(KUserAgentBase, &BLUEWHALEPLATFORM_SOFTWARE_BUILD_VERSION(), &manufacturerName, manufacturer, uid);
+
 	properties->AddL(KUserAgentKey(),userAgent);
-	properties->AddL(KPlatformKey(),platform);
+	properties->AddL(KPlatformKey(),userAgent);
 	properties->AddL(KprotocolpathKey(),KprotocolpathValue);
 
 			
