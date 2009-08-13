@@ -56,6 +56,7 @@
 #include "ThreadUtils.h"
 #include "AudioPlayer.h"
 #include <imageconversion.h>
+#include "PhoneCall.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -489,6 +490,7 @@ private:
 	TDesC8* iSourceData;
 	char* iOutData;
 	char* iOutMaskData;
+	CPhoneCall* iPhoneCall;
 };
 
 
