@@ -67,6 +67,7 @@ SOURCE			HostResolver.cpp
 SOURCE			DirectoryList.cpp
 SOURCE			ManagementObjectFactory.cpp
 SOURCE			AudioPlayer.cpp
+SOURCE			PhoneCall.cpp
 
 #if defined(_DEBUGTERMINAL_)
 SOURCE 			DebugTerminal.cpp
@@ -142,6 +143,7 @@ LIBRARY			mediaclientaudiostream.lib
 LIBRARY			mmfcontrollerframework.lib
 LIBRARY			mmfstandardcustomcommands.lib
 LIBRARY			imageconversion.lib
+LIBRARY			etel3rdparty.lib
 
 LIBRARY			cldc_vm_lib.lib
 

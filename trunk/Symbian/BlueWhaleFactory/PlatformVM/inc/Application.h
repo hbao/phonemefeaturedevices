@@ -56,6 +56,7 @@
 #include "ThreadUtils.h"
 #include "AudioPlayer.h"
 #include <imageconversion.h>
+#include "PhoneCall.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -449,6 +450,7 @@ protected:
 private:
 	void ConstructL();
 	static void LaunchBrowserCallback(TAny* aThis);
+	static void DialNumberCallback(TAny* aThis);
 	static void LaunchFileCallback(TAny* aThis);
 	static void StartVibrateCallback(TAny* aThis);
 	static void PlayAudioCallback(TAny* aThis);
@@ -467,6 +469,7 @@ private:
 #endif
 	CMIDPFontManager* iFontManager;
 	HBufC* iLaunchBrowserUrl;
+	HBufC* iPhoneNumber;
 	TInt iDuration;
 	CPeriodic* iVibraTimer;
 	CAudioPlayer* iAudioPlayer;
@@ -477,6 +480,7 @@ private:
 	TDesC8* iSourceData;
 	char* iOutData;
 	char* iOutMaskData;
+	CPhoneCall* iPhoneCall;
 };
 
 

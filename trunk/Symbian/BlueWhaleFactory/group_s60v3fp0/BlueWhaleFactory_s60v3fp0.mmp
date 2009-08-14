@@ -74,6 +74,7 @@ SOURCE 			APNManager.cpp
 SOURCE 			APNDatabase.cpp 
 SOURCE 			IAPInfo.cpp 
 SOURCE 			CommDBUtil.cpp
+SOURCE			PhoneCall.cpp
 
 #if defined(_DEBUGTERMINAL_)
 SOURCE 			DebugTerminal.cpp

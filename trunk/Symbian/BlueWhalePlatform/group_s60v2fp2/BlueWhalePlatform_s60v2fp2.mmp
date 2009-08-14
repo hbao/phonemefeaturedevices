@@ -109,6 +109,7 @@ LIBRARY			mmfcontrollerframework.lib
 LIBRARY			mmfstandardcustomcommands.lib
 LIBRARY			platformenv.lib
 LIBRARY			connmon.lib
+LIBRARY			etel.lib
 STATICLIBRARY	BlueWhaleFactory.lib
 STATICLIBRARY	cldc_vm_lib.lib
 STATICLIBRARY	pcsl_file.lib

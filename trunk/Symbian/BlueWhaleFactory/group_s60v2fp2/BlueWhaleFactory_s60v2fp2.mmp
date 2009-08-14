@@ -74,6 +74,7 @@ SOURCE			ManagementObjectFactory.cpp
 SOURCE			AudioPlayer.cpp
 SOURCE 			IAPInfo.cpp 
 SOURCE 			CommDBUtil.cpp
+SOURCE			PhoneCall.cpp
 
 SOURCEPATH		..\Util\src
 SOURCE			Thread.cpp
@@ -151,7 +152,8 @@ LIBRARY			platformenv.lib
 LIBRARY			imageconversion.lib
 
 LIBRARY			cldc_vm_lib.lib
-LIBRARY			connmon.lib etel3rdparty.lib 
+LIBRARY			connmon.lib
+LIBRARY			etel.lib
 
 #if defined(WINS)
 deffile .\bluewhalefactory.def
