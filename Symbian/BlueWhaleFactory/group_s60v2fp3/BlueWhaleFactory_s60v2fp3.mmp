@@ -77,6 +77,7 @@ SOURCE 			APNManager.cpp
 SOURCE 			APNDatabase.cpp 
 SOURCE 			IAPInfo.cpp 
 SOURCE 			CommDBUtil.cpp
+SOURCE			PhoneCall.cpp
 
 SOURCEPATH		..\Util\src
 SOURCE			Thread.cpp
