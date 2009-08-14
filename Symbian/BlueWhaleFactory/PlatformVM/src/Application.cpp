@@ -605,6 +605,7 @@ CMIDPApp::~CMIDPApp()
 	delete iAudioType;
 	delete iImageConverter;
 	delete iPhoneCall;
+	delete iPhoneNumber;
 }
 
 void CMIDPApp::ConstructL()
@@ -946,6 +947,15 @@ void CMIDPApp::LaunchBrowserCallback(TAny* aThis)
 	}
 }
 
+void CMIDPApp::DialNumberCallback(TAny* aThis)
+{
+	CMIDPApp* This = static_cast<CMIDPApp*>(aThis);
+	if (This->iPhoneCall && This->iPhoneNumber)
+	{
+		This->iPhoneCall->Dial(*This->iPhoneNumber);
+	}
+}
+
 TBool CMIDPApp::PlatformRequest(const TDesC& aUrl)
 {
 	_LIT(KInternalInstall,"&x-bw-internal-download");
@@ -999,7 +1009,14 @@ TBool CMIDPApp::PlatformRequest(const TDesC& aUrl)
 	}
 	else if(KPhoneCallUrl().Compare(aUrl.Left(KPhoneCallUrl().Length())) == 0)
 	{
-		ret = iPhoneCall->Dial(aUrl.Right(aUrl.Length() - KPhoneCallUrl().Length()));
+		delete iPhoneNumber;
+		iPhoneNumber = HBufC::New(aUrl.Length() - KPhoneCallUrl().Length());
+		if (iPhoneNumber)
+		{
+			iPhoneNumber->Des() = aUrl.Right(aUrl.Length() - KPhoneCallUrl().Length());
+			iThreadRunner->DoCallback(DialNumberCallback,this);
+			ret = ETrue;
+		}
 	}
 	else if(aUrl.FindF(KInternalInstall) != KErrNotFound)
 	{
