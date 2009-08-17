@@ -95,9 +95,12 @@ TInt CPhoneCall::Dial(const TDesC& aNumber)
 	callParams.iIdRestrict = CTelephony::ESendMyId;
 	CTelephony::TCallParamsV1Pckg callParamsPckg(callParams);
  
-	iTelephony->DialNewCall(iStatus, callParamsPckg, telNumber, iCallId);
-	SetActive();
-	result = ETrue;
+	if (iTelephony)
+	{
+		iTelephony->DialNewCall(iStatus, callParamsPckg, telNumber, iCallId);
+		SetActive();
+		result = ETrue;
+	}
 #else
 	if (iCall.OpenNewCall(iLine) == KErrNone)
 	{
