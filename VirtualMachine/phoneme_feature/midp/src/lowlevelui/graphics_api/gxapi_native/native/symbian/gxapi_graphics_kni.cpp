@@ -576,7 +576,7 @@ KNIDECL(javax_microedition_lcdui_Graphics_drawString) {
             KNI_ThrowNew(midpNullPointerException, NULL);
         } else if (!check_anchor(anchor, VCENTER)) {
             KNI_ThrowNew(midpIllegalArgumentException, NULL);
-        } else {
+        } else if (strLen > 0) {
             int      face, style, size;
             _JavaString *jstr;
             jshort clip[4]; /* Defined in Graphics.java as 4 shorts */
