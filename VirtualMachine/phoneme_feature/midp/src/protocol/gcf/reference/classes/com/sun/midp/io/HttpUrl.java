@@ -22,6 +22,11 @@
  * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa
  * Clara, CA 95054 or visit www.sun.com if you need additional
  * information or have any questions.
+ *  
+ * Please contact Blue Whale Systems Ltd, Suite 123, The LightBox
+ * 111 Power Road, Chiswick, London, W4 5PY, United Kingdom or visit 
+ * www.bluewhalesystems.com if you need additional 
+ * information or have any questions.  
  */
 
 package com.sun.midp.io;
@@ -555,6 +560,11 @@ public class HttpUrl {
      * @param hose the host name for checking
      * @return true when the host name has a valid format
      */
+     /*
+            Modified by M Burton of BlueWhalesystems as valid urls were not being marked as valid
+            e.g www.1and1.co.uk
+            The digit after the . was causing the failure
+     */
     private boolean isValidHostName(String host) {
         char currChar;
         int ptrChar = 0;
@@ -566,12 +576,12 @@ public class HttpUrl {
                     return false;
                 }
                 lenDomain = 0;
-            } else if (currChar == '-' || Character.isDigit(currChar)) {
+            } else if (currChar == '-') {
                 if (lenDomain == 0) {
                     return false;
                 }
                 lenDomain++;
-            } else if (Character.isLowerCase(currChar) || Character.isUpperCase(currChar)) {
+            } else if (Character.isLowerCase(currChar) || Character.isUpperCase(currChar) || Character.isDigit(currChar)) {
                 lenDomain++;
             } else {
                 return false;
