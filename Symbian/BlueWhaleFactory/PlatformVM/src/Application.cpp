@@ -1481,20 +1481,24 @@ void CMIDPFontManager::DrawCharsCallback(TAny* aThis)
 	bottomScanLineOffset = Max(bottomScanLineOffset, 0);
 	bottomScanLineOffset = Min(bottomScanLineOffset, This->iDest->width * This->iDest->height * 2);
 
-	This->iBitmap->LockHeap();
-    TUint32* bitmapData = This->iBitmap->DataAddress();
-    Mem::Copy(bitmapData, ((TUint8*)This->iDest->pixelData) + topScanLineOffset, bottomScanLineOffset - topScanLineOffset);
-    This->iBitmap->UnlockHeap();
+	textRect.SetRect(TPoint(textRect.iTl.iX, This->iAscent + gap + Min(textRect.iTl.iY - This->iAscent - gap, 0)), textRect.Size());
+	if (textRect.Intersects(clipRect))
+	{
+		This->iBitmap->LockHeap();
+		TUint32* bitmapData = This->iBitmap->DataAddress();
+		Mem::Copy(bitmapData, ((TUint8*)This->iDest->pixelData) + topScanLineOffset, bottomScanLineOffset - topScanLineOffset);
+		This->iBitmap->UnlockHeap();
+		
+		This->iGc->SetClippingRect(clipRect);
+		This->iGc->SetPenColor(TRgb(This->iPixel));
+		This->iGc->DrawText(text, TPoint(textRect.iTl.iX, This->iAscent + gap + Min(textRect.iTl.iY - This->iAscent - gap, 0)));
+		This->iGc->CancelClippingRect();
 	
-	This->iGc->SetClippingRect(clipRect);
-	This->iGc->SetPenColor(TRgb(This->iPixel));
-	This->iGc->DrawText(text, TPoint(textRect.iTl.iX, This->iAscent + gap + Min(textRect.iTl.iY - This->iAscent - gap, 0)));
-	This->iGc->CancelClippingRect();
-
-	This->iBitmap->LockHeap();
-	bitmapData = This->iBitmap->DataAddress();
-    Mem::Copy(((TUint8*)This->iDest->pixelData) + topScanLineOffset, bitmapData, bottomScanLineOffset - topScanLineOffset);
-    This->iBitmap->UnlockHeap();
+		This->iBitmap->LockHeap();
+		bitmapData = This->iBitmap->DataAddress();
+		Mem::Copy(((TUint8*)This->iDest->pixelData) + topScanLineOffset, bitmapData, bottomScanLineOffset - topScanLineOffset);
+		This->iBitmap->UnlockHeap();
+	}
 }
 
 void CMIDPFontManager::FontInfoCallback(TAny* aThis)
