@@ -200,16 +200,16 @@
 		</svn>
 	</target>
 
-	<!-- Calls a python script which replaces the specified string '0000' in the pkg file with the -->
+	<!-- Calls a python script which replaces the specified string '0000' in the buildversion.h file with the -->
 	<!-- current Subversion revision number	-->
 	<target name="injectbuildnumber" depends="revertbuildnumber">
 		<echo>${deviceSDK}</echo>
 		<exec executable="python.exe" dir="${basedir}" failonerror="true">
 			<arg value="..\BlueTools\replaceStringWithSubversionRevision.py" />
 			<arg value="${basedir}/PlatformVM/inc/buildversion.h" />
-			<arg value="unknown_00.00.00" />
+			<arg value="unknown_v00.00.00" />
 			<arg value="." />
-			<arg value="${deviceSDK}_" />
+			<arg value="${deviceSDK}_v" />
 		</exec>
 	</target>
 

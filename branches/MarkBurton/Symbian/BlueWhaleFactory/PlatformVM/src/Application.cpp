@@ -604,6 +604,8 @@ CMIDPApp::~CMIDPApp()
 	delete iAudioPlayer;
 	delete iAudioType;
 	delete iImageConverter;
+	delete iPhoneCall;
+	delete iPhoneNumber;
 }
 
 void CMIDPApp::ConstructL()
@@ -635,6 +637,10 @@ void CMIDPApp::ConstructL()
 	if (!iImageConverter)
 	{
 		iImageConverter = CImageConverter::NewL();
+	}
+	if (!iPhoneCall)
+	{
+		TRAPD(ignore, iPhoneCall = CPhoneCall::NewL());	// don't let telephony failures stop us starting up
 	}
 }
 
@@ -941,10 +947,20 @@ void CMIDPApp::LaunchBrowserCallback(TAny* aThis)
 	}
 }
 
+void CMIDPApp::DialNumberCallback(TAny* aThis)
+{
+	CMIDPApp* This = static_cast<CMIDPApp*>(aThis);
+	if (This->iPhoneCall && This->iPhoneNumber)
+	{
+		This->iPhoneCall->Dial(*This->iPhoneNumber);
+	}
+}
+
 TBool CMIDPApp::PlatformRequest(const TDesC& aUrl)
 {
 	_LIT(KInternalInstall,"&x-bw-internal-download");
 	_LIT(KFileUrl,"file:");
+	_LIT(KPhoneCallUrl,"tel:");
 	_LIT(KRegisterMonkey,"x-bw-registermonkey");
 	_LIT(KSpankMonkey,"x-bw-spankmonkey");
 	_LIT(KDeregisterMonkey,"x-bw-deregistermonkey");
@@ -990,6 +1006,17 @@ TBool CMIDPApp::PlatformRequest(const TDesC& aUrl)
 			ret = ETrue;
 		}
 
+	}
+	else if(KPhoneCallUrl().Compare(aUrl.Left(KPhoneCallUrl().Length())) == 0)
+	{
+		delete iPhoneNumber;
+		iPhoneNumber = HBufC::New(aUrl.Length() - KPhoneCallUrl().Length());
+		if (iPhoneNumber)
+		{
+			iPhoneNumber->Des() = aUrl.Right(aUrl.Length() - KPhoneCallUrl().Length());
+			iThreadRunner->DoCallback(DialNumberCallback,this);
+			ret = ETrue;
+		}
 	}
 	else if(aUrl.FindF(KInternalInstall) != KErrNotFound)
 	{

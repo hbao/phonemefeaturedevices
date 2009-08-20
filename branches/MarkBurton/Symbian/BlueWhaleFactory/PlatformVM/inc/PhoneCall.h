@@ -28,10 +28,41 @@
  * information or have any questions.  
  */ 
 
-#ifndef __BUILDVERSION_H__
-#define __BUILDVERSION_H__
-#include <e32def.h>
+#ifndef __PHONECALL_H__
+#define __PHONECALL_H__
 
-_LIT8(BLUEWHALEPLATFORM_SOFTWARE_BUILD_VERSION ,"unknown_v00.00.00");
+#include <OSVersion.h>
 
-#endif /*BUILDVERSION_H_*/
+#if (__S60_VERSION__ >= __S60_V2_FP3_VERSION_NUMBER__) || (__UIQ_VERSION_NUMBER__ >= __UIQ_V3_FP0_VERSION_NUMBER__)
+#include <etel3rdparty.h>
+#else
+#include <etel.h>
+#endif
+
+class CPhoneCall : public CActive
+{
+public:
+	static CPhoneCall* NewL();
+    virtual ~CPhoneCall();
+    TInt Dial(const TDesC& aNumber);
+
+protected:
+    void ConstructL();
+	CPhoneCall();
+    void DoCancel();
+    void RunL();
+
+private:
+#if (__S60_VERSION__ >= __S60_V2_FP3_VERSION_NUMBER__) || (__UIQ_VERSION_NUMBER__ >= __UIQ_V3_FP0_VERSION_NUMBER__)
+    CTelephony*	iTelephony;
+    CTelephony::TCallId iCallId;
+#else
+	RTelServer iTelServer;
+	RPhone iPhone;
+	RLine iLine;
+	RCall iCall;
+#endif
+};
+
+
+#endif // __PHONECALL_H__
