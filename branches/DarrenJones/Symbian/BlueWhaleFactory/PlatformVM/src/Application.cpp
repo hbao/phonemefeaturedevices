@@ -1455,45 +1455,54 @@ void CMIDPFontManager::DrawCharsCallback(TAny* aThis)
 	{
 		textRect.Move(-textWidth, 0);
 	}
-	
-	if(This->iAnchor & HCENTER)
+	else if(This->iAnchor & HCENTER)
 	{
 		textRect.Move(-textWidth / 2, 0);
 	}
 	
 	if(This->iAnchor & BOTTOM)
 	{
-		textRect.Move(0, -This->iDescent);
+		textRect.Move(0, -(This->iHeight + gap));
+	}
+	else if(This->iAnchor & TOP)
+	{
+		// no shift required
+	}
+	else
+	{
+		textRect.Move(0, -(This->iAscent + gap));
 	}
 	
-	if(This->iAnchor & TOP)
+	TRect intersectRect(clipRect);
+	intersectRect.Intersection(textRect);
+	if (!intersectRect.IsEmpty())
 	{
-		textRect.Move(0, This->iAscent + gap);
-	}
-
-	clipRect.iTl.iY -= Max(0, textRect.iTl.iY - This->iAscent - gap);
-	clipRect.iBr.iY -= Max(0, textRect.iTl.iY - This->iAscent - gap);
-	TInt topScanLineOffset = (This->iDest->width * (textRect.iTl.iY - This->iAscent - gap)) * 2;
-	topScanLineOffset = Max(topScanLineOffset, 0);
-	topScanLineOffset = Min(topScanLineOffset, This->iDest->width * This->iDest->height * 2);
-	
-	TInt bottomScanLineOffset = (This->iDest->width * (textRect.iTl.iY + This->iDescent)) * 2;
-	bottomScanLineOffset = Max(bottomScanLineOffset, 0);
-	bottomScanLineOffset = Min(bottomScanLineOffset, This->iDest->width * This->iDest->height * 2);
-
-	textRect.SetRect(TPoint(textRect.iTl.iX, This->iAscent + gap + Min(textRect.iTl.iY - This->iAscent - gap, 0)), textRect.Size());
-	if (textRect.Intersects(clipRect))
-	{
+		TInt topScanLineOffset = This->iDest->width * textRect.iTl.iY * 2;
+		topScanLineOffset = Max(topScanLineOffset, 0);
+		topScanLineOffset = Min(topScanLineOffset, This->iDest->width * This->iDest->height * 2);
+		
+		TInt bottomScanLineOffset = (This->iDest->width * (textRect.iTl.iY + gap + This->iHeight)) * 2;
+		bottomScanLineOffset = Max(bottomScanLineOffset, 0);
+		bottomScanLineOffset = Min(bottomScanLineOffset, This->iDest->width * This->iDest->height * 2);
+		
 		This->iBitmap->LockHeap();
 		TUint32* bitmapData = This->iBitmap->DataAddress();
 		Mem::Copy(bitmapData, ((TUint8*)This->iDest->pixelData) + topScanLineOffset, bottomScanLineOffset - topScanLineOffset);
 		This->iBitmap->UnlockHeap();
-		
-		This->iGc->SetClippingRect(clipRect);
+
+		clipRect.Move(0, -textRect.iTl.iY);
+		TBool useClippingRect = (intersectRect != textRect);
+		if (useClippingRect)
+		{
+			This->iGc->SetClippingRect(clipRect);
+		}
 		This->iGc->SetPenColor(TRgb(This->iPixel));
-		This->iGc->DrawText(text, TPoint(textRect.iTl.iX, This->iAscent + gap + Min(textRect.iTl.iY - This->iAscent - gap, 0)));
-		This->iGc->CancelClippingRect();
-	
+		This->iGc->DrawText(text, TPoint(textRect.iTl.iX, gap + This->iAscent));
+		if (useClippingRect)
+		{
+			This->iGc->CancelClippingRect();
+		}
+		
 		This->iBitmap->LockHeap();
 		bitmapData = This->iBitmap->DataAddress();
 		Mem::Copy(((TUint8*)This->iDest->pixelData) + topScanLineOffset, bitmapData, bottomScanLineOffset - topScanLineOffset);
