@@ -150,7 +150,7 @@ public class Connector {
         /* Set up the platform name */
 		// Blue Whale Systems:  Added check for bluewhale_platform platform property.
 		platform = System.getProperty("microedition.platform");
-        if ((platform == null) || (platform.equals("generic")) || (platform.startsWith("bluewhale_platform"))) {
+        if ((platform == null) || (platform.equals("generic")) || (platform.indexOf("bluewhale") != -1)) {
             platform = "j2me";
         }
 

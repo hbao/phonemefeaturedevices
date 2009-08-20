@@ -80,11 +80,11 @@
   <property Key="useJavaInstallerForPlatformRequest"
                                 Value="1"
                                 Scope="internal"/>
-								
+
 	<property Key="microedition.platform" 
-		Value="bluewhale_platform_wm2003ppcarm" 
+		Value="bluewhale_unknown_v00.00.00 Profile/MIDP-2.1 Configuration/CLDC-1.1 Windows CE bluewhale_platform"
 		Scope="system"
-		Comment="Platform name."/> 								
+		Comment="Platform name."/>
 
 </properties>
 </configuration>
