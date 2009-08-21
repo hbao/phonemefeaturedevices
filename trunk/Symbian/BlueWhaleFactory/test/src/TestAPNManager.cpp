@@ -580,7 +580,6 @@ MUnknown * CTestAPNManager::APNManagerWrapperCreate(TUid aImplementationUid, TUi
 	return ret;
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 void CTestAPNManager::testCreateAPNManager()
 {
 	/*MProperties* properties = DiL(MProperties);
@@ -778,4 +777,205 @@ void CTestAPNManager::testUserChooseAPN()
 	CleanupStack::PopAndDestroy(session);
 	CleanupStack::PopAndDestroy(manager);
 	CleanupStack::PopAndDestroy(properties);
+}
+
+class CTestAPNManagerTelephonyWrapperNoNetWork : public CBaseTelephonyWrapper
+{
+public:
+	virtual void GetNetworkRegistrationStatus(TRequestStatus& aReqStatus, TDes8& aStatus) const
+	{
+		CTelephony::TNetworkRegistrationV1 info;
+		CTelephony::TNetworkRegistrationV1Pckg infoPckg(info);
+		
+		info.iRegStatus = CTelephony::ERegistrationUnknown;
+		aStatus.Copy(infoPckg);
+		TRequestStatus* status = &aReqStatus; 
+		User::RequestComplete(status,KErrNone);
+	}		
+	
+	virtual void GetCurrentNetworkInfo(TRequestStatus& aReqStatus, TDes8& aNetworkInfo) const
+	{
+		CTelephony::TNetworkInfoV1 info;
+		CTelephony::TNetworkInfoV1Pckg infoPckg(info);
+		
+		info.iStatus = CTelephony::ENetworkStatusUnknown;
+		aNetworkInfo.Copy(infoPckg);
+		TRequestStatus* status = &aReqStatus; 
+		User::RequestComplete(status,KErrNone);
+	}
+};
+
+MUnknown * CTestAPNManager::APNManagerNoNetworkNoWLAN(TUid aImplementationUid, TUid aInterfaceUid, TAny* aConstructionParameters)
+{
+	MUnknown * ret = NULL;
+	switch(aImplementationUid.iUid)
+	{
+		case KCID_MTelephonyWrapper:
+			ret = new (ELeave) CTestAPNManagerTelephonyWrapperNoNetWork;
+			break;
+		default:
+			ret = APNManagerTimedWrapperCreate(aImplementationUid,aInterfaceUid,aConstructionParameters);
+	}
+	return ret;
+	
+}
+
+void CTestAPNManager::testNoNetworkNoWLAN()
+{
+	MProperties* properties = DiL(MProperties);
+	CleanupReleasePushL(*properties);
+	
+	REComPlusSession::SetDelegate(APNManagerNoNetworkNoWLAN);
+		
+	CAPNManager* manager = CAPNManager::NewL(properties);
+	CleanupStack::PushL(manager);
+	
+	manager->SetBeingTested();
+	
+	MIAPSession* session = manager->StartIAPSession();
+	CleanupReleasePushL(*session);
+	
+	TInt iap = session->GetNextIAP(0);
+	RDebug::Print(_L("IAP %d"),iap);
+	TS_ASSERT(iap == -1);	
+	CleanupStack::PopAndDestroy(session);
+	CleanupStack::PopAndDestroy(manager);
+	CleanupStack::PopAndDestroy(properties);
+			
+}
+
+class CTestAPNManagerConnectionMonitorWrapperWithWLAN : public CTestAPNManagerConnectionMonitorWrapper
+{
+public:
+	void GetPckgAttribute( const TUint aConnectionId,const TUint aSubConnectionId,const TUint aAttribute,TDes8& aValue,TRequestStatus& aStatus ) const
+	{
+		iClientStatus = &aStatus;
+		*iClientStatus = KRequestPending;
+		switch(aAttribute)
+		{
+			case KNetworkNames:
+			{
+				TConnMonNetworkNames info;
+				TPckg<TConnMonNetworkNames> infoPckg(info);
+				info.iCount = 2;
+				info.iNetwork[0].iName.Copy(KTestWlanWithIAP);
+				info.iNetwork[0].iSignalStrength = 10;
+				
+				info.iNetwork[1].iName.Copy(KTestWlan);
+				info.iNetwork[1].iSignalStrength = 10;
+				
+				aValue.Copy(infoPckg);
+				TRequestStatus* status = &aStatus; 
+				User::RequestComplete(status,KErrNone);
+				break;
+			}
+			default:
+				CTestAPNManagerConnectionMonitorWrapper::GetPckgAttribute(aConnectionId,aSubConnectionId,aAttribute,aValue,aStatus );
+		}
+	}	
+};
+class CCommDBWrapperwithWLAN : public CBase,public MCommDBWrapper
+{
+public:
+	MUnknown * QueryInterfaceL( TInt aInterfaceId )
+	{	
+		if( KIID_MCommDBWrapper == aInterfaceId )
+		{
+			AddRef();
+			return static_cast<MCommDBWrapper*>(this);
+		}
+		return NULL;
+	}
+	void AddRef(){ iRef++;}
+	void Release()
+	{
+		if(--iRef <= 0)
+		{
+			delete this;
+		}
+	}
+	
+	TInt BeginTransaction(){return 0;}
+	
+	TInt CommitTransaction(){return 0;}
+	
+	void RollbackTransaction()
+	{}
+	
+	class CTestSimpleCommsDbTableViewWrapper : public MCCommsDbTableViewWrapper
+	{
+		void Release()
+		{
+			delete this;
+		}
+		virtual TInt GotoFirstRecord(){return 0;}
+		virtual TInt GotoNextRecord() {return -1;}
+		virtual TInt InsertRecord(TUint32& aId) {return 0;}
+		virtual TInt UpdateRecord() {return 0;}
+		virtual void ReadTextL(const TDesC& aColumn, TDes16& aValue) 
+		{
+			aValue.Copy(KTestWlanWithIAP);
+		}
+		virtual void ReadUintL(const TDesC& aColumn, TUint32& aValue) 
+		{
+			aValue = 1;
+		}
+		virtual void WriteTextL(const TDesC& aColumn, const TDesC16& aValue) {}
+		virtual void WriteLongTextL(const TDesC& aColumn, const TDesC& aValue) {}
+		virtual void WriteUintL(const TDesC& aColumn, const TUint32& aValue) {}
+		virtual void WriteBoolL(const TDesC& aColumn, const TBool& aValue) {}
+		virtual TInt PutRecordChanges(TBool aHidden = EFalse, TBool aReadOnly = EFalse) {return 0;}
+		virtual TInt DeleteRecord() {return 0;}
+	};
+	MCCommsDbTableViewWrapper* OpenTableL(const TDesC& aTableName)
+	{
+		iWrapper = new (ELeave)CTestSimpleCommsDbTableViewWrapper;
+	}
+	CTestSimpleCommsDbTableViewWrapper* iWrapper;
+	TInt iRef;
+};
+
+
+MUnknown * CTestAPNManager::APNManagerNoNetworkWithWLAN(TUid aImplementationUid, TUid aInterfaceUid, TAny* aConstructionParameters)
+{
+	MUnknown * ret = NULL;
+	switch(aImplementationUid.iUid)
+	{
+		case KCID_MConnectionMonitorWrapper:
+			ret = new (ELeave) CTestAPNManagerConnectionMonitorWrapperWithWLAN;
+			break;
+		case KCID_MCommDBWrapper:
+			ret = new (ELeave) CCommDBWrapperwithWLAN;
+			break;
+		default:
+			ret = APNManagerNoNetworkNoWLAN(aImplementationUid,aInterfaceUid,aConstructionParameters);
+	}
+	return ret;
+	
+}
+
+void CTestAPNManager::testNoNetworkWithWLAN()
+{
+MProperties* properties = DiL(MProperties);
+	CleanupReleasePushL(*properties);
+	
+	REComPlusSession::SetDelegate(APNManagerNoNetworkWithWLAN);
+		
+	CAPNManager* manager = CAPNManager::NewL(properties);
+	CleanupStack::PushL(manager);
+	
+	manager->SetBeingTested();
+
+	CActiveScheduler::Start();
+	
+	MIAPSession* session = manager->StartIAPSession();
+	TInt iap = session->GetNextIAP(0);
+	RDebug::Print(_L("IAP %d"),iap);
+	TS_ASSERT(iap != -1);	
+	CleanupReleasePushL(*session);
+	
+	CleanupStack::PopAndDestroy(session);
+	CleanupStack::PopAndDestroy(manager);
+	CleanupStack::PopAndDestroy(properties);
+	
 }
