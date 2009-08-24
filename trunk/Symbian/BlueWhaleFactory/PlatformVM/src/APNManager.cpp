@@ -209,7 +209,11 @@ void CAPNManager::BuildCurrentValidIAPsL()
 #endif
 	// if all else fails, ask the user
 	// iap of zero prompts the user
-	iCurrentIAPList.AppendL(TIAPWithPort(0,0,KUserPickPriority));
+	// only do this if there are no stored APNs
+	if(current.Count() == 0)
+	{
+		iCurrentIAPList.AppendL(TIAPWithPort(0,0,KUserPickPriority));
+	}
 	DEBUGMSG(_L("BuildCurrentValidIAPsL<-"));
 		
 }
