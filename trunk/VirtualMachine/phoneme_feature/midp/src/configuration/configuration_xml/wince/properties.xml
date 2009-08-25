@@ -82,7 +82,7 @@
                                 Scope="internal"/>
 
 	<property Key="microedition.platform" 
-		Value="bluewhale_unknown_v00.00.00 Profile/MIDP-2.1 Configuration/CLDC-1.1 Windows CE bluewhale_platform"
+		Value="bluewhale_unknown_v00.00.00 Profile/MIDP-2.1 Configuration/CLDC-1.1 Windows CE bluewhale_platform_unknown_v00.00.00"
 		Scope="system"
 		Comment="Platform name."/>
 
