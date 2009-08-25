@@ -1490,14 +1490,14 @@ void CMIDPFontManager::DrawCharsCallback(TAny* aThis)
 		Mem::Copy(bitmapData, ((TUint8*)This->iDest->pixelData) + topScanLineOffset, bottomScanLineOffset - topScanLineOffset);
 		This->iBitmap->UnlockHeap();
 
-		clipRect.Move(0, -textRect.iTl.iY);
+		clipRect.Move(0, -Max(0, textRect.iTl.iY));
 		TBool useClippingRect = (intersectRect != textRect);
 		if (useClippingRect)
 		{
 			This->iGc->SetClippingRect(clipRect);
 		}
 		This->iGc->SetPenColor(TRgb(This->iPixel));
-		This->iGc->DrawText(text, TPoint(textRect.iTl.iX, gap + This->iAscent));
+		This->iGc->DrawText(text, TPoint(textRect.iTl.iX, Min(0, textRect.iTl.iY) + gap + This->iAscent));
 		if (useClippingRect)
 		{
 			This->iGc->CancelClippingRect();
