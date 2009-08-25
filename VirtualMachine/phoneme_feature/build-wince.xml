@@ -67,13 +67,11 @@
 		]]>	</script>
 	</target>
 
-	<target name="vm_wm5ppc_arm" description="Windows Mobile 5 PocketPC SDK - ARM">
+	<target name="vm_wm5ppc_arm" description="Windows Mobile 5 PocketPC SDK - ARM" depends="getbuildversion">
 
 		<echo>---------------------------------------------------</echo>
 		<echo>Windows Mobile 5 PocketPC - ARM - eVC++ 4.0</echo>
 		<echo>---------------------------------------------------</echo>
-
-		<antcall target="getbuildversion" />
 
 		<!-- Be nice and ensure external dependencies were built successfully early in the process -->
 		<property name="finalExpectedOutputFile" value="C:\wince_vm\wm5_ppc\midp\bin\arm\runMidlet.exe" />
@@ -103,7 +101,7 @@
 	</target>	
 	
 	
-	<target name="vm_wm2003ppc_arm" description="Windows Mobile 2003 PocketPC SDK - ARM">
+	<target name="vm_wm2003ppc_arm" description="Windows Mobile 2003 PocketPC SDK - ARM" depends="getbuildversion">
 
 		<echo>---------------------------------------------------</echo>
 		<echo>Windows Mobile 2003 PocketPC - ARM - eVC++ 4.0</echo>
