@@ -442,7 +442,8 @@ ReturnOop Java_java_lang_System_getProperty0(JVM_SINGLE_ARG_TRAPS) {
   */
 
   if (jvm_strcmp(name, "Host-Version") == 0) {
-    return Universe::new_string(JVM_BUILD_VERSION, jvm_strlen(JVM_BUILD_VERSION) JVM_CHECK_0);
+    const char *value = "bluewhale_unknown_v00.00.00 Profile/MIDP-2.1 Configuration/CLDC-1.1 Windows CE bluewhale_platform_unknown_v00.00.00";
+    return Universe::new_string(value, jvm_strlen(value) JVM_CHECK_0);
   }
 #endif
 #endif
