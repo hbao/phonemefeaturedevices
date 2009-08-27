@@ -506,9 +506,9 @@ _LIT8(KTestRMS,"javax.microedition.lcdui.TestGraphics");
 
 _LIT8(KUserAgentKey,"user-agent");
 #if __S60_VERSION__ >= __S60_V2_FP1_VERSION_NUMBER__
-_LIT8(KUserAgentBase,"bluewhale_%S Profile/MIDP-2.1 Configuration/CLDC-1.1 SymbianOS/ %S 0x%08x-0x%08x bluewhale_platform");
+_LIT8(KUserAgentBase,"bluewhale_%S Profile/MIDP-2.1 Configuration/CLDC-1.1 SymbianOS/ %S 0x%08x-0x%08x bluewhale_platform_%S");
 #elif __UIQ_VERSION_NUMBER__ >= __UIQ_V3_FP0_VERSION_NUMBER__
-_LIT8(KUserAgentBase,"bluewhale_%S Profile/MIDP-2.1 Configuration/CLDC-1.1 Symbian OS; %S 0x%08x-0x%08x bluewhale_platform");
+_LIT8(KUserAgentBase,"bluewhale_%S Profile/MIDP-2.1 Configuration/CLDC-1.1 Symbian OS; %S 0x%08x-0x%08x bluewhale_platform_%S");
 #endif
 
 _LIT8(KPlatformKey,"microedition.platform");
@@ -678,7 +678,7 @@ TInt CJVMRunner::RunVML()
 	HAL::Get(HALData::EMachineUid, uid);
 	HAL::Get(HALData::EManufacturer, manufacturer);
 	TBuf8<32> manufacturerName(ManufacturerName(manufacturer));
-	userAgent.Format(KUserAgentBase, &BLUEWHALEPLATFORM_SOFTWARE_BUILD_VERSION(), &manufacturerName, manufacturer, uid);
+	userAgent.Format(KUserAgentBase, &BLUEWHALEPLATFORM_SOFTWARE_BUILD_VERSION(), &manufacturerName, manufacturer, uid, &BLUEWHALEPLATFORM_SOFTWARE_BUILD_VERSION());
 
 	properties->AddL(KUserAgentKey(),userAgent);
 	properties->AddL(KPlatformKey(),userAgent);
@@ -696,7 +696,7 @@ TInt CJVMRunner::RunVML()
 		properties->AddL(KAutoStartKey(),KAutoStartOffValue());
 	}
 	
-	properties->AddL(KHostVersion(),BLUEWHALEPLATFORM_SOFTWARE_BUILD_VERSION());
+	properties->AddL(KHostVersion(),userAgent);
 		
 	TBuf8<KMaxFileName + 1> installFileName;
 	installFileName.Copy(VMInstallFileName());
