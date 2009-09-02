@@ -102,7 +102,9 @@ public final class PushRegistryImpl {
             final MIDletSuite midletSuite,
             final String midlet)
             throws ClassNotFoundException {
-        checkMidletRegistered(midletSuite, midlet);
+        if (MIDletSuite.INTERNAL_SUITE_ID != midletSuite.getID()) {
+            checkMidletRegistered(midletSuite, midlet);
+        }
 
         /*
          * IMPL_NOTE: strings in MIDlet-<n> attributes (see the check
