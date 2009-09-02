@@ -19,6 +19,12 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA
  * 
+ * NOTICE: Portions Copyright (c) 2007-2009 Blue Whale Systems.
+ * This file has been modified by Blue Whale Systems on 02Sep2009.
+ * The changes are licensed under the terms of the GNU General Public
+ * License version 2. This notice was added to meet the conditions of
+ * Section 3.a of the GNU General Public License version 2.
+ *
  * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa
  * Clara, CA 95054 or visit www.sun.com if you need additional
  * information or have any questions.
@@ -102,7 +108,9 @@ public final class PushRegistryImpl {
             final MIDletSuite midletSuite,
             final String midlet)
             throws ClassNotFoundException {
-        checkMidletRegistered(midletSuite, midlet);
+        if (MIDletSuite.INTERNAL_SUITE_ID != midletSuite.getID()) {
+            checkMidletRegistered(midletSuite, midlet);
+        }
 
         /*
          * IMPL_NOTE: strings in MIDlet-<n> attributes (see the check
