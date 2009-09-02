@@ -685,6 +685,28 @@ TInt CJVMRunner::RunVML()
 	properties->AddL(KprotocolpathKey(),KprotocolpathValue);
 
 			
+	// ensure KBlueWhaleStarterExe is running (so that the autostart property is set correctly)
+	TFileName matchName(KBlueWhaleStarterExe);
+	matchName.Append(_L("*"));
+	TFindProcess processFinder(matchName);
+	TFileName result;
+	if (processFinder.Next(result) != KErrNone)
+	{
+		TUidType uidType(KNullUid, KNullUid, KUidStarterExe);
+		RProcess proc;
+		if (proc.Create(KBlueWhaleStarterExe, KNullDesC, uidType) == KErrNone)
+		{
+			TRequestStatus status;
+			proc.Rendezvous(status);
+			if (status == KRequestPending)
+			{
+				proc.Resume();
+				User::WaitForRequest(status);
+			}
+			proc.Close();
+		}
+	}
+
 	TInt val = 0;
 	TInt ignore = RProperty::Get(KUidStarterExe, KUidAutoStart.iUid, val);
 	if(val != 0)
