@@ -69,6 +69,7 @@ extern "C" {
 static const TUid KUidBlueWhalePlatformApp = {0x2000E27A};
 
 const TUid KUidStarterExe = {0x2000E27B};
+_LIT(KBlueWhaleStarterExe, "bluewhalestarter.exe");
 _LIT(KAutostartConnection,"autostart://:");
 const TUid KUidAutoStart = {0xA0003F50};
 const TUid KUidWatcherMonkey = {0xA0003F52};
