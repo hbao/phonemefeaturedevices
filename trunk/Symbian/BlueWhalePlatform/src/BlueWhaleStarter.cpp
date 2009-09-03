@@ -294,6 +294,7 @@ void CAutoStartWatcher::ConstructL()
 	CActiveScheduler::Add(this);
 	iProperty.Subscribe(iStatus);
 	SetActive();
+	RProcess().Rendezvous(KErrCompletion);
 }
 
 
