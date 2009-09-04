@@ -98,6 +98,7 @@ class CJVMRunner : public CActive, public MRunnable
 		TBuf8<32> ManufacturerName(TInt aManufacturer);
 
 	protected:
+		void EnsureAutoStartController();
 		TInt RunVML();
 		MApplication* iApplication;
 		MThread* iThread;
