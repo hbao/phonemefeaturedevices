@@ -664,6 +664,61 @@ TBuf8<32> CJVMRunner::ManufacturerName(TInt aManufacturer)
 	return result;
 }
 
+void CJVMRunner::EnsureAutoStartController()
+{
+	TFileName matchName(_L("BlueWhaleStarter"));
+	matchName.Append(_L("*"));
+
+#if (__S60_VERSION__ >= __S60_V3_FP0_VERSION_NUMBER__) || (__UIQ_VERSION_NUMBER__ >= __UIQ_V3_FP0_VERSION_NUMBER__) || (!defined __WINSCW__)
+	TFindProcess finder(matchName);
+#else
+	TFindThread finder(matchName);
+#endif
+
+	TFileName result;
+	if (finder.Next(result) != KErrNone)
+	{
+		TUidType uidType(KNullUid, KNullUid, KUidStarterExe);
+
+#if (__S60_VERSION__ >= __S60_V3_FP0_VERSION_NUMBER__) || (__UIQ_VERSION_NUMBER__ >= __UIQ_V3_FP0_VERSION_NUMBER__)
+		RProcess proc;
+		TInt err = proc.Create(KBlueWhaleStarterExe, KNullDesC, uidType);
+#elif defined __WINSCW__
+		RThread proc;
+		RLibrary lib;
+		TInt err = lib.Load(_L("bluewhalestarter.app"), _L("z:\\system\\apps\\BlueWhaleStarter\\"), uidType);
+		if (err == KErrNone)
+		{
+			TThreadFunction threadFunction = (TThreadFunction)lib.Lookup(1);
+			err = proc.Create(_L("BlueWhaleStarter"), threadFunction, KDefaultStackSize, NULL, &lib, NULL, 0x400, 0x100000, EOwnerProcess);
+			lib.Close();
+		}
+#else
+		RProcess proc;
+		TFileName drive;
+		Dll::FileName(drive); // Get the drive letter
+		TParsePtrC parse(drive);
+
+		TFileName starterFileName(parse.Drive());
+		starterFileName.Append(_L("\\system\\apps\\BlueWhalePlatform\\"));
+		starterFileName.Append(KBlueWhaleStarterExe);
+		TInt err = proc.Create(starterFileName, KNullDesC, uidType);
+#endif
+
+		if (err == KErrNone)
+		{
+			TRequestStatus status;
+			proc.Rendezvous(status);
+			if (status == KRequestPending)
+			{
+				proc.Resume();
+				User::WaitForRequest(status);
+			}
+			proc.Close();
+		}
+	}
+}
+
 TInt CJVMRunner::RunVML()
 {
 	DEBUGMESSAGE(_L("Starting VM"));
@@ -685,27 +740,7 @@ TInt CJVMRunner::RunVML()
 	properties->AddL(KprotocolpathKey(),KprotocolpathValue);
 
 			
-	// ensure KBlueWhaleStarterExe is running (so that the autostart property is set correctly)
-	TFileName matchName(KBlueWhaleStarterExe);
-	matchName.Append(_L("*"));
-	TFindProcess processFinder(matchName);
-	TFileName result;
-	if (processFinder.Next(result) != KErrNone)
-	{
-		TUidType uidType(KNullUid, KNullUid, KUidStarterExe);
-		RProcess proc;
-		if (proc.Create(KBlueWhaleStarterExe, KNullDesC, uidType) == KErrNone)
-		{
-			TRequestStatus status;
-			proc.Rendezvous(status);
-			if (status == KRequestPending)
-			{
-				proc.Resume();
-				User::WaitForRequest(status);
-			}
-			proc.Close();
-		}
-	}
+	EnsureAutoStartController();
 
 	TInt val = 0;
 	TInt ignore = RProperty::Get(KUidStarterExe, KUidAutoStart.iUid, val);
