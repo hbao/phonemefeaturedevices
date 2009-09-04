@@ -294,7 +294,11 @@ void CAutoStartWatcher::ConstructL()
 	CActiveScheduler::Add(this);
 	iProperty.Subscribe(iStatus);
 	SetActive();
+#if (__S60_VERSION__ >= __S60_V3_FP0_VERSION_NUMBER__) || (__UIQ_VERSION_NUMBER__ >= __UIQ_V3_FP0_VERSION_NUMBER__) || (!defined __WINSCW__)
 	RProcess().Rendezvous(KErrCompletion);
+#else
+	RThread().Rendezvous(KErrCompletion);
+#endif
 }
 
 
