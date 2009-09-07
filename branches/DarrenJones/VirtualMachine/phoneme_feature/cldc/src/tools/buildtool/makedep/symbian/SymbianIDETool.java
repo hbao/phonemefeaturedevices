@@ -91,7 +91,24 @@ abstract class SymbianIDETool extends IDETool
 		aInf.addExport("..\\..\\..\\..\\jsr75\\src\\cldc_application\\native\\share\\inc\\midpNativeMounts.h");
 		aInf.addExport("..\\..\\..\\..\\jsr75\\src\\cldc_application\\native\\share\\inc\\midpDirSize.h");
 		aInf.addExport("..\\..\\..\\..\\jsr75\\src\\cldc_application\\native\\share\\fcNotifyIsolates.h");		
-        
+		// jsr211
+		aInf.addExport("..\\..\\..\\..\\abstractions\\src\\cldc_application\\native\\include\\jsrop_exceptions_md.h");
+		aInf.addExport("..\\..\\..\\..\\abstractions\\src\\cldc_application\\native\\include\\jsrop_memory_md.h");
+		aInf.addExport("..\\..\\..\\..\\abstractions\\src\\cldc_application\\native\\include\\jsrop_suitestore_md.h");
+		aInf.addExport("..\\..\\..\\..\\abstractions\\src\\share\\include\\jsrop_memory.h");
+		aInf.addExport("..\\..\\..\\..\\abstractions\\src\\share\\include\\jsrop_kni.h");
+		aInf.addExport("..\\..\\..\\..\\abstractions\\src\\share\\include\\jsrop_suitestore.h");
+		aInf.addExport("..\\..\\..\\..\\javacall\\implementation\\share\\utils\\inc\\javautil_unicode.h");
+		aInf.addExport("..\\..\\..\\..\\javacall\\implementation\\symbian\\javacall_platform_defs.h");
+		aInf.addExport("..\\..\\..\\..\\javacall\\interface\\javacall_defs.h");
+		aInf.addExport("..\\..\\..\\..\\javacall\\interface\\common\\javacall_memory.h");
+		aInf.addExport("..\\..\\..\\..\\javacall\\interface\\jsr211_chapi\\javacall_chapi_invoke.h");
+		aInf.addExport("..\\..\\..\\..\\javacall\\interface\\jsr211_chapi\\javacall_chapi_registry.h");
+		aInf.addExport("..\\..\\..\\..\\jsr211\\src\\share\\core\\native\\symbian\\jsr211_registry.h");
+		aInf.addExport("..\\..\\..\\..\\jsr211\\src\\share\\core\\native\\include\\jsr211_result.h");
+		aInf.addExport("..\\..\\..\\..\\jsr211\\src\\cldc_application\\core\\native\\inc\\jsr211_invoc.h");
+		aInf.addExport("..\\..\\..\\..\\jsr211\\src\\cldc_application\\core\\native\\inc\\jsr211_invoc.h");
+		aInf.addExport("..\\..\\..\\..\\jsr211\\src\\cldc_application\\core\\native\\inc\\jsr211_platform_invoc.h");		        
 	}
 	
 	Properties queryUserSettings() throws Exception 
