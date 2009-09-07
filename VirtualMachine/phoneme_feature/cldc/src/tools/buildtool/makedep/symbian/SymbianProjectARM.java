@@ -532,6 +532,16 @@ class SymbianProjectARM extends SymbianIDEProjectARM
 	putln("USERINCLUDE ..\\..\\..\\..\\jsr75\\src\\cldc_application\\native\\share\\inc");
 	putln("USERINCLUDE ..\\..\\..\\..\\midp\\src\\core\\string\\include");
 	putln("USERINCLUDE ..\\..\\..\\..\\midp\\src\\push\\push_timer\\include");
+	putln("USERINCLUDE ..\\..\\..\\..\\javacall\\implementation\\share\\utils\\inc");
+	putln("USERINCLUDE ..\\..\\..\\..\\javacall\\implementation\\symbian");
+	putln("USERINCLUDE ..\\..\\..\\..\\javacall\\interface");
+	putln("USERINCLUDE ..\\..\\..\\..\\javacall\\interface\\common");
+	putln("USERINCLUDE ..\\..\\..\\..\\javacall\\interface\\jsr211_chapi");
+	putln("USERINCLUDE ..\\..\\..\\..\\abstractions\\src\\cldc_application\\native\\include");
+	putln("USERINCLUDE ..\\..\\..\\..\\abstractions\\src\\share\\include");
+	putln("USERINCLUDE ..\\..\\..\\..\\jsr211\\src\\share\\core\\native\\symbian");
+	putln("USERINCLUDE ..\\..\\..\\..\\jsr211\\src\\share\\core\\native\\include");
+	putln("USERINCLUDE ..\\..\\..\\..\\jsr211\\src\\cldc_application\\core\\native\\inc");
     putln("USERINCLUDE ..\\..\\..\\..\\restricted_crypto\\src\\restricted_crypto\\reference\\native");
 	putln("SYSTEMINCLUDE \\epoc32\\include \\epoc32\\include\\libc ..\\generated . \\epoc32\\include\\mmf\\plugin");
 	}
