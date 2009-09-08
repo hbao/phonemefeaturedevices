@@ -886,8 +886,7 @@ KNIDECL(javax_microedition_lcdui_Graphics_drawRGB) {
                 KNI_ThrowNew(midpArrayIndexOutOfBoundsException, NULL);
             } else {
 	  
-                if ((0 == scanlen || 
-                     0 == width   || 
+                if ((0 == width   || 
                      0 == height)) {
 	    
                     /* Valid values, but nothing to render. */
