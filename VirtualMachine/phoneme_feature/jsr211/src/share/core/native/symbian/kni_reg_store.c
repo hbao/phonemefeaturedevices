@@ -391,7 +391,7 @@ static int fillHandlerData(KNIDECLARGS jobject o, jsr211_content_handler* handle
         }
 
         // flag
-        handler->flag = KNI_GetIntField(o, chImplregMethod);
+        handler->flag = (jsr211_register_type)KNI_GetIntField(o, chImplregMethod);
 
         // types
         KNI_GetObjectField(o, chImplTypes, fldObj);

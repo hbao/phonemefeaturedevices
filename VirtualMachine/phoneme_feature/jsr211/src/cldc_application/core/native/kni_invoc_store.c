@@ -2131,7 +2131,7 @@ jsr211_process_platform_finish_notification (int invoc_id,
             NULL,
             0, NULL, /* args */
             0, NULL, /* data */
-            STATUS_ERROR
+            (javacall_chapi_invocation_status)STATUS_ERROR
             );
         return;
     }
