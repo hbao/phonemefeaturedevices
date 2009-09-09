@@ -89,8 +89,8 @@ static jchar* rowHandlers[] = {
  * After deserialization ptr is moved right after '\0'
  * @return 0 if failed.
  */
-static const jchar* getString(const jchar** ptr) {
-	const jchar* p; 
+static const jchar* getString(jchar** ptr) {
+	jchar* p; 
 	const jchar* pstart = p = *ptr;
     while (*(p++));
 	*ptr = p;
@@ -104,8 +104,8 @@ static const jchar* getString(const jchar** ptr) {
  * After deserialization ptr is moved right after double '\0'
  * @return allocated string list or 0 if list is empty
  */
-static int fillArray(const jchar **ptr, /*OUT*/int* len, const jchar*** arr) {
-	const jchar* p = *ptr;
+static int fillArray(jchar **ptr, /*OUT*/int* len, const jchar*** arr) {
+	jchar* p = *ptr;
 	const jchar** list;
 	//count array size
 	*len = 0;
@@ -126,7 +126,7 @@ static int fillArray(const jchar **ptr, /*OUT*/int* len, const jchar*** arr) {
 		*(list++) = getString(&p);
 	} 
 
-	*ptr = p+1;
+	*ptr = (jchar*)p+1;
 
 	return 1;
 }
@@ -164,7 +164,7 @@ static jsr211_result installHandler(int n) {
  */
 	ch.id = handlerIds[n];
 	ch.suite_id = intrenalSuiteID;
-	ch.class_name = getString(&ptr);
+	ch.class_name = (jchar*)getString(&ptr);
 	ch.flag = JSR211_REGISTER_TYPE_STATIC_FLAG; // non-native, statically registered
 
 	// allocate parameters

@@ -220,11 +220,12 @@ abstract class SymbianIDEProject extends IDEProject
 				lst.addElement("..\\..\\..\\..\\abstractions\\src\\cldc_application\\native\\share\\kni_utils.c");
 				lst.addElement("..\\..\\..\\..\\abstractions\\src\\cldc_application\\native\\symbian\\jsrop_suitestore.c");
 				lst.addElement("..\\..\\..\\..\\javacall\\implementation\\share\\utils\\javautil_unicode.c");
+				lst.addElement("..\\..\\..\\..\\javacall\\implementation\\share\\utils\\javautil_string.c");
 				lst.addElement("..\\..\\..\\..\\javacall\\implementation\\stubs\\jsr211_chapi\\chapi.c");
 				lst.addElement("..\\..\\..\\..\\jsr211\\src\\cldc_application\\core\\native\\symbian\\kni_invoc_store.c");
 				lst.addElement("..\\..\\..\\..\\jsr211\\src\\share\\core\\native\\symbian\\kni_reg_store.c");
 				lst.addElement("..\\..\\..\\..\\jsr211\\src\\share\\core\\native\\symbian\\jsr211_result.c");
-				lst.addElement("..\\..\\..\\..\\jsr211\\src\\share\\core\\native\\jsr211_registry_impl.c");
+				lst.addElement("..\\..\\..\\..\\jsr211\\src\\share\\core\\native\\symbian\\jsr211_registry_impl.c");
 				lst.addElement("..\\..\\..\\..\\jsr211\\src\\share\\core\\native\\symbian\\jsr211_deploy.c");
             break;
         case LOOPGEN:
