@@ -236,15 +236,15 @@ jsr211_boolean jsr211_isUniqueString(const jchar *str, size_t sz, int casesens, 
         jsr211_get_data( bd, &data, &length );
 		if ( length == sz * sizeof(jchar) ) {
 			if (casesens == JAVACALL_TRUE) {
-				if( wcsncmp(str, (const jchar *)data, sz) == 0 )
-                    return JAVACALL_FALSE;
+				if( memcmp(str, (const jchar *)data, length) == 0 )
+                    return (jsr211_boolean)JAVACALL_FALSE;
 			} else {
 				if( javautil_wcsnicmp(str, (const jchar *)data, sz) == 0 )
-                    return JAVACALL_FALSE;
+                    return (jsr211_boolean)JAVACALL_FALSE;
 			}
 		}
     }
-    return JAVACALL_TRUE;
+    return (jsr211_boolean)JAVACALL_TRUE;
 }
 
 /**
@@ -263,11 +263,11 @@ jsr211_boolean jsr211_isUniqueHandler(const jchar *id, size_t id_sz, JSR211_RESU
         const void * data; size_t length;
         jsr211_get_data( id_handle, &data, &length );
 		if ( length == id_sz * sizeof(jchar) ) {
-			if( wcsncmp(id, (const jchar *)data, id_sz) == 0 )
-                return JAVACALL_FALSE;
+			if( memcmp(id, (const jchar *)data, length) == 0 )
+                return (jsr211_boolean)JAVACALL_FALSE;
 		}
     }
-    return JAVACALL_TRUE;
+    return (jsr211_boolean)JAVACALL_TRUE;
 }
 
 /**

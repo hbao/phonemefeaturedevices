@@ -93,12 +93,13 @@ abstract class SymbianIDETool extends IDETool
 		aInf.addExport("..\\..\\..\\..\\jsr75\\src\\cldc_application\\native\\share\\fcNotifyIsolates.h");		
 		// jsr211
 		aInf.addExport("..\\..\\..\\..\\abstractions\\src\\cldc_application\\native\\include\\jsrop_exceptions_md.h");
-		aInf.addExport("..\\..\\..\\..\\abstractions\\src\\cldc_application\\native\\include\\jsrop_memory_md.h");
+		aInf.addExport("..\\..\\..\\..\\abstractions\\src\\cldc_application\\native\\symbian\\jsrop_memory_md.h");
 		aInf.addExport("..\\..\\..\\..\\abstractions\\src\\cldc_application\\native\\include\\jsrop_suitestore_md.h");
 		aInf.addExport("..\\..\\..\\..\\abstractions\\src\\share\\include\\jsrop_memory.h");
 		aInf.addExport("..\\..\\..\\..\\abstractions\\src\\share\\include\\jsrop_kni.h");
 		aInf.addExport("..\\..\\..\\..\\abstractions\\src\\share\\include\\jsrop_suitestore.h");
 		aInf.addExport("..\\..\\..\\..\\javacall\\implementation\\share\\utils\\inc\\javautil_unicode.h");
+		aInf.addExport("..\\..\\..\\..\\javacall\\implementation\\symbian\\javautil_string.h");
 		aInf.addExport("..\\..\\..\\..\\javacall\\implementation\\symbian\\javacall_platform_defs.h");
 		aInf.addExport("..\\..\\..\\..\\javacall\\interface\\javacall_defs.h");
 		aInf.addExport("..\\..\\..\\..\\javacall\\interface\\common\\javacall_memory.h");
