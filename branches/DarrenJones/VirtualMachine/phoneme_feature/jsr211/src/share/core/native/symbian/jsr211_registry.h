@@ -132,7 +132,7 @@ typedef enum {
 typedef struct jsr211_content_handler_ {
 	const jchar*			id;         /**< Content handler ID */
 	jchar*					suite_id;   /**< Storage where the handler is */
-	const jchar*			class_name; /**< Content handler class name */
+	jchar*					class_name; /**< Content handler class name */
 	jsr211_register_type	flag;		/**< Flag for registered content handlers. */
 	int						type_num;   /**< Number of types */
 	const jchar**			types;      /**< The types that are supported by this content handler */
@@ -153,7 +153,7 @@ typedef struct jsr211_content_handler_ {
     NULL,							/* id         */  \
     NULL,							/* suite_id   */  \
     NULL,							/* class_name */  \
-    0,                              /* flag       */  \
+    (jsr211_register_type)0,        /* flag       */  \
     0,                              /* type_num   */  \
     NULL,                           /* types      */  \
     0,                              /* suff_num   */  \

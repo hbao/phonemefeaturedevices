@@ -78,10 +78,10 @@ static jfieldID anMapActionnames;   // [] actionnames
 DECLARE_MSG(fcFindHandler,   "Could not find ContentHandler for field value")
 DECLARE_MSG(fcFindInvocation,   "Invocation not found")
 DECLARE_MSG(fcFindForSuite,   "Could not find ContentHandler for suite ID")
-DECLARE_MSG(fcFindGetValues, "Could not read ContentHandler values");
-DECLARE_MSG(fcGetHandlerField, "Could not read ContentHandler fields");
-DECLARE_MSG(fcGetHandler, "Could not find ContentHandler");
-DECLARE_MSG(fcHandlerByURL, "Could not find ContentHandler for URL");
+DECLARE_MSG(fcFindGetValues, "Could not read ContentHandler values")
+DECLARE_MSG(fcGetHandlerField, "Could not read ContentHandler fields")
+DECLARE_MSG(fcGetHandler, "Could not find ContentHandler")
+DECLARE_MSG(fcHandlerByURL, "Could not find ContentHandler for URL")
 DECLARE_MSG(fcUnexpectedFinilize,   "Unexpected RegistryStore finalization")
 DECLARE_MSG(fcNoClassFields,   "Could not initialize JSR211 class fields")
 DECLARE_MSG(fcRegister,   "Could not register ContentHandler")
@@ -716,7 +716,7 @@ KNIDECL(com_sun_j2me_content_RegistryStore_getHandler0) {
         }
         mode = KNI_GetParameterAsInt(3);
 
-        jsr211_get_handler(callerId, id, mode, &handler);
+        jsr211_get_handler(callerId, id, (jsr211_search_flag)mode, &handler);
     } while (0);
 
     JAVAME_FREE(callerId);
@@ -743,7 +743,7 @@ KNIDECL(com_sun_j2me_content_RegistryStore_loadFieldValues0) {
     KNI_GetParameterAsObject(1, strObj); /* handlerId */
     if (JAVACALL_OK == jsrop_jstring_to_utf16_string(strObj, &id)) {
         fieldId = KNI_GetParameterAsInt(2);
-        jsr211_get_handler_field(id, fieldId, &result);
+        jsr211_get_handler_field(id, (jsr211_field)fieldId, &result);
         JAVAME_FREE(id);
         result2string(KNIPASSARGS  result, strObj);
     } else {
