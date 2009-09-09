@@ -36,6 +36,7 @@
 #include "javacall_chapi_registry.h"
 #include "javacall_chapi_invoke.h"
 #include "jsr211_registry.h"
+#include "javautil_string.h"
 
 #define MAX_BUFFER 128
 
@@ -67,7 +68,7 @@
 
 static int put_handler(const jchar* id, JSR211_RESULT_BUFFER * result, int append) {
 
-	int id_sz = wcslen( id );
+	int id_sz = wcslen( (const wchar_t*)id );
 
 	jchar* classname = NULL;
 	int classname_len = MAX_BUFFER;
@@ -78,10 +79,10 @@ static int put_handler(const jchar* id, JSR211_RESULT_BUFFER * result, int appen
 	int res;
 
 	while (1) {
-		classname = JAVAME_MALLOC(classname_len * sizeof(*classname));
+		classname = (jchar*)JAVAME_MALLOC(classname_len * sizeof(*classname));
 		if (!classname) break;
 
-		suite_id = JAVAME_MALLOC(suite_id_len  * sizeof(*suite_id));
+		suite_id = (jchar*)JAVAME_MALLOC(suite_id_len  * sizeof(*suite_id));
 		if (!suite_id) break;
 
 		res = javacall_chapi_get_handler_info(id, suite_id, &suite_id_len,
@@ -130,7 +131,7 @@ jsr211_result jsr211_initialize(void){
  */
 jsr211_result jsr211_finalize(void){
 	javacall_chapi_finalize_registry();
-	return 0;
+	return (jsr211_result)0;
 }
 
 /**
@@ -151,7 +152,7 @@ jsr211_result jsr211_register_handler(const jsr211_content_handler* ch) {
     javacall_utf16_string *accesses = NULL;
     int n = ch->act_num * ch->locale_num; // action_map length
 
-	status = javacall_chapi_register_handler(
+	status = (jsr211_result)javacall_chapi_register_handler(
 						(javacall_const_utf16_string)ch->id,
 						(javacall_const_utf16_string)L"Java Appliation",
 						(javacall_const_utf16_string)ch->suite_id, 
@@ -265,7 +266,7 @@ jsr211_result jsr211_find_for_suite( javacall_const_utf16_string suite_id,
 	int len, maxlen = MAX_BUFFER;
 	int res;
 
-	int suite_id_len = wcslen(suite_id);
+	int suite_id_len = wcslen((const wchar_t*)suite_id);
 
 	buffer = (jchar*) JAVAME_MALLOC(maxlen*sizeof(*buffer));
 
@@ -320,7 +321,7 @@ javacall_const_utf16_string suffix;
 buffer = (jchar*) JAVAME_MALLOC(maxlen*sizeof(*buffer));
 if (!buffer) return JSR211_FAILED;
 
-suffix=(javacall_const_utf16_string)javautil_wcsrchr(url,'.');
+suffix=(javacall_const_utf16_string)javautil_wcsrchr((wchar_t*)url,'.');
 
 // enum by suffix
 while (buffer && suffix && !found){
@@ -386,7 +387,7 @@ jsr211_result jsr211_get_all(
     }
 
     if (field != JSR211_FIELD_ID){
-	    value = JAVAME_MALLOC(valuemaxlen*sizeof(*value));
+	    value = (jchar*)JAVAME_MALLOC(valuemaxlen*sizeof(*value));
 	    if (!value) {
 		    if(handler) JAVAME_FREE(handler);
 		    return JSR211_FAILED;
@@ -598,7 +599,7 @@ jsr211_result jsr211_get_handler_field(javacall_const_utf16_string id,
 	int res;
 
 	if (field_id == JSR211_FIELD_ACTION_MAP) {
-		return get_action_map(id,result);
+		return (jsr211_result)get_action_map(id,result);
 	}
 
 	buffer = (jchar*) JAVAME_MALLOC(maxlen * sizeof(*buffer));
