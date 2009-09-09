@@ -320,7 +320,7 @@ javacall_const_utf16_string suffix;
 buffer = (jchar*) JAVAME_MALLOC(maxlen*sizeof(*buffer));
 if (!buffer) return JSR211_FAILED;
 
-suffix=(javacall_const_utf16_string)wcsrchr(url,'.');
+suffix=(javacall_const_utf16_string)javautil_wcsrchr(url,'.');
 
 // enum by suffix
 while (buffer && suffix && !found){
