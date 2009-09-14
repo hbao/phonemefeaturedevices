@@ -107,7 +107,7 @@ abstract class SymbianMIDPBase extends NMakefile
         {
             putln((String)jav.elementAt(i) + " : " + (String)jpp.elementAt(i));
             puttabln("@echo Preproccesing " + (String)jpp.elementAt(i));
-			puttabln("$(JAVA6) -classpath ..\\buildtool Jpp " + (String)jpp.elementAt(i) + " -DENABLE_PUBLICKEYSTORE -DENABLE_CHAMELEON -DENABLE_JSR_75 -d " + (String)dir.elementAt(i));
+			puttabln("$(JAVA6) -classpath ..\\buildtool Jpp " + (String)jpp.elementAt(i) + " -DENABLE_PUBLICKEYSTORE -DENABLE_CHAMELEON -DENABLE_JSR_75 -DENABLE_JSR_211 -d " + (String)dir.elementAt(i));
 			putln();
 		}
         putln();
@@ -601,7 +601,34 @@ abstract class SymbianMIDPBase extends NMakefile
         v.addElement("$(JSR120_DIR)\\share\\core\\common\\classes\\javax\\wireless\\messaging\\Message.java");
         v.addElement("$(JSR120_DIR)\\share\\core\\common\\classes\\javax\\wireless\\messaging\\TextMessage.java");
         v.addElement("$(JSR120_DIR)\\share\\core\\common\\classes\\javax\\wireless\\messaging\\MessageListener.java");
-        
+
+        // jsr 211 support
+		v.addElement("$(ABSTRACTIONS_DIR)\\cldc_application\\classes\\com\\sun\\j2me\\security\\TrustedClass.java");
+
+        v.addElement("$(JSR211_DIR)\\cldc_application\\classes\\com\\sun\\jsr211\\security\\SecurityInitializer.java");
+        v.addElement("$(JSR211_DIR)\\cldc_application\\classes\\com\\sun\\j2me\\content\\AppProxy.java"); 
+        v.addElement("$(JSR211_DIR)\\cldc_application\\classes\\com\\sun\\j2me\\content\\InvocationStore.java");
+        v.addElement("$(JSR211_DIR)\\cldc_application\\classes\\com\\sun\\j2me\\content\\Invoker.java");
+
+        v.addElement("$(JSR211_DIR)\\share\\classes\\com\\sun\\j2me\\content\\ContentHandlerImpl.java");
+        v.addElement("$(JSR211_DIR)\\share\\classes\\com\\sun\\j2me\\content\\ContentReader.java");   
+        v.addElement("$(JSR211_DIR)\\share\\classes\\com\\sun\\j2me\\content\\InvocationImpl.java");
+        v.addElement("$(JSR211_DIR)\\share\\classes\\com\\sun\\j2me\\content\\InvocationStoreProxy.java");
+        v.addElement("$(JSR211_DIR)\\share\\classes\\com\\sun\\j2me\\content\\RegistryImpl.java");
+        v.addElement("$(JSR211_DIR)\\share\\classes\\com\\sun\\j2me\\content\\RegistryStore.java");
+        v.addElement("$(JSR211_DIR)\\share\\classes\\com\\sun\\j2me\\content\\RequestListenerImpl.java");
+        v.addElement("$(JSR211_DIR)\\share\\classes\\com\\sun\\j2me\\content\\ResponseListenerImpl.java");
+
+        v.addElement("$(JSR211_DIR)\\share\\classes\\javax\\microedition\\content\\ActionNameMap.java");
+        v.addElement("$(JSR211_DIR)\\share\\classes\\javax\\microedition\\content\\ContentHandler.java");
+        v.addElement("$(JSR211_DIR)\\share\\classes\\javax\\microedition\\content\\ContentHandlerException.java");
+        v.addElement("$(JSR211_DIR)\\share\\classes\\javax\\microedition\\content\\ContentHandlerServer.java");
+        v.addElement("$(JSR211_DIR)\\share\\classes\\javax\\microedition\\content\\ContentHandlerServerImpl.java");
+        v.addElement("$(JSR211_DIR)\\share\\classes\\javax\\microedition\\content\\Invocation.java");
+        v.addElement("$(JSR211_DIR)\\share\\classes\\javax\\microedition\\content\\Registry.java");
+        v.addElement("$(JSR211_DIR)\\share\\classes\\javax\\microedition\\content\\RequestListener.java");
+        v.addElement("$(JSR211_DIR)\\share\\classes\\javax\\microedition\\content\\ResponseListener.java");        
+
         
 		put("MIDP_SOURCES =");
         for (int i=0; i<v.size(); i++) 
@@ -634,6 +661,7 @@ void writeRules() throws Exception
         putln("ROMGEN = ..\\romgen\\romgen.exe");
         putln("JSR75_DIR=$(ROOT_DIR)\\jsr75\\src");
         putln("JSR120_DIR=$(ROOT_DIR)\\jsr120\\src");
+        putln("JSR211_DIR=$(ROOT_DIR)\\jsr211\\src");
 		putln("RESTRICTED_CRYPTO_DIR=$(ROOT_DIR)\\restricted_crypto\\src");
 		putln("ABSTRACTIONS_DIR=$(ROOT_DIR)\\abstractions\\src");
         putln("MIDP_SRC_DIR="  + tool().getWorkSpaceArg() + "\\..\\midp\\src");

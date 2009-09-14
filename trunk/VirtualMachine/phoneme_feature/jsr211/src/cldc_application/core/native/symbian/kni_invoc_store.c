@@ -39,7 +39,6 @@
  * <br>
  */
 
-#include <memory.h>
 #include <kni.h>
 #include <sni.h>
 
@@ -1618,7 +1617,7 @@ void jsr211_remove_invocation(StoredInvoc* invoc) {
 }
 
 jsr211_boolean jsr211_enqueue_invocation(StoredInvoc *invoc) {
-    return invocPut(invoc);
+    return (jsr211_boolean)invocPut(invoc);
 }
 
 
@@ -2027,7 +2026,7 @@ static void handle_javanotify_chapi_java_invoke(
 jsr211_boolean jsr211_platform_finish(int tid, jsr211_boolean *should_exit)
 {
     javacall_const_utf16_string url;
-    javacall_utf16_string *args;
+    javacall_const_utf16_string *args;
     int i;
     javacall_chapi_invocation_status status;
     javacall_bool _should_exit;
@@ -2056,7 +2055,7 @@ jsr211_boolean jsr211_platform_finish(int tid, jsr211_boolean *should_exit)
                 case STATUS_OK:
                 case STATUS_CANCELLED:
                 case STATUS_ERROR:
-                    status = invoc->status;
+                    status = (javacall_chapi_invocation_status)invoc->status;
                     break;
                 default:
                     success = JSR211_FALSE;
