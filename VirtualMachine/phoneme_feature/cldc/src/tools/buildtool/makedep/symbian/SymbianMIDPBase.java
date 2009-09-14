@@ -107,7 +107,7 @@ abstract class SymbianMIDPBase extends NMakefile
         {
             putln((String)jav.elementAt(i) + " : " + (String)jpp.elementAt(i));
             puttabln("@echo Preproccesing " + (String)jpp.elementAt(i));
-			puttabln("$(JAVA6) -classpath ..\\buildtool Jpp " + (String)jpp.elementAt(i) + " -DENABLE_PUBLICKEYSTORE -DENABLE_CHAMELEON -DENABLE_JSR_75 -d " + (String)dir.elementAt(i));
+			puttabln("$(JAVA6) -classpath ..\\buildtool Jpp " + (String)jpp.elementAt(i) + " -DENABLE_PUBLICKEYSTORE -DENABLE_CHAMELEON -DENABLE_JSR_75 -DENABLE_JSR_211 -d " + (String)dir.elementAt(i));
 			putln();
 		}
         putln();
