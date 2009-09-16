@@ -42,7 +42,7 @@ class SymbianRom extends NMakefile
         putln("ROMImage.cpp: $(ROMGEN) $(CLASSES_ZIP)");
         puttabln("$(ROMGEN) -cp $(CLASSES_ZIP) \\");
         puttabln("=HeapCapacity16M \\");
-        puttabln("-romconfig \"" + tool().getWorkSpaceArg() + "\\src\\vm\\cldcx_rom.cfg\" \\");
+        puttabln("-romconfig \"" + tool().getWorkSpaceArg() + "\\src\\vm\\symbian_rom.cfg\" \\");
         puttabln("-romincludepath \"" + tool().getWorkSpaceArg() + "\\src\\vm\" \\");
         puttabln("+EnableAllROMOptimizations \\");
         //puttabln("+GenerateGNUCode \\");
