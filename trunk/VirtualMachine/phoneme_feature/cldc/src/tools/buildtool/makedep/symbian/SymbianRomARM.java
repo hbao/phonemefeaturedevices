@@ -18,6 +18,8 @@ class SymbianRomARM extends SymbianRom
         puttabln("=HeapCapacity16M \\");
         puttabln("-romconfig \"" + tool().getWorkSpaceArg() + "\\src\\vm\\symbian_rom.cfg\" \\");
         puttabln("-romincludepath \"" + tool().getWorkSpaceArg() + "\\src\\vm\" \\");
+        puttabln("-romincludepath \"" + tool().getWorkSpaceArg() + "\\..\\jsr75\\src\\cldc_application\\config\\share\" \\");
+        puttabln("-romincludepath \"" + tool().getWorkSpaceArg() + "\\..\\jsr211\\src\\share\\config\" \\");
         puttabln("+EnableAllROMOptimizations \\");
         puttabln("-romize \\");
         puttabln("+GenerateROMStructs");
