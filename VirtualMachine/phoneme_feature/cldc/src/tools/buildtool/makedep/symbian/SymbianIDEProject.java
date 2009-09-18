@@ -220,8 +220,9 @@ abstract class SymbianIDEProject extends IDEProject
 				lst.addElement("..\\..\\..\\..\\abstractions\\src\\cldc_application\\native\\share\\kni_utils.c");
 				lst.addElement("..\\..\\..\\..\\abstractions\\src\\cldc_application\\native\\symbian\\jsrop_suitestore.c");
 				lst.addElement("..\\..\\..\\..\\javacall\\implementation\\share\\utils\\javautil_unicode.c");
-				lst.addElement("..\\..\\..\\..\\javacall\\implementation\\symbian\\javautil_string.cpp");
-				lst.addElement("..\\..\\..\\..\\javacall\\implementation\\stubs\\jsr211_chapi\\chapi.c");
+				lst.addElement("..\\..\\..\\..\\javacall\\implementation\\symbian\\jsr211_chapi\\javautil_string.cpp");
+				lst.addElement("..\\..\\..\\..\\javacall\\implementation\\symbian\\jsr211_chapi\\javautil_storage.c");
+				lst.addElement("..\\..\\..\\..\\javacall\\implementation\\symbian\\jsr211_chapi\\chapi.c");
 				lst.addElement("..\\..\\..\\..\\javacall\\implementation\\win32_emul\\common\\memory.c");
 				lst.addElement("..\\..\\..\\..\\jsr211\\src\\cldc_application\\core\\native\\symbian\\kni_invoc_store.c");
 				lst.addElement("..\\..\\..\\..\\jsr211\\src\\share\\core\\native\\symbian\\kni_reg_store.c");

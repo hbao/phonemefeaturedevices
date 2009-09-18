@@ -456,6 +456,7 @@ out.close();
 	putln("USERINCLUDE ..\\..\\..\\..\\midp\\src\\core\\string\\include");
 	putln("USERINCLUDE ..\\..\\..\\..\\midp\\src\\push\\push_timer\\include");
 	putln("USERINCLUDE ..\\..\\..\\..\\javacall\\implementation\\symbian");
+	putln("USERINCLUDE ..\\..\\..\\..\\javacall\\implementation\\symbian\\jsr211_chapi\\inc");
 	putln("USERINCLUDE ..\\..\\..\\..\\javacall\\implementation\\share\\utils\\inc");
 	putln("USERINCLUDE ..\\..\\..\\..\\javacall\\interface");
 	putln("USERINCLUDE ..\\..\\..\\..\\javacall\\interface\\common");
