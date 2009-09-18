@@ -221,6 +221,7 @@ abstract class SymbianIDEProject extends IDEProject
 				lst.addElement("..\\..\\..\\..\\abstractions\\src\\cldc_application\\native\\symbian\\jsrop_suitestore.c");
 				lst.addElement("..\\..\\..\\..\\javacall\\implementation\\share\\utils\\javautil_unicode.c");
 				lst.addElement("..\\..\\..\\..\\javacall\\implementation\\symbian\\jsr211_chapi\\javautil_string.cpp");
+				lst.addElement("..\\..\\..\\..\\javacall\\implementation\\symbian\\jsr211_chapi\\javautil_str.c");
 				lst.addElement("..\\..\\..\\..\\javacall\\implementation\\symbian\\jsr211_chapi\\javautil_storage.c");
 				lst.addElement("..\\..\\..\\..\\javacall\\implementation\\symbian\\jsr211_chapi\\chapi.c");
 				lst.addElement("..\\..\\..\\..\\javacall\\implementation\\win32_emul\\common\\memory.c");
