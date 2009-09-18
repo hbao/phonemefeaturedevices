@@ -99,7 +99,7 @@ abstract class SymbianIDETool extends IDETool
 		aInf.addExport("..\\..\\..\\..\\abstractions\\src\\share\\include\\jsrop_kni.h");
 		aInf.addExport("..\\..\\..\\..\\abstractions\\src\\share\\include\\jsrop_suitestore.h");
 		aInf.addExport("..\\..\\..\\..\\javacall\\implementation\\share\\utils\\inc\\javautil_unicode.h");
-		aInf.addExport("..\\..\\..\\..\\javacall\\implementation\\symbian\\javautil_string.h");
+		aInf.addExport("..\\..\\..\\..\\javacall\\implementation\\symbian\\jsr211_chapi\\inc\\javautil_string.h");
 		aInf.addExport("..\\..\\..\\..\\javacall\\implementation\\symbian\\javacall_platform_defs.h");
 		aInf.addExport("..\\..\\..\\..\\javacall\\interface\\javacall_defs.h");
 		aInf.addExport("..\\..\\..\\..\\javacall\\interface\\common\\javacall_memory.h");
