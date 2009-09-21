@@ -629,6 +629,9 @@ abstract class SymbianMIDPBase extends NMakefile
         v.addElement("$(JSR211_DIR)\\share\\classes\\javax\\microedition\\content\\RequestListener.java");
         v.addElement("$(JSR211_DIR)\\share\\classes\\javax\\microedition\\content\\ResponseListener.java");        
 
+        v.addElement("$(JSR211_DIR)\\cldc_application\\core\\jams\\classes\\com\\sun\\j2me\\content\\RegistryInstaller.java");
+        v.addElement("$(JSR211_DIR)\\cldc_application\\core\\jams\\classes\\com\\sun\\j2me\\content\\AppBundleProxy.java");
+        v.addElement("$(JSR211_DIR)\\cldc_application\\core\\jams\\classes\\com\\sun\\j2me\\content\\CHManagerImpl.java");
         
 		put("MIDP_SOURCES =");
         for (int i=0; i<v.size(); i++) 
