@@ -959,7 +959,16 @@ void reset_lastread(){
  * @return JAVACALL_OK if initialization was successful, error code otherwise
  */
  javacall_result javacall_chapi_init_registry(void){
-      return (javacall_result)JAVACALL_NOT_IMPLEMENTED;
+	char buf[MAX_BUFFER];
+	int fpos=0;
+	int res;
+
+#ifdef DEBUG_OUTPUT
+	wprintf(L"JAVACALL::javacall_chapi_init_registry()\n");
+#endif
+	
+	res = read_caps();
+	return res;
  }
 
 /**
@@ -1371,7 +1380,30 @@ javacall_result javacall_chapi_enum_handlers_by_suite_id(
         int* pos_id, 
         /*OUT*/ javacall_utf16*  handler_id_out,
         int* length){
-return (javacall_result)JAVACALL_NOT_IMPLEMENTED;
+	int result;
+	int index=*pos_id;
+
+#ifdef DEBUG_OUTPUT
+	wprintf(L"JAVACALL::javacall_chapi_enum_handlers_by_suite_id(%s,%d)\n",suite_id,*pos_id);
+#endif
+
+	if (!index){
+		result = update_registry();
+		if (result) return result;
+	}
+
+	while (index < g_handler_infos_used){
+		if ((g_handler_infos[index]->flag & TYPE_INFO_JAVA_HANDLER) && !javautil_str_wcscmp(g_handler_infos[index]->suite_id,suite_id)){
+			result=get_id(g_handler_infos[index],handler_id_out,length);
+			if (!result){
+				*pos_id = index+1;
+			}
+			return result;
+		}
+		index++;
+	}
+
+	return JAVACALL_CHAPI_ERROR_NO_MORE_ELEMENTS;
 }
 
 
@@ -1402,7 +1434,32 @@ return (javacall_result)JAVACALL_NOT_IMPLEMENTED;
 javacall_result javacall_chapi_enum_handlers_by_prefix(javacall_const_utf16_string id, 
     int* pos_id, /*OUT*/ javacall_utf16* handler_id_out, int* length)
 {
-     return (javacall_result)JAVACALL_NOT_IMPLEMENTED;
+	int result;
+	int index=*pos_id;
+	int id_len = javautil_str_wcslen( id );
+
+#ifdef DEBUG_OUTPUT
+	wprintf(L"JAVACALL::javacall_chapi_enum_handlers_by_prefix(%s,%d)\n",id,*pos_id);
+#endif
+
+	if (!index){
+		result = update_registry();
+		if (result) return result;
+	}
+
+	while (index < g_handler_infos_used){
+		if ( javautil_str_wcslen( g_handler_infos[index]->handler_id ) > id_len &&
+				0 == javautil_str_wcsncmp(id, g_handler_infos[index]->handler_id, id_len) ){
+			result=get_id(g_handler_infos[index],handler_id_out,length);
+			if (!result){
+				*pos_id = index+1;
+			}
+			return result;
+		}
+		index++;
+	}
+
+	return JAVACALL_CHAPI_ERROR_NO_MORE_ELEMENTS;
 }
 
 /**
@@ -1433,7 +1490,34 @@ javacall_result javacall_chapi_enum_handlers_by_prefix(javacall_const_utf16_stri
 javacall_result javacall_chapi_enum_handlers_prefixes_of(javacall_const_utf16_string id, 
 												int* pos_id, /*OUT*/ javacall_utf16* handler_id_out, int* length)
 {
-     return (javacall_result)JAVACALL_NOT_IMPLEMENTED;
+	int result;
+	int index=*pos_id;
+	int id_len = javautil_str_wcslen( id );
+
+#ifdef DEBUG_OUTPUT
+	wprintf(L"JAVACALL::javacall_chapi_enum_handlers_prefixes_of(%s,%d)\n",id,*pos_id);
+#endif
+
+	if (!index){
+		result = update_registry();
+		if (result) return result;
+	}
+
+	while (index < g_handler_infos_used){
+		int handler_len = javautil_str_wcslen( g_handler_infos[index]->handler_id );
+		if ( handler_len <= id_len &&
+				0 == javautil_str_wcsncmp(id, g_handler_infos[index]->handler_id, handler_len) ){
+			result=get_id(g_handler_infos[index],handler_id_out,length);
+			if (!result){
+				*pos_id = index+1;
+			}
+			return result;
+		}
+		index++;
+	}
+
+	return JAVACALL_CHAPI_ERROR_NO_MORE_ELEMENTS;
+
 }
 
 /**
@@ -1654,7 +1738,40 @@ javacall_result javacall_chapi_get_handler_info(javacall_const_utf16_string cont
 				   javacall_utf16*  classname_out, int* classname_len,
 				   javacall_chapi_handler_registration_type *flag_out)
 {
-     return (javacall_result)JAVACALL_NOT_IMPLEMENTED;
+    handler_info* info;
+    int i;
+    int res;
+
+#ifdef DEBUG_OUTPUT
+    wprintf(L"JAVACALL::javacall_chapi_get_handler_info(%s)\n",content_handler_id);
+#endif
+
+    res = update_registry();
+    if (res) return res;
+
+	for (i=0;i<g_handler_infos_used;++i){
+		if (!javautil_str_wcscmp(g_handler_infos[i]->handler_id,content_handler_id)){
+			info = g_handler_infos[i];
+			if (info->flag & TYPE_INFO_JAVA_HANDLER){
+				if (suite_id_out) {
+					res = copy_string(info->suite_id,suite_id_out,suite_id_len);
+					if (res) return res;
+				}
+				if (flag_out) *flag_out = info->jflag;
+				if (classname_out) {
+					res = copy_string(info->classname,classname_out,classname_len);
+				}
+            } else {
+			    if (suite_id_out) *suite_id_out = 0;
+			    if (flag_out) *flag_out = 0;
+			    if (classname_out) {
+				    res = copy_string(info->appname,classname_out,classname_len);
+			    }
+            }
+			return res;
+		}
+	}
+	return JAVACALL_CHAPI_ERROR_NOT_FOUND;
 }
 
 static javacall_bool is_access_allowed( handler_info* info, javacall_const_utf16_string caller_id ) {
