@@ -69,7 +69,7 @@ javacall_result javautil_storage_open(const char* name, int flag, /* OUT */ java
 
 javacall_result javautil_storage_remove(const char* name)
 { 
-	return (remove(name) == 0) ? JAVACALL_OK : JAVACALL_IO_ERROR;  
+	return (unlink(name) == 0) ? JAVACALL_OK : JAVACALL_IO_ERROR;  
 }
 
 

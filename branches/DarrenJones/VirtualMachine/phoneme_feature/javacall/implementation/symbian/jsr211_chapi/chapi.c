@@ -104,6 +104,7 @@ content_type_info** g_content_type_infos = 0;
 int g_content_type_infos_used;
 int g_content_type_infos_allocated;
 
+
 handler_info** g_handler_infos = 0;
 int g_handler_infos_used;
 int g_handler_infos_allocated;
@@ -119,7 +120,6 @@ const short* DEFAULT_ACTION = 0;
 #define CHAPI_APPEND 3
 
 #define chrieq(a,b) (((a ^ b) & ~0x20) == 0)
-
 
 static int open_db(int db_index, javautil_storage* file, int flag);
 static void close_db(javautil_storage file);
@@ -976,7 +976,14 @@ void reset_lastread(){
  *
  * @return nothing
  */
- void javacall_chapi_finalize_registry(void){}
+ void javacall_chapi_finalize_registry(void){
+#ifdef DEBUG_OUTPUT
+	wprintf(L"JAVACALL::javacall_chapi_finalize_registry()\n");
+#endif
+
+	clean_registry();
+	reset_lastread();
+ }
 
 /**
  * Add new Content Handler to Registry
@@ -1736,8 +1743,7 @@ javacall_result javacall_chapi_get_handler_info(javacall_const_utf16_string cont
 				   /*OUT*/
 				   javacall_utf16*  suite_id_out, int* suite_id_len,
 				   javacall_utf16*  classname_out, int* classname_len,
-				   javacall_chapi_handler_registration_type *flag_out)
-{
+				   javacall_chapi_handler_registration_type *flag_out){
     handler_info* info;
     int i;
     int res;
@@ -1800,8 +1806,7 @@ static javacall_bool is_access_allowed( handler_info* info, javacall_const_utf16
  * @return JAVACALL_TRUE if caller is trusted
  *         JAVACALL_FALSE if caller is not trusted
  */
-javacall_bool javacall_chapi_is_access_allowed(javacall_const_utf16_string content_handler_id, javacall_const_utf16_string caller_id)
-{
+javacall_bool javacall_chapi_is_access_allowed(javacall_const_utf16_string content_handler_id, javacall_const_utf16_string caller_id){
 	int res;
 	handler_info* info;
 	
