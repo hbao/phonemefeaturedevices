@@ -60,10 +60,8 @@ typedef struct _handler_info{
 	int flag;
 	short* handler_id;
 	short* handler_friendly_name;
-	union {
-		short* classname;
-		short* appname;
-	};
+	short* classname;
+	short* appname;
 	short* suite_id;
 	int jflag;
 	short** access_list;
@@ -73,10 +71,8 @@ typedef struct _action_info{
 	content_type_info* content_type;
 	handler_info* handler;
 	int flag;
-	union {
-		short* actionname;
-		const short* actionname_const;
-	};
+	short* actionname;
+	const short* actionname_const;
 	short* params;
 	short** locales;
 	short** localnames;
