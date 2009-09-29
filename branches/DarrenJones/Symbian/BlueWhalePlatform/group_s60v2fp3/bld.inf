@@ -4,6 +4,7 @@ BlueWhalePlatform_s60v2fp3.mmp
 gnumakefile icons_scalable_dc.mk
 BlueWhaleRecog.mmp
 BlueWhaleStarter.mmp
+BlueWhaleSisReader.mmp
 
 PRJ_PLATFORMS
 

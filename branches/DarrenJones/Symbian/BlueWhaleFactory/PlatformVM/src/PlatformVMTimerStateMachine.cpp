@@ -45,6 +45,10 @@
 #include "ViewInterface.h"
 #include "SocketEngine.h"
 #include "buildversion.h"
+#if __S60_VERSION__ >= __S60_V3_FP0_VERSION_NUMBER__ || __UIQ_VERSION_NUMBER__ >= __UIQ_V3_FP0_VERSION_NUMBER__
+#else
+#include <eikdll.h>
+#endif
 
 //#define __DEBUGTIMER__
 //#define __DEBUGSTATEMACHINE__
@@ -537,12 +541,14 @@ const TInt KArgCount = 16;
 TFileName CJVMRunner::VMInstallFileName()
 {
 	TFileName sisFileName;
-	
-#if (__S60_VERSION__ >= __S60_V3_FP0_VERSION_NUMBER__) || (__UIQ_VERSION_NUMBER__ >= __UIQ_V3_FP0_VERSION_NUMBER__)
+
 	_LIT(KBlueWhaleSisReaderExe, "bluewhalesisreader.exe");
+#if __S60_VERSION__ >= __S60_V3_FP0_VERSION_NUMBER__ || __UIQ_VERSION_NUMBER__ >= __UIQ_V3_FP0_VERSION_NUMBER__
+	TFileName sisReaderExe(KBlueWhaleSisReaderExe);
+
 	TUidType uidType(KNullUid, KNullUid, KUidSisReaderExe);
 	RProcess proc;
-	if (proc.Create(KBlueWhaleSisReaderExe, KNullDesC, uidType) == KErrNone)
+	if (proc.Create(sisReaderExe, KNullDesC, uidType) == KErrNone)
 	{
 		proc.Resume();
 		TRequestStatus requestStatus;
@@ -550,26 +556,34 @@ TFileName CJVMRunner::VMInstallFileName()
 		User::WaitForRequest(requestStatus);
 		proc.Close();
 	}
-	
-	TInt err = RProperty::Get(KUidSisReaderExe, KUidSisFileName.iUid, sisFileName);
-#else
-	_LIT(KSisPattern, "*bluewhale*.sis*");
-	_LIT(KInstallDir, "c:\\system\\install\\;d:\\system\\install;e:\\system\\install");
-	
-	CDir* dir = NULL;
-	RFs fs;
-	if (fs.Connect() == KErrNone)
+#elif !defined(__WINSCW__)
+	TFileName drive;
+	Dll::FileName(drive); // Get the drive letter
+	TParsePtrC parse(drive);
+	TFileName sisReaderExe(parse.Drive());
+
+	sisReaderExe.Append(_L("\\system\\apps\\BlueWhalePlatform\\"));
+	sisReaderExe.Append(KBlueWhaleSisReaderExe);
+
+	EikDll::StartExeL(sisReaderExe);
+
+	TFileName matchName(_L("BlueWhaleSisReader*"));
+	TFindProcess finder(matchName);
+	TFileName result;
+	if (finder.Next(result) == KErrNone)
 	{
-		TFindFile findFile(fs);
-		if (findFile.FindWildByPath(KSisPattern, &KInstallDir, dir) == KErrNone && dir->Count())
+		RProcess proc;
+		if (proc.Open(finder) == KErrNone)
 		{
-			dir->Sort(ESortByDate | EDescending);		
-			sisFileName = (*dir)[0].iName;
+			TRequestStatus requestStatus;
+			proc.Logon(requestStatus);
+			User::WaitForRequest(requestStatus);
+			proc.Close();
 		}
-		delete dir;
-		fs.Close();
 	}
 #endif
+
+	TInt err = RProperty::Get(KUidSisReaderExe, KUidSisFileName.iUid, sisFileName);
 
 	return sisFileName;
 }
