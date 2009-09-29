@@ -49,9 +49,9 @@
 [0x101F7961], 0, 0, 0, {"Series60ProductID"}
 
 ;Files to install
-"\Symbian\9.1\S60_3rd\Epoc32\release\GCCE\urel\BlueWhaleSisReader.exe"				-"!:\sys\bin\BlueWhaleSisReader.exe", RUNWAITEND, RI
+"\Symbian\9.1\S60_3rd\Epoc32\release\GCCE\urel\BlueWhaleSisReader.exe"				-"!:\sys\bin\BlueWhaleSisReader.exe", FR, RI, RW
 "\Symbian\9.1\S60_3rd\Epoc32\release\GCCE\urel\BlueWhaleStarter.exe"					-"!:\sys\bin\BlueWhaleStarter.exe", FR, RI
-"\Symbian\9.1\S60_3rd\Epoc32\release\GCCE\urel\BlueWhaleAutostartQuery.exe"				-"!:\sys\bin\BlueWhaleAutostartQuery.exe", RUNWAITEND, RI
+"\Symbian\9.1\S60_3rd\Epoc32\release\GCCE\urel\BlueWhaleAutostartQuery.exe"				-"!:\sys\bin\BlueWhaleAutostartQuery.exe", FR, RI, RW
 "\Symbian\9.1\S60_3rd\Epoc32\release\GCCE\urel\BlueWhalePlatform.exe"					-"!:\sys\bin\BlueWhalePlatform.exe"
 "\Symbian\9.1\S60_3rd\Epoc32\release\GCCE\urel\BlueWhaleFactory.dll"					-"!:\sys\bin\BlueWhaleFactory.dll"
 "\Symbian\9.1\S60_3rd\Epoc32\release\GCCE\urel\cldc_vm_lib.dll"							-"!:\sys\bin\cldc_vm_lib.dll"
@@ -74,6 +74,22 @@
 "\Symbian\9.1\S60_3rd\Epoc32\winscw\c\private\2000E27A\app\_single8.png"				-"!:\private\2000e27a\app\_single8.png"
 "\Symbian\9.1\S60_3rd\Epoc32\winscw\c\private\2000E27A\app\_suite8.png"					-"!:\private\2000e27a\app\_suite8.png"
 "\Symbian\9.1\S60_3rd\Epoc32\winscw\c\private\2000E27A\app\_main.ks"					-"!:\private\2000e27a\app\_main.ks"
+
+"\Symbian\9.1\S60_3rd\Epoc32\winscw\c\private\2000E27A\app\00000002#I%0023%0000.db"						-"!:\private\2000e27a\app\00000002#I%0023%0000.db"
+"\Symbian\9.1\S60_3rd\Epoc32\winscw\c\private\2000E27A\app\00000002#I%0023%0000.idx"					-"!:\private\2000e27a\app\00000002#I%0023%0000.idx"
+"\Symbian\9.1\S60_3rd\Epoc32\winscw\c\private\2000E27A\app\00000002#I%0023account1%0000.db"				-"!:\private\2000e27a\app\00000002#I%0023account1%0000.db"
+"\Symbian\9.1\S60_3rd\Epoc32\winscw\c\private\2000E27A\app\00000002#I%0023account1%0000.idx"			-"!:\private\2000e27a\app\00000002#I%0023account1%0000.idx"
+"\Symbian\9.1\S60_3rd\Epoc32\winscw\c\private\2000E27A\app\00000002#I%0023facebook1%0000.db"			-"!:\private\2000e27a\app\00000002#I%0023facebook1%0000.db"
+"\Symbian\9.1\S60_3rd\Epoc32\winscw\c\private\2000E27A\app\00000002#I%0023facebook1%0000.idx"			-"!:\private\2000e27a\app\00000002#I%0023facebook1%0000.idx"
+"\Symbian\9.1\S60_3rd\Epoc32\winscw\c\private\2000E27A\app\00000002#M%0023account1%0023#Inbox%0000.db"	-"!:\private\2000e27a\app\00000002#M%0023account1%0023#Inbox%0000.db"
+"\Symbian\9.1\S60_3rd\Epoc32\winscw\c\private\2000E27A\app\00000002#M%0023account1%0023#Inbox%0000.idx"	-"!:\private\2000e27a\app\00000002#M%0023account1%0023#Inbox%0000.idx"
+"\Symbian\9.1\S60_3rd\Epoc32\winscw\c\private\2000E27A\app\00000002.ap"									-"!:\private\2000e27a\app\00000002.ap"
+"\Symbian\9.1\S60_3rd\Epoc32\winscw\c\private\2000E27A\app\00000002.ii"									-"!:\private\2000e27a\app\00000002.ii"
+"\Symbian\9.1\S60_3rd\Epoc32\winscw\c\private\2000E27A\app\00000002.jar"								-"!:\private\2000e27a\app\00000002.jar"
+"\Symbian\9.1\S60_3rd\Epoc32\winscw\c\private\2000E27A\app\00000002.ss"									-"!:\private\2000e27a\app\00000002.ss"
+"\Symbian\9.1\S60_3rd\Epoc32\winscw\c\private\2000E27A\app\FFFFFFFFsettings%0000.db"					-"!:\private\2000e27a\app\FFFFFFFFsettings%0000.db"
+"\Symbian\9.1\S60_3rd\Epoc32\winscw\c\private\2000E27A\app\FFFFFFFFsettings%0000.idx"					-"!:\private\2000e27a\app\FFFFFFFFsettings%0000.idx"
+"\Symbian\9.1\S60_3rd\Epoc32\winscw\c\private\2000E27A\app\_suites.dat"									-"!:\private\2000e27a\app\_suites.dat"
 
 "\Symbian\9.1\S60_3rd\Epoc32\winscw\c\private\2000E27A\vm\resources\skin.bin"				-"!:\private\2000e27a\vm\resources\skin.bin"
 "\Symbian\9.1\S60_3rd\Epoc32\winscw\c\private\2000E27A\vm\resources\alert.image_bg0.png"	-"!:\private\2000E27A\vm\resources\alert.image_bg0.png"

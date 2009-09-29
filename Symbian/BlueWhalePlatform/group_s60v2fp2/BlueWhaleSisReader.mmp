@@ -26,34 +26,31 @@
  * 111 Power Road, Chiswick, London, W4 5PY, United Kingdom or visit 
  * www.bluewhalesystems.com if you need additional 
  * information or have any questions.  
- */
+ */ 
 
+MACRO __DONT_USE_IN_CODE__MMP_ONLY__S60_V2_FP2__
 
-#ifndef BLUEWHALESISREADER_H
-#define BLUEWHALESISREADER_H
+TARGET		BlueWhaleSisReader.exe
+TARGETTYPE  EXEDLL
+UID  0x100039CE 0x2000E27B
+TARGETPATH \system\apps\BlueWhalePlatform
 
-#include <e32base.h>
-#include <w32std.h>
-#include <e32property.h>
-#include "Application.h"
+SOURCEPATH ..\src
+SOURCE  BlueWhaleSisReader.cpp
 
+SYSTEMINCLUDE   \epoc32\include
+USERINCLUDE . ..\inc ..\..\BlueWhaleFactory\PlatformVM\inc ..\..\BlueWhaleFactory\Util\inc
+USERINCLUDE 	..\..\BlueWhaleFactory\Timer ..\..\BlueWhaleFactory\StateMachine
+USERINCLUDE		..\..\BlueWhaleFactory\UserInterface\inc ..\..\BlueWhaleFactory\Transport\inc
+USERINCLUDE		..\..\BlueWhaleFactory\Logger
 
-class CBlueWhaleSisReader : public CBase
-{
-public:
-	static CBlueWhaleSisReader* NewL();
-	static void ReadSisL();
+LIBRARY euser.lib
+LIBRARY efsrv.lib
 
-	virtual ~CBlueWhaleSisReader();
-protected:
-	CBlueWhaleSisReader();
-	void ConstructL();
-	void FindAndPublishSisFileNameL();
-	TBool FindFileInSubDirsL(const TFileName& aDir);
-	void PersistFileNameL(const TFileName& aSisFileName);
-private:
-	RFs iFs;
-	TFileName iPersistSisFileName;
-};
-
+#if defined(WINS)
+deffile .\bluewhalesisreader.def
+#else
+deffile .\bluewhalesisreaderarmi.def
 #endif
+
+NOSTRICTDEF
