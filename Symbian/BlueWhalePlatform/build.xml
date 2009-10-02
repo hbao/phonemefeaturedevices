@@ -308,10 +308,10 @@
 
 
 
-		<condition property="dos_command" value="call sign.cmd ${deviceBranchFinalOutputName}_v${src.revision} ..\BlueWhalePlatform\sis\${relativeSisxFileDeployedDirectory}">
+		<condition property="dos_command" value="call sign.cmd bluewhale_${deviceBranchFinalOutputName}_v${src.revision} ..\BlueWhalePlatform\sis\${relativeSisxFileDeployedDirectory}">
 			<equals arg1="${deviceSDK}" arg2="s60v3fp0"/>
 		</condition>
-		<condition property="dos_command" value="call sign_uiq.cmd ${deviceBranchFinalOutputName}_v${src.revision} ..\BlueWhalePlatform\sis\${relativeSisxFileDeployedDirectory}">
+		<condition property="dos_command" value="call sign_uiq.cmd bluewhale_${deviceBranchFinalOutputName}_v${src.revision} ..\BlueWhalePlatform\sis\${relativeSisxFileDeployedDirectory}">
 			<equals arg1="${deviceSDK}" arg2="uiqv3fp0"/>
 		</condition>
 		<echo>dos_command[${dos_command}]    executionDirectory[${executionDirectory}]   deviceSDK[${deviceSDK}]    platform: [${platform}]   release: [${release}]   EPOCDEVICE[${EPOCDEVICE}]   pathAdditions[${pathAdditions}]</echo>
