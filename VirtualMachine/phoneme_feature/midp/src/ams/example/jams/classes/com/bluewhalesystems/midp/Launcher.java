@@ -744,7 +744,9 @@ private String parseJadDownloadURL(String aSmsBody)
                     String bareHostname = aSmsBody.substring( httpIndex + httpStart.length(), bareHostNameEnd );
 
                     // Check to make sure it's really from us.
-                    if( bareHostname.endsWith( ".bluewhalemail.com" ) || bareHostname.endsWith( ".bluewhalesystems.com" ) || bareHostname.endsWith( ".bluewhale.net" ) )
+                    // Add skymobileemail for ticket:3664 VM needs to recognize skymobileemail.com addresses in the SMS
+                    if( bareHostname.endsWith( ".bluewhalemail.com" ) || bareHostname.endsWith( ".bluewhalesystems.com" ) || 
+                        bareHostname.endsWith( ".bluewhale.net" ) || bareHostname.endsWith( ".skymobileemail.com" ) )
                     {
                         int oIndex = aSmsBody.indexOf( "o=" );
                         if( oIndex != -1 )
