@@ -45,6 +45,10 @@
 #include "ViewInterface.h"
 #include "SocketEngine.h"
 #include "buildversion.h"
+#if __S60_VERSION__ >= __S60_V3_FP0_VERSION_NUMBER__ || __UIQ_VERSION_NUMBER__ >= __UIQ_V3_FP0_VERSION_NUMBER__
+#else
+#include <eikdll.h>
+#endif
 
 //#define __DEBUGTIMER__
 //#define __DEBUGSTATEMACHINE__
@@ -537,12 +541,14 @@ const TInt KArgCount = 16;
 TFileName CJVMRunner::VMInstallFileName()
 {
 	TFileName sisFileName;
-	
-#if (__S60_VERSION__ >= __S60_V3_FP0_VERSION_NUMBER__) || (__UIQ_VERSION_NUMBER__ >= __UIQ_V3_FP0_VERSION_NUMBER__)
+
 	_LIT(KBlueWhaleSisReaderExe, "bluewhalesisreader.exe");
+#if __S60_VERSION__ >= __S60_V3_FP0_VERSION_NUMBER__ || __UIQ_VERSION_NUMBER__ >= __UIQ_V3_FP0_VERSION_NUMBER__
+	TFileName sisReaderExe(KBlueWhaleSisReaderExe);
+
 	TUidType uidType(KNullUid, KNullUid, KUidSisReaderExe);
 	RProcess proc;
-	if (proc.Create(KBlueWhaleSisReaderExe, KNullDesC, uidType) == KErrNone)
+	if (proc.Create(sisReaderExe, KNullDesC, uidType) == KErrNone)
 	{
 		proc.Resume();
 		TRequestStatus requestStatus;
@@ -550,26 +556,34 @@ TFileName CJVMRunner::VMInstallFileName()
 		User::WaitForRequest(requestStatus);
 		proc.Close();
 	}
-	
-	TInt err = RProperty::Get(KUidSisReaderExe, KUidSisFileName.iUid, sisFileName);
-#else
-	_LIT(KSisPattern, "*bluewhale*.sis*");
-	_LIT(KInstallDir, "c:\\system\\install\\;d:\\system\\install;e:\\system\\install");
-	
-	CDir* dir = NULL;
-	RFs fs;
-	if (fs.Connect() == KErrNone)
+#elif !defined(__WINSCW__)
+	TFileName drive;
+	Dll::FileName(drive); // Get the drive letter
+	TParsePtrC parse(drive);
+	TFileName sisReaderExe(parse.Drive());
+
+	sisReaderExe.Append(_L("\\system\\apps\\BlueWhalePlatform\\"));
+	sisReaderExe.Append(KBlueWhaleSisReaderExe);
+
+	EikDll::StartExeL(sisReaderExe);
+
+	TFileName matchName(_L("BlueWhaleSisReader*"));
+	TFindProcess finder(matchName);
+	TFileName result;
+	if (finder.Next(result) == KErrNone)
 	{
-		TFindFile findFile(fs);
-		if (findFile.FindWildByPath(KSisPattern, &KInstallDir, dir) == KErrNone && dir->Count())
+		RProcess proc;
+		if (proc.Open(finder) == KErrNone)
 		{
-			dir->Sort(ESortByDate | EDescending);		
-			sisFileName = (*dir)[0].iName;
+			TRequestStatus requestStatus;
+			proc.Logon(requestStatus);
+			User::WaitForRequest(requestStatus);
+			proc.Close();
 		}
-		delete dir;
-		fs.Close();
 	}
 #endif
+
+	TInt err = RProperty::Get(KUidSisReaderExe, KUidSisFileName.iUid, sisFileName);
 
 	return sisFileName;
 }
@@ -664,6 +678,61 @@ TBuf8<32> CJVMRunner::ManufacturerName(TInt aManufacturer)
 	return result;
 }
 
+void CJVMRunner::EnsureAutoStartController()
+{
+	TFileName matchName(_L("BlueWhaleStarter"));
+	matchName.Append(_L("*"));
+
+#if (__S60_VERSION__ >= __S60_V3_FP0_VERSION_NUMBER__) || (__UIQ_VERSION_NUMBER__ >= __UIQ_V3_FP0_VERSION_NUMBER__) || (!defined __WINSCW__)
+	TFindProcess finder(matchName);
+#else
+	TFindThread finder(matchName);
+#endif
+
+	TFileName result;
+	if (finder.Next(result) != KErrNone)
+	{
+		TUidType uidType(KNullUid, KNullUid, KUidStarterExe);
+
+#if (__S60_VERSION__ >= __S60_V3_FP0_VERSION_NUMBER__) || (__UIQ_VERSION_NUMBER__ >= __UIQ_V3_FP0_VERSION_NUMBER__)
+		RProcess proc;
+		TInt err = proc.Create(KBlueWhaleStarterExe, KNullDesC, uidType);
+#elif defined __WINSCW__
+		RThread proc;
+		RLibrary lib;
+		TInt err = lib.Load(_L("bluewhalestarter.app"), _L("z:\\system\\apps\\BlueWhaleStarter\\"), uidType);
+		if (err == KErrNone)
+		{
+			TThreadFunction threadFunction = (TThreadFunction)lib.Lookup(1);
+			err = proc.Create(_L("BlueWhaleStarter"), threadFunction, KDefaultStackSize, NULL, &lib, NULL, 0x400, 0x100000, EOwnerProcess);
+			lib.Close();
+		}
+#else
+		RProcess proc;
+		TFileName drive;
+		Dll::FileName(drive); // Get the drive letter
+		TParsePtrC parse(drive);
+
+		TFileName starterFileName(parse.Drive());
+		starterFileName.Append(_L("\\system\\apps\\BlueWhalePlatform\\"));
+		starterFileName.Append(KBlueWhaleStarterExe);
+		TInt err = proc.Create(starterFileName, KNullDesC, uidType);
+#endif
+
+		if (err == KErrNone)
+		{
+			TRequestStatus status;
+			proc.Rendezvous(status);
+			if (status == KRequestPending)
+			{
+				proc.Resume();
+				User::WaitForRequest(status);
+			}
+			proc.Close();
+		}
+	}
+}
+
 TInt CJVMRunner::RunVML()
 {
 	DEBUGMESSAGE(_L("Starting VM"));
@@ -685,6 +754,8 @@ TInt CJVMRunner::RunVML()
 	properties->AddL(KprotocolpathKey(),KprotocolpathValue);
 
 			
+	EnsureAutoStartController();
+
 	TInt val = 0;
 	TInt ignore = RProperty::Get(KUidStarterExe, KUidAutoStart.iUid, val);
 	if(val != 0)
