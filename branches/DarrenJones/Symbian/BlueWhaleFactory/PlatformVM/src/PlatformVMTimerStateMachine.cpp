@@ -197,7 +197,7 @@ void CVMTimerStateMachine::DoInitialStateL(TCommand aCommand, MProperties * /*aC
 		User::Leave(KErrCommandNotExpected);
 	}
 }
-void CVMTimerStateMachine::DoReadyStateL(TCommand aCommand, MProperties * /*aCommandProperties*/)
+void CVMTimerStateMachine::DoReadyStateL(TCommand aCommand, MProperties* aCommandProperties)
 {
 	if(aCommand == KCommandOnline)
 	{
@@ -206,8 +206,9 @@ void CVMTimerStateMachine::DoReadyStateL(TCommand aCommand, MProperties * /*aCom
 		delete iDebugTimer;
 		iDebugTimer = NULL;
 		iDebugTimer = CPeriodic::NewL(CActive::EPriorityIdle);
+		const TDesC8& className(aCommandProperties->GetString8L(KPropertyString8ClassName));
 		
-		CreateVML();
+		CreateVML(className);
 		iVMManager->StartL();
 		iVMThread->StartL();
 		TCallBack callback(DebugTimerFunction,this);
@@ -346,7 +347,7 @@ TBool CVMTimerStateMachine::AcceptCommandL(TCommand aCommand, MProperties * aCom
 void CVMTimerStateMachine::Reset()
 {}
 
-void CVMTimerStateMachine::CreateVML()
+void CVMTimerStateMachine::CreateVML(const TDesC8& aClassName)
 {
 	TBuf<32> name;
 	name.Format(KManThreadName(),iInstanceCount);
@@ -363,7 +364,7 @@ void CVMTimerStateMachine::CreateVML()
 
 	iVMThread = iFactory->CreateVMThreadObject(name);
 	
-	iJVM = new (ELeave) CJVMRunner(reinterpret_cast<MApplication*>(iApp));
+	iJVM = new (ELeave) CJVMRunner(reinterpret_cast<MApplication*>(iApp), aClassName);
 	iVMThread->AddL(iJVM);
 	undertaker = new (ELeave)CMyUndertaker(&iVMThread->Thread(),this);
 	CleanupStack::PushL(undertaker);
@@ -487,7 +488,7 @@ TBool CVMTimerStateMachine::Offline() const
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
-CJVMRunner::CJVMRunner(MApplication* aApplication) : CActive(EPriorityNormal), iApplication(aApplication)
+CJVMRunner::CJVMRunner(MApplication* aApplication, const TDesC8& aClassName) : CActive(EPriorityNormal), iApplication(aApplication), iClassName(aClassName)
 {
 }
 
@@ -534,9 +535,12 @@ _LIT8(KPlatformnameKey,"x-bw-platform-name");
 _LIT8(KPlatformname,"BlueWhale");
 
 _LIT8(KAppnameKey,"x-bw-app-name");
-_LIT8(KAppname,"BlueWhaleMail");
+_LIT8(KAppFullNameKey, "x-bw-app-full-name");
 
-const TInt KArgCount = 16;
+_LIT8(KDefaultAppName,"BlueWhaleMail");
+_LIT8(KDefaultAppFullName,"com.bluewhalesystems.client.midlet.BlueWhaleMail");
+
+const TInt KArgCount = 17;
 
 TFileName CJVMRunner::VMInstallFileName()
 {
@@ -777,7 +781,23 @@ TInt CJVMRunner::RunVML()
 	properties->AddL(KQuitReasonKey(),QuitReasonText());
 		
 	properties->AddL(KPlatformnameKey(),KPlatformname());
-	properties->AddL(KAppnameKey(),KAppname());
+	
+	if (iClassName.Length() == 0)
+	{
+		properties->AddL(KAppnameKey(), KDefaultAppName());
+		properties->AddL(KAppFullNameKey(), KDefaultAppFullName());
+	}
+	else
+	{
+		TBuf8<256> appName(iClassName);
+		TInt dotIndex = appName.LocateReverse('.');
+		if ((dotIndex != KErrNotFound) && (dotIndex + 1 < appName.Length()))
+		{
+			appName = appName.Mid(dotIndex + 1);
+		}
+		properties->AddL(KAppnameKey(), appName);
+		properties->AddL(KAppFullNameKey(), iClassName);
+	}
 
 #ifdef __WINSCW__
 	_LIT8(KPrintIsolateMemoryUsage,"+PrintIsolateMemoryUsage");

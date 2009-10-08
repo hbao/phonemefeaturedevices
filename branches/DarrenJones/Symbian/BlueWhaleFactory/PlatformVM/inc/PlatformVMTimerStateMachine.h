@@ -101,7 +101,7 @@ private:
 	CVMTimerStateMachine(TAny * aConstructionParameters );
 	~CVMTimerStateMachine();
 
-	void CreateVML();
+	void CreateVML(const TDesC8& aClassName);
 	TInt StopRunningThreads(TThreadId aId);
 	static TInt DebugTimerFunction(TAny* aSelf);
 	static TInt RestartTimerFunction(TAny* aSelf);

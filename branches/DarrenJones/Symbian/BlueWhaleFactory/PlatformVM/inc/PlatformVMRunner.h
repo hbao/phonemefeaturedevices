@@ -82,7 +82,7 @@ public:
 class CJVMRunner : public CActive, public MRunnable
 {
 	public:
-		CJVMRunner(MApplication* aApplication);
+		CJVMRunner(MApplication* aApplication, const TDesC8& aClassName);
 		~CJVMRunner();
 		void ConstructL();
 		void StartL(RThread& aThread);
@@ -102,6 +102,7 @@ class CJVMRunner : public CActive, public MRunnable
 		TInt RunVML();
 		MApplication* iApplication;
 		MThread* iThread;
+		TBuf8<256> iClassName;
 };
 
 
