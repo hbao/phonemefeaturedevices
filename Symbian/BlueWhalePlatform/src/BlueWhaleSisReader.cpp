@@ -38,6 +38,8 @@ _LIT(KPersistSisFileName, "sisfilename.txt");
 _LIT(KDownloadDirC, "c:\\system\\dmgr\\");
 _LIT(KDownloadDirE, "e:\\system\\dmgr\\");
 _LIT(KInstallDir, "c:\\data\\installs\\;e:\\data\\installs\\");
+#elif __S60_VERSION__ >= __S60_V2_FP1_VERSION_NUMBER__
+_LIT(KInstallDir, "c:\\nokia\\installs\\;c:\\system\\install\\;e:\\;e:\\system\\install\\");
 #elif __UIQ_VERSION_NUMBER__ >= __UIQ_V3_FP0_VERSION_NUMBER__
 _LIT(KInstallDir, "c:\\system\\temp\\;d:\\system\\temp\\");
 #endif
@@ -65,6 +67,19 @@ CBlueWhaleSisReader::~CBlueWhaleSisReader()
 	iFs.Close();
 }
 
+void CBlueWhaleSisReader::PersistFileNameL(const TFileName& aSisFileName)
+{
+	iFs.MkDirAll(iPersistSisFileName);
+	RFile file;
+	if (file.Replace(iFs, iPersistSisFileName, EFileWrite) == KErrNone)
+	{
+		TBuf8<KMaxFileName> fileName8;
+		fileName8.Copy(aSisFileName);
+		file.Write(fileName8);
+		file.Close();
+	}
+}
+
 TBool CBlueWhaleSisReader::FindFileInSubDirsL(const TFileName& aDir)
 {
 	TBool result = EFalse;	
@@ -82,15 +97,7 @@ TBool CBlueWhaleSisReader::FindFileInSubDirsL(const TFileName& aDir)
 			{
 				subDir->Sort(ESortByDate | EDescending);
 				TInt ignore = RProperty::Set(KUidSisReaderExe, KUidSisFileName.iUid, (*subDir)[0].iName);
-				iFs.MkDirAll(iPersistSisFileName);
-				RFile file;
-				if (file.Replace(iFs, iPersistSisFileName, EFileWrite) == KErrNone)
-				{
-					TBuf8<KMaxFileName> fileName8;
-					fileName8.Copy((*subDir)[0].iName);
-					file.Write(fileName8);
-					file.Close();
-				}
+				PersistFileNameL((*subDir)[0].iName);
 				result = ETrue;
 				delete subDir;
 				break;
@@ -144,6 +151,7 @@ void CBlueWhaleSisReader::FindAndPublishSisFileNameL()
 	{
 		dir->Sort(ESortByDate | EDescending);
 		ignore = RProperty::Set(KUidSisReaderExe, KUidSisFileName.iUid, (*dir)[0].iName);
+		PersistFileNameL((*dir)[0].iName);
 	}
 	delete dir;
 	

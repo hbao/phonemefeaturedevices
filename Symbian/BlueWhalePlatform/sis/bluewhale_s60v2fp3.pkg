@@ -50,7 +50,8 @@
 
 ;Files to install
 ".\dummyS60V2Autostart.txt" 																-"!:\private\2000E27B\autostart.txt"
-"\Symbian\8.1a\S60_2nd_FP3\Epoc32\release\armi\urel\BlueWhaleStarter.exe"					-"!:\system\apps\BlueWhalePlatform\BlueWhaleStarter.exe"
+"\Symbian\8.1a\S60_2nd_FP3\Epoc32\release\armi\urel\BlueWhaleSisReader.exe"					-"!:\system\apps\BlueWhalePlatform\BlueWhaleSisReader.exe", FR, RI, RW
+"\Symbian\8.1a\S60_2nd_FP3\Epoc32\release\armi\urel\BlueWhaleStarter.exe"					-"!:\system\apps\BlueWhalePlatform\BlueWhaleStarter.exe", FR, RI
 "\Symbian\8.1a\S60_2nd_FP3\Epoc32\release\armi\urel\BlueWhalePlatform.app"					-"!:\system\apps\BlueWhalePlatform\BlueWhalePlatform.app"
 "\Symbian\8.1a\S60_2nd_FP3\Epoc32\release\armi\urel\ECOMPLUS.dll"							-"!:\system\apps\BlueWhalePlatform\ECOMPLUS.dll"
 "\Symbian\8.1a\S60_2nd_FP3\epoc32\data\z\system\apps\BlueWhalePlatform\BlueWhalePlatform.rsc"              	-"!:\system\apps\BlueWhalePlatform\BlueWhalePlatform.rsc"

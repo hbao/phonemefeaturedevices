@@ -49,9 +49,9 @@
 [0x101F7961], 0, 0, 0, {"Series60ProductID"}
 
 ;Files to install
-"\Symbian\9.1\S60_3rd\Epoc32\release\GCCE\urel\BlueWhaleSisReader.exe"				-"!:\sys\bin\BlueWhaleSisReader.exe", RUNWAITEND, RI
+"\Symbian\9.1\S60_3rd\Epoc32\release\GCCE\urel\BlueWhaleSisReader.exe"				-"!:\sys\bin\BlueWhaleSisReader.exe", FR, RI, RW
 "\Symbian\9.1\S60_3rd\Epoc32\release\GCCE\urel\BlueWhaleStarter.exe"					-"!:\sys\bin\BlueWhaleStarter.exe", FR, RI
-"\Symbian\9.1\S60_3rd\Epoc32\release\GCCE\urel\BlueWhaleAutostartQuery.exe"				-"!:\sys\bin\BlueWhaleAutostartQuery.exe", RUNWAITEND, RI
+"\Symbian\9.1\S60_3rd\Epoc32\release\GCCE\urel\BlueWhaleAutostartQuery.exe"				-"!:\sys\bin\BlueWhaleAutostartQuery.exe", FR, RI, RW
 "\Symbian\9.1\S60_3rd\Epoc32\release\GCCE\urel\BlueWhalePlatform.exe"					-"!:\sys\bin\BlueWhalePlatform.exe"
 "\Symbian\9.1\S60_3rd\Epoc32\release\GCCE\urel\BlueWhaleFactory.dll"					-"!:\sys\bin\BlueWhaleFactory.dll"
 "\Symbian\9.1\S60_3rd\Epoc32\release\GCCE\urel\cldc_vm_lib.dll"							-"!:\sys\bin\cldc_vm_lib.dll"
