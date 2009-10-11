@@ -206,9 +206,14 @@ void CVMTimerStateMachine::DoReadyStateL(TCommand aCommand, MProperties* aComman
 		delete iDebugTimer;
 		iDebugTimer = NULL;
 		iDebugTimer = CPeriodic::NewL(CActive::EPriorityIdle);
-		const TDesC8& className(aCommandProperties->GetString8L(KPropertyString8ClassName));
-		
-		CreateVML(className);
+		if (aCommandProperties)
+		{		
+			CreateVML(aCommandProperties->GetString8L(KPropertyString8ShortcutName));
+		}
+		else
+		{
+			CreateVML(KNullDesC8);
+		}
 		iVMManager->StartL();
 		iVMThread->StartL();
 		TCallBack callback(DebugTimerFunction,this);
@@ -347,7 +352,7 @@ TBool CVMTimerStateMachine::AcceptCommandL(TCommand aCommand, MProperties * aCom
 void CVMTimerStateMachine::Reset()
 {}
 
-void CVMTimerStateMachine::CreateVML(const TDesC8& aClassName)
+void CVMTimerStateMachine::CreateVML(const TDesC8& aShortcutName)
 {
 	TBuf<32> name;
 	name.Format(KManThreadName(),iInstanceCount);
@@ -364,7 +369,7 @@ void CVMTimerStateMachine::CreateVML(const TDesC8& aClassName)
 
 	iVMThread = iFactory->CreateVMThreadObject(name);
 	
-	iJVM = new (ELeave) CJVMRunner(reinterpret_cast<MApplication*>(iApp), aClassName);
+	iJVM = new (ELeave) CJVMRunner(reinterpret_cast<MApplication*>(iApp), aShortcutName);
 	iVMThread->AddL(iJVM);
 	undertaker = new (ELeave)CMyUndertaker(&iVMThread->Thread(),this);
 	CleanupStack::PushL(undertaker);
@@ -488,7 +493,7 @@ TBool CVMTimerStateMachine::Offline() const
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
-CJVMRunner::CJVMRunner(MApplication* aApplication, const TDesC8& aClassName) : CActive(EPriorityNormal), iApplication(aApplication), iClassName(aClassName)
+CJVMRunner::CJVMRunner(MApplication* aApplication, const TDesC8& aShortcutName) : CActive(EPriorityNormal), iApplication(aApplication), iShortcutName(aShortcutName)
 {
 }
 
@@ -782,21 +787,14 @@ TInt CJVMRunner::RunVML()
 		
 	properties->AddL(KPlatformnameKey(),KPlatformname());
 	
-	if (iClassName.Length() == 0)
+	properties->AddL(KAppFullNameKey(), KDefaultAppFullName());
+	if (iShortcutName.Length() == 0)
 	{
 		properties->AddL(KAppnameKey(), KDefaultAppName());
-		properties->AddL(KAppFullNameKey(), KDefaultAppFullName());
 	}
 	else
 	{
-		TBuf8<256> appName(iClassName);
-		TInt dotIndex = appName.LocateReverse('.');
-		if ((dotIndex != KErrNotFound) && (dotIndex + 1 < appName.Length()))
-		{
-			appName = appName.Mid(dotIndex + 1);
-		}
-		properties->AddL(KAppnameKey(), appName);
-		properties->AddL(KAppFullNameKey(), iClassName);
+		properties->AddL(KAppnameKey(), iShortcutName);
 	}
 
 #ifdef __WINSCW__

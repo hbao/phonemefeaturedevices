@@ -261,7 +261,7 @@ void CBlueWhalePlatformAppUi::HandleCommandL(TInt aCommand)
 	}
 }
 
-void CBlueWhalePlatformAppUi::StartMidpL(const TDesC8& aClassName)
+void CBlueWhalePlatformAppUi::StartMidpL(const TDesC8& aShortcutName)
 {
 	MVMObjectFactory* factory = DiL(MVMObjectFactory);
 	CleanupReleasePushL(*factory);
@@ -284,7 +284,7 @@ void CBlueWhalePlatformAppUi::StartMidpL(const TDesC8& aClassName)
 	iVM->AcceptCommandL(KCommandOpen,NULL);
 	properties = DiL(MProperties);
 	CleanupReleasePushL(*properties);
-	properties->SetString8L(KPropertyString8ClassName, aClassName);
+	properties->SetString8L(KPropertyString8ShortcutName, aShortcutName);
 	iVM->AcceptCommandL(KCommandOnline, properties);
 	CleanupStack::PopAndDestroy(properties);
 
