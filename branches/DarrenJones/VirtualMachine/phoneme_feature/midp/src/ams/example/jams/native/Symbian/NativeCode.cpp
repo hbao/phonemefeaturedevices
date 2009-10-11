@@ -38,6 +38,7 @@
 
 extern "C" {
 #include <midp_foreground_id.h>
+#include <commonKNIMacros.h>
 }
 
 #include <msvapi.h>
@@ -51,6 +52,8 @@ extern "C" {
 #include <midpMalloc.h>
 #include <OSVersion.h>
 #include <pcsl_memory.h>
+
+_LIT(KShortcutsPath, "vm\\shortcuts\\");
 
 KNIEXPORT KNI_RETURNTYPE_VOID
 Java_com_sun_midp_main_BWMDisplayController_requestBackground0()
@@ -289,6 +292,59 @@ Java_com_bluewhalesystems_midp_PlatformRequestListener_deleteSystemProperty0()
 		pcsl_mem_free(keyChars);
 	}
 	
+	KNI_EndHandles();
+	KNI_ReturnVoid();
+}
+
+KNIEXPORT KNI_RETURNTYPE_VOID Java_com_sun_midp_installer_GraphicalInstaller_00024BackgroundInstaller_install0()
+{
+	unsigned char* fileData = NULL;
+
+	KNI_StartHandles(2);
+	KNI_DeclareHandle(fileNameObject);
+	KNI_DeclareHandle(fileDataObject);
+	KNI_GetParameterAsObject(1, fileNameObject);
+	KNI_GetParameterAsObject(2, fileDataObject);
+
+	const int fileNameLength = KNI_GetStringLength(fileNameObject);
+
+	jchar* fileNameChars = (jchar*)pcsl_mem_malloc(fileNameLength * sizeof(jchar));
+	if (fileNameChars)
+	{
+		KNI_GetStringRegion(fileNameObject, 0, fileNameLength, fileNameChars);
+		TFileName fileName;
+		fileName.Copy(fileNameChars, fileNameLength);
+		for (TInt i = 0; i < fileName.Length(); i++)
+		{
+			if (fileName[i] == '/')
+			{
+				fileName[i] = '\\';
+			}
+		}
+		TParsePtrC parse(fileName);
+		fileName = parse.NameAndExt();
+
+		fileData = (unsigned char*)JavaByteArray(fileDataObject);
+		int fileDataLength = KNI_GetArrayLength(fileDataObject);
+	
+		RFs fs;
+		if (fs.Connect() == KErrNone)
+		{
+			CleanupClosePushL(fs);
+			TFileName shortcutPath(static_cast<MApplication*>(Dll::Tls())->GetFullPath(KShortcutsPath));
+			TInt ignore = fs.MkDirAll(shortcutPath);
+			shortcutPath += fileName;
+			RFile file;
+			if (file.Replace(fs, shortcutPath, EFileWrite) == KErrNone)
+			{
+				TPtr8 data(fileData, fileDataLength, fileDataLength);
+				file.Write(data);
+				file.Close();
+			}
+			CleanupStack::PopAndDestroy(&fs);
+		}
+	}
+
 	KNI_EndHandles();
 	KNI_ReturnVoid();
 }
