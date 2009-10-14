@@ -41,7 +41,7 @@ CApaDocument* CBlueWhalePlatformApplication::CreateDocumentL()
 
 TUid CBlueWhalePlatformApplication::AppDllUid() const
 {
-    // Return the UID for the BlueWhaleMail application
+    // Return the UID for the BlueWhale application
     return KUidBlueWhalePlatformApp;
 }
 
