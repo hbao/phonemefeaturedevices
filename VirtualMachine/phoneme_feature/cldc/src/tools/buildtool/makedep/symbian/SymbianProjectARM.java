@@ -94,7 +94,7 @@ class SymbianProjectARM extends SymbianIDEProjectARM
 			writeDefines(osVersion);
 			writeSource();
 			writeInclude();
-			writeLibraries();
+			writeLibraries(osVersion);
 			writeStaticLibraries(osVersion);
 			writeDefFileLine(osVersion);
 			closeOutputFile();
@@ -138,9 +138,9 @@ class SymbianProjectARM extends SymbianIDEProjectARM
         }
     }
     
-    void writeLibraries() throws Exception
+    void writeLibraries(String aOsVersion) throws Exception
     {
-        Vector v = getLibraries();
+        Vector v = getLibraries(aOsVersion);
         for (int i=0; i<v.size(); i++) 
         {
             putln("LIBRARY " + v.elementAt(i));
@@ -236,7 +236,7 @@ class SymbianProjectARM extends SymbianIDEProjectARM
 		}
 	}	
 	
-    Vector getLibraries()
+    Vector getLibraries(String aOsVersion)
     {
         Vector v = new Vector();
         v.addElement("euser.lib");
@@ -250,6 +250,10 @@ class SymbianProjectARM extends SymbianIDEProjectARM
 		v.addElement("gsmu.lib");
 		v.addElement("etext.lib");
 		v.addElement("bafl.lib");
+		if (aOsVersion.equals("_s60v3fp0"))
+		{
+			v.addElement("swinstcli.lib");
+		}
         return v;
     }
 	
