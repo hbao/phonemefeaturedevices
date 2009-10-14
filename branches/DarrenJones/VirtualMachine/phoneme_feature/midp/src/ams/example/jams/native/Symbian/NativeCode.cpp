@@ -52,6 +52,9 @@ extern "C" {
 #include <midpMalloc.h>
 #include <OSVersion.h>
 #include <pcsl_memory.h>
+#if (__S60_VERSION__ >= __S60_V3_FP0_VERSION_NUMBER__)
+#include <swinstapi.h>
+#endif
 
 _LIT(KShortcutsPath, "vm\\shortcuts\\");
 
@@ -340,6 +343,34 @@ KNIEXPORT KNI_RETURNTYPE_VOID Java_com_sun_midp_installer_GraphicalInstaller_000
 				TPtr8 data(fileData, fileDataLength, fileDataLength);
 				file.Write(data);
 				file.Close();
+#if (__S60_VERSION__ >= __S60_V3_FP0_VERSION_NUMBER__)
+#ifndef __WINSCW__
+				SwiUI::RSWInstSilentLauncher installer;
+				if (installer.Connect() == KErrNone)
+				{
+					CleanupClosePushL(installer);
+					SwiUI::TInstallOptions options;
+					options.iUpgrade = SwiUI::EPolicyAllowed;
+					options.iOCSP = SwiUI::EPolicyNotAllowed;
+					TFileName location;
+					TBuf<2> drive;
+					Dll::FileName(location); // Get the drive letter
+					TParsePtrC parse(location);
+					location = parse.Drive();
+
+					options.iDrive = location[0];
+					options.iUntrusted = SwiUI::EPolicyNotAllowed;
+					options.iCapabilities = SwiUI::EPolicyNotAllowed;
+
+					SwiUI::TInstallOptionsPckg optionsPckg = options;
+
+					TRequestStatus status;
+					installer.SilentInstall(status, shortcutPath, optionsPckg);
+					User::WaitForRequest(status);
+					CleanupStack::PopAndDestroy(&installer);
+				}
+#endif
+#endif
 			}
 			CleanupStack::PopAndDestroy(&fs);
 		}
