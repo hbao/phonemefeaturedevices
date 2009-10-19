@@ -61,7 +61,6 @@ typedef struct _handler_info{
 	short* handler_id;
 	short* handler_friendly_name;
 	short* classname;
-	short* appname;
 	short* suite_id;
 	int jflag;
 	short** access_list;
@@ -72,7 +71,6 @@ typedef struct _action_info{
 	handler_info* handler;
 	int flag;
 	short* actionname;
-	const short* actionname_const;
 	short* params;
 	short** locales;
 	short** localnames;
@@ -825,7 +823,7 @@ int read_caps(){
 
 			if (!action) {
 				action = (action_info*)new_action_info(type, handler);
-				action->actionname_const = DEFAULT_ACTION;
+				action->actionname = (short*)DEFAULT_ACTION;
 				action->flag |= TYPE_INFO_JAVA_HANDLER | TYPE_INFO_ACTION_DEFAULT;
 			}
 
@@ -1767,7 +1765,7 @@ javacall_result javacall_chapi_get_handler_info(javacall_const_utf16_string cont
 			    if (suite_id_out) *suite_id_out = 0;
 			    if (flag_out) *flag_out = 0;
 			    if (classname_out) {
-				    res = copy_string(info->appname,classname_out,classname_len);
+				    res = copy_string(info->classname,classname_out,classname_len);
 			    }
             }
 			return res;
