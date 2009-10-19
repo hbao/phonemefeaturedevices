@@ -54,6 +54,10 @@ extern "C" {
 #include <pcsl_memory.h>
 #if (__S60_VERSION__ >= __S60_V3_FP0_VERSION_NUMBER__)
 #include <swinstapi.h>
+#elif (__UIQ_VERSION_NUMBER__ >= __UIQ_V3_FP0_VERSION_NUMBER__)
+#else
+#include <apacmdln.h>
+#include <eikdll.h>
 #endif
 
 _LIT(KShortcutsPath, "vm\\shortcuts\\");
@@ -343,8 +347,10 @@ KNIEXPORT KNI_RETURNTYPE_VOID Java_com_sun_midp_installer_GraphicalInstaller_000
 				TPtr8 data(fileData, fileDataLength, fileDataLength);
 				file.Write(data);
 				file.Close();
-#if (__S60_VERSION__ >= __S60_V3_FP0_VERSION_NUMBER__)
+
 #ifndef __WINSCW__
+
+#if (__S60_VERSION__ >= __S60_V3_FP0_VERSION_NUMBER__)
 				SwiUI::RSWInstSilentLauncher installer;
 				if (installer.Connect() == KErrNone)
 				{
@@ -369,7 +375,34 @@ KNIEXPORT KNI_RETURNTYPE_VOID Java_com_sun_midp_installer_GraphicalInstaller_000
 					User::WaitForRequest(status);
 					CleanupStack::PopAndDestroy(&installer);
 				}
+#elif (__UIQ_VERSION_NUMBER__ >= __UIQ_V3_FP0_VERSION_NUMBER__)
+#else
+				// start the installer
+				CApaCommandLine* cmdLine = CApaCommandLine::NewLC();
+				cmdLine->SetLibraryNameL(_L("z:\\system\\apps\\appinst\\appinst.app"));
+				cmdLine->SetDocumentNameL(shortcutPath);
+				cmdLine->SetCommandL(EApaCommandRun);
+				cmdLine->SetTailEndL(_L8("INSTALLX"));
+				EikDll::StartAppL(*cmdLine);
+				CleanupStack::PopAndDestroy();
+
+				// wait for it to complete
+				TFileName matchName(_L("appinst*"));
+				TFindProcess finder(matchName);
+				TFileName result;
+				if (finder.Next(result) == KErrNone)
+				{
+					RProcess proc;
+					if (proc.Open(finder) == KErrNone)
+					{
+						TRequestStatus requestStatus;
+						proc.Logon(requestStatus);
+						User::WaitForRequest(requestStatus);
+						proc.Close();
+					}
+				}
 #endif
+
 #endif
 			}
 			CleanupStack::PopAndDestroy(&fs);
