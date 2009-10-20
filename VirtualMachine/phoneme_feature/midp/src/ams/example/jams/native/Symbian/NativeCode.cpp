@@ -58,6 +58,7 @@ extern "C" {
 #else
 #include <apacmdln.h>
 #include <eikdll.h>
+#include <apgcli.h>
 #endif
 
 _LIT(KShortcutsPath, "vm\\shortcuts\\");
@@ -378,29 +379,23 @@ KNIEXPORT KNI_RETURNTYPE_VOID Java_com_sun_midp_installer_GraphicalInstaller_000
 #elif (__UIQ_VERSION_NUMBER__ >= __UIQ_V3_FP0_VERSION_NUMBER__)
 #else
 				// start the installer
-				CApaCommandLine* cmdLine = CApaCommandLine::NewLC();
-				cmdLine->SetLibraryNameL(_L("z:\\system\\apps\\appinst\\appinst.app"));
-				cmdLine->SetDocumentNameL(shortcutPath);
-				cmdLine->SetCommandL(EApaCommandRun);
-				cmdLine->SetTailEndL(_L8("INSTALLX"));
-				EikDll::StartAppL(*cmdLine);
-				CleanupStack::PopAndDestroy();
-
-				// wait for it to complete
-				TFileName matchName(_L("appinst*"));
-				TFindProcess finder(matchName);
-				TFileName result;
-				if (finder.Next(result) == KErrNone)
+				RApaLsSession apaLsSession;
+				User::LeaveIfError(apaLsSession.Connect());
+				CleanupClosePushL(apaLsSession);
+				TThreadId threadId;
+				if (apaLsSession.StartDocument(shortcutPath, threadId) == KErrNone)
 				{
-					RProcess proc;
-					if (proc.Open(finder) == KErrNone)
+					RThread thread;
+					if (thread.Open(threadId) == KErrNone)
 					{
 						TRequestStatus requestStatus;
-						proc.Logon(requestStatus);
+						thread.Logon(requestStatus);
 						User::WaitForRequest(requestStatus);
-						proc.Close();
+						thread.Close();
 					}
 				}
+
+				CleanupStack::PopAndDestroy(&apaLsSession);
 #endif
 
 #endif
