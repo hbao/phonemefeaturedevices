@@ -1,6 +1,6 @@
 # ============================================================================
 #  Name     : Icons_scalable_dc.mk
-#  Part of  : BlueWhaleMail
+#  Part of  : BlueWhale
 #
 #  Description: This is file for creating .mif file (scalable icon)
 # 
