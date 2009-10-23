@@ -69,19 +69,19 @@ RESOURCE EIK_APP_INFO
 	// so don't define any here or you'll get a weird
 	// painting issue where screen below shows through
 	// because app is allocating twice the space for CBA's.
-    menubar = r_BlueWhaleMail_menubar;
+    menubar = r_BlueWhale_menubar;
     cba = R_AVKON_SOFTKEYS_OPTIONS_EXIT;
     }
 
-RESOURCE MENU_BAR r_BlueWhaleMail_menubar
+RESOURCE MENU_BAR r_BlueWhale_menubar
 {
 titles =
     {
-		MENU_TITLE {menu_pane = r_BlueWhaleMail_menu;}
+		MENU_TITLE {menu_pane = r_BlueWhale_menu;}
     };
 }
 
-RESOURCE MENU_PANE r_BlueWhaleMail_menu
+RESOURCE MENU_PANE r_BlueWhale_menu
 {
 items =
     {
