@@ -38,6 +38,7 @@
 
 extern "C" {
 #include <midp_foreground_id.h>
+#include <commonKNIMacros.h>
 }
 
 #include <msvapi.h>
@@ -51,6 +52,15 @@ extern "C" {
 #include <midpMalloc.h>
 #include <OSVersion.h>
 #include <pcsl_memory.h>
+#if (__S60_VERSION__ >= __S60_V3_FP0_VERSION_NUMBER__)
+#include <swinstapi.h>
+#else
+#include <apacmdln.h>
+#include <eikdll.h>
+#include <apgcli.h>
+#endif
+
+_LIT(KShortcutsPath, "vm\\shortcuts\\");
 
 KNIEXPORT KNI_RETURNTYPE_VOID
 Java_com_sun_midp_main_BWMDisplayController_requestBackground0()
@@ -289,6 +299,110 @@ Java_com_bluewhalesystems_midp_PlatformRequestListener_deleteSystemProperty0()
 		pcsl_mem_free(keyChars);
 	}
 	
+	KNI_EndHandles();
+	KNI_ReturnVoid();
+}
+
+KNIEXPORT KNI_RETURNTYPE_VOID Java_com_sun_midp_installer_GraphicalInstaller_00024BackgroundInstaller_install0()
+{
+	unsigned char* fileData = NULL;
+
+	KNI_StartHandles(2);
+	KNI_DeclareHandle(fileNameObject);
+	KNI_DeclareHandle(fileDataObject);
+	KNI_GetParameterAsObject(1, fileNameObject);
+	KNI_GetParameterAsObject(2, fileDataObject);
+
+	const int fileNameLength = KNI_GetStringLength(fileNameObject);
+
+	jchar* fileNameChars = (jchar*)pcsl_mem_malloc(fileNameLength * sizeof(jchar));
+	if (fileNameChars)
+	{
+		KNI_GetStringRegion(fileNameObject, 0, fileNameLength, fileNameChars);
+		TFileName fileName;
+		fileName.Copy(fileNameChars, fileNameLength);
+		for (TInt i = 0; i < fileName.Length(); i++)
+		{
+			if (fileName[i] == '/')
+			{
+				fileName[i] = '\\';
+			}
+		}
+		TParsePtrC parse(fileName);
+		fileName = parse.NameAndExt();
+
+		fileData = (unsigned char*)JavaByteArray(fileDataObject);
+		int fileDataLength = KNI_GetArrayLength(fileDataObject);
+	
+		RFs fs;
+		if (fs.Connect() == KErrNone)
+		{
+			CleanupClosePushL(fs);
+			TFileName shortcutPath(static_cast<MApplication*>(Dll::Tls())->GetFullPath(KShortcutsPath));
+			TInt ignore = fs.MkDirAll(shortcutPath);
+			shortcutPath += fileName;
+			RFile file;
+			if (file.Replace(fs, shortcutPath, EFileWrite) == KErrNone)
+			{
+				TPtr8 data(fileData, fileDataLength, fileDataLength);
+				file.Write(data);
+				file.Close();
+
+#ifndef __WINSCW__
+
+#if (__S60_VERSION__ >= __S60_V3_FP0_VERSION_NUMBER__)
+				SwiUI::RSWInstSilentLauncher installer;
+				if (installer.Connect() == KErrNone)
+				{
+					CleanupClosePushL(installer);
+					SwiUI::TInstallOptions options;
+					options.iUpgrade = SwiUI::EPolicyAllowed;
+					options.iOCSP = SwiUI::EPolicyNotAllowed;
+					TFileName location;
+					TBuf<2> drive;
+					Dll::FileName(location); // Get the drive letter
+					TParsePtrC parse(location);
+					location = parse.Drive();
+
+					options.iDrive = location[0];
+					options.iUntrusted = SwiUI::EPolicyAllowed;	// TODO: change to EPolicyNotAllowed when shortcuts are signed?
+					options.iCapabilities = SwiUI::EPolicyNotAllowed;
+
+					SwiUI::TInstallOptionsPckg optionsPckg = options;
+
+					TRequestStatus status;
+					installer.SilentInstall(status, shortcutPath, optionsPckg);
+					User::WaitForRequest(status);
+					CleanupStack::PopAndDestroy(&installer);
+				}
+#else
+				// start the installer
+				RApaLsSession apaLsSession;
+				User::LeaveIfError(apaLsSession.Connect());
+				CleanupClosePushL(apaLsSession);
+				TThreadId threadId;
+				if (apaLsSession.StartDocument(shortcutPath, threadId) == KErrNone)
+				{
+					RThread thread;
+					if (thread.Open(threadId) == KErrNone)
+					{
+						TRequestStatus requestStatus;
+						thread.Logon(requestStatus);
+						User::WaitForRequest(requestStatus);
+						thread.Close();
+					}
+				}
+
+				CleanupStack::PopAndDestroy(&apaLsSession);
+#endif
+
+#endif
+				TInt ignore = fs.Delete(shortcutPath);
+			}
+			CleanupStack::PopAndDestroy(&fs);
+		}
+	}
+
 	KNI_EndHandles();
 	KNI_ReturnVoid();
 }

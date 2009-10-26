@@ -54,7 +54,7 @@ public class BWMDisplayController extends DisplayController
     MIDletProxy backgroundRequest(MIDletProxy midlet) 
     {
         debugMessage("backgroundRequest " + midlet);
-        if(midlet.getClassName().equals("com.bluewhalesystems.client.midlet.BlueWhaleMail") && midlet.getMidletState() != MIDletProxy.MIDLET_DESTROYED)
+        if(midlet.getClassName().equals(System.getProperty("x-bw-app-full-name")) && midlet.getMidletState() != MIDletProxy.MIDLET_DESTROYED)
         {
             requestBackground0(midlet.getDisplayId());
         }

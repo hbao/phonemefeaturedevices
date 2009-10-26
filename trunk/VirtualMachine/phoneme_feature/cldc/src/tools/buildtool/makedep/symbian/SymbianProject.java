@@ -269,7 +269,7 @@ out.close();
         putln("TARGET\t\t" + getName() + ".dll");
         putln("TARGETTYPE\tdll");
         putln("UID\t0x1000008d 0x2000E279");
-        putln("CAPABILITY\tNetworkServices ReadUserData WriteUserData ReadDeviceData WriteDeviceData");
+        putln("CAPABILITY\tNetworkServices ReadUserData WriteUserData ReadDeviceData WriteDeviceData TrustedUI");
         putln();
     }
     void addFile(Vector aElements, String aFile)

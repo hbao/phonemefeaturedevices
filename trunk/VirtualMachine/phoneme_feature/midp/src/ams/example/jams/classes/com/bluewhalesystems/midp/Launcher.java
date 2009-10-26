@@ -57,7 +57,8 @@ public class Launcher extends MIDlet implements Runnable, CommandListener,MIDlet
     private static final int DOWNLOAD_WAITING_FOR_USER = 5;
     private static final String SONY_ERICSSON_AUTOSTART	= "autostart://:";
 	private static final String INSTALLER = "com.sun.midp.installer.GraphicalInstaller";
-	private static final String BLUEWHALEMIDLET = "com.bluewhalesystems.client.midlet.BlueWhaleMail";
+	private String iMIDletName;
+	private String iMIDletFullName;
     private Form iForm;
     private StringItem iProgressString;
     private HttpConnection iHttpConnection;
@@ -91,10 +92,11 @@ public class Launcher extends MIDlet implements Runnable, CommandListener,MIDlet
 
     public Launcher() {
         MIDletProxyList midletProxyList = MIDletProxyList.getMIDletProxyList();
-
+		iMIDletName = System.getProperty("x-bw-app-name");
+		iMIDletFullName = System.getProperty("x-bw-app-full-name");
         midletProxyList.getMIDletProxyList().addListener(this);
         iProgressString = new StringItem(null, "");
-        iForm = new Form("BlueWhaleMail");
+        iForm = new Form(iMIDletName);
         iLauncherCustomItem = new LauncherCustomItem(iForm);
         iProgId = iForm.append(iProgressString);
         iForm.append(iLauncherCustomItem);
@@ -131,7 +133,7 @@ public class Launcher extends MIDlet implements Runnable, CommandListener,MIDlet
         midletProxyList.setDisplayController(iDisplayController);
 
         if (!isInstalled()) {
-            iProgressString.setText("BlueWhaleMail needs to check for features specific to your phone. This will use airtime. Proceed?\n");
+            iProgressString.setText(iMIDletName + " needs to check for features specific to your phone. This will use airtime. Proceed?\n");
             iForm.removeCommand(iCommandCancel);
             iForm.addCommand(iCommandYes);
             iForm.addCommand(iCommandNo);
@@ -256,7 +258,7 @@ public class Launcher extends MIDlet implements Runnable, CommandListener,MIDlet
                 finished = (iStatus != DOWNLOAD_FAILED);
             } catch (ConnectionNotFoundException e) {
                 iForm.deleteAll();
-                iProgressString.setText("Download problem: BlueWhaleMail can't connect to the internet. Please make sure you are in good coverage.\nIf you are asked to \"Select access point\" from a list, pick \"BlueWhale\" if it's there, otherwise just pick one. If it does not work, try again with a different one.\nConsult http://www.bluewhalemail.com/forum/ for help.\n");
+                iProgressString.setText("Download problem: " + iMIDletName + " can't connect to the internet. Please make sure you are in good coverage.\nIf you are asked to \"Select access point\" from a list, pick \"BlueWhale\" if it's there, otherwise just pick one. If it does not work, try again with a different one.\nConsult http://www.bluewhalemail.com/forum/ for help.\n");
                 iProgId = iForm.append(iProgressString);
                 iForm.append(iLauncherCustomItem);
                 iForm.removeCommand(iCommandExit);
@@ -519,7 +521,7 @@ public class Launcher extends MIDlet implements Runnable, CommandListener,MIDlet
                     }
 
                     MIDletInfo midlet = new MIDletInfo(value);
-                    if (midlet.classname.equals(BLUEWHALEMIDLET)) {
+                    if (midlet.classname.equals(iMIDletFullName)) {
                         suiteId = suiteIds[i];
                     }
                 }
@@ -651,7 +653,7 @@ public class Launcher extends MIDlet implements Runnable, CommandListener,MIDlet
             // notifyPaused();
 
             Isolate runTask = AmsUtil.startMidletInNewIsolate(suiteId,
-                                     BLUEWHALEMIDLET, "BlueWhaleMail", null, null, null);
+                                     iMIDletFullName, iMIDletName, null, null, null);
 
             //runTask.waitForExit();
             
@@ -668,7 +670,7 @@ public class Launcher extends MIDlet implements Runnable, CommandListener,MIDlet
     public void midletUpdated(MIDletProxy midlet, int aReason)
     {
         debugMessage("midletUpdated " + midlet + "\nReason " + aReason);
-		if(midlet.getClassName().equals(BLUEWHALEMIDLET)
+		if(midlet.getClassName().equals(iMIDletFullName)
 			&& midlet.getMidletState() == MIDletProxy.MIDLET_ACTIVE
 			&& midlet.wantsForeground())
 			{
@@ -679,7 +681,7 @@ public class Launcher extends MIDlet implements Runnable, CommandListener,MIDlet
     public void midletRemoved(MIDletProxy midlet)
     {
 		debugMessage("midletRemoved " + midlet);
-		if(midlet.getClassName().equals(BLUEWHALEMIDLET))
+		if(midlet.getClassName().equals(iMIDletFullName))
         {
             if(iUrl != null)
             {
