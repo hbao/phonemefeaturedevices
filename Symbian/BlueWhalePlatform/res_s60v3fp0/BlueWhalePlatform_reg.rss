@@ -43,11 +43,11 @@ RESOURCE APP_REGISTRATION_INFO
   	localisable_resource_id = R_LOCALISABLE_APP_INFO;
  	embeddability=KAppNotEmbeddable;
 	newfile=KAppDoesNotSupportNewFile;
-	opaque_data = r_startup_detect;
+	opaque_data = r_opaque_data;
  }
 
-RESOURCE NUMBER_INT8 r_startup_detect
+RESOURCE TBUF r_opaque_data
 {
-	  value = 1;
+	buf = "";
 }
 

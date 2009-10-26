@@ -228,7 +228,7 @@ TBool CBlueWhalePlatformAppUi::ProcessCommandParametersL(CApaCommandLine& aComma
 	}
 	
 	iView = GetOrCreateViewL(KCID_MBaseMIDPView,KCID_MBaseMIDPView,this,ETrue);
-	StartMidpL();
+	StartMidpL(aCommandLine.OpaqueData());
 	return __BWM_APPUI__::ProcessCommandParametersL(aCommandLine);
 }
 #elif __S60_VERSION__ >= __S60_V2_FP1_VERSION_NUMBER__
@@ -238,14 +238,14 @@ TBool CBlueWhalePlatformAppUi::ProcessCommandParametersL(TApaCommand aCommand, T
 	{
 		iEikonEnv->RootWin().SetOrdinalPosition(0);
 	    iView = GetOrCreateViewL(KCID_MBaseMIDPView,KCID_MBaseMIDPView,this,ETrue);
-	    StartMidpL();
+	    StartMidpL(aTail);
 	}
 	else
 	{
 		// autostarting - need to to bring the window to the front or midlet will fail to launch on s60v2fp2
 		iEikonEnv->RootWin().SetOrdinalPosition(0);
 	    iView = GetOrCreateViewL(KCID_MBaseMIDPView,KCID_MBaseMIDPView,this,ETrue);
-	    StartMidpL();
+	    StartMidpL(aTail);
 	}
 	return CAknViewAppUi::ProcessCommandParametersL(aCommand, aDocumentName, aTail);
 }
@@ -260,7 +260,8 @@ void CBlueWhalePlatformAppUi::HandleCommandL(TInt aCommand)
 		break;
 	}
 }
-void CBlueWhalePlatformAppUi::StartMidpL()
+
+void CBlueWhalePlatformAppUi::StartMidpL(const TDesC8& aShortcutName)
 {
 	MVMObjectFactory* factory = DiL(MVMObjectFactory);
 	CleanupReleasePushL(*factory);
@@ -271,7 +272,8 @@ void CBlueWhalePlatformAppUi::StartMidpL()
 	properties->SetObjectL(KPropertyObjectViewAppUiCallback,this);
 	iVM = static_cast<MTimerStateMachine*>(REComPlusSession::CreateImplementationL(TUid::Uid(KCID_MTimerStateMachine), TUid::Uid(KIID_MTimerStateMachine),properties));
 	CleanupStack::PopAndDestroy(properties);
-
+	properties = NULL;
+	
 	MVMObjectFactoryClient* client = QiL(iVM,MVMObjectFactoryClient);
 	CleanupReleasePushL(*client);
 	client->SetClient(factory);
@@ -280,7 +282,11 @@ void CBlueWhalePlatformAppUi::StartMidpL()
 	factory->SetCanvas(iMidpView->GetCanvas());
 	
 	iVM->AcceptCommandL(KCommandOpen,NULL);
-	iVM->AcceptCommandL(KCommandOnline,NULL);
+	properties = DiL(MProperties);
+	CleanupReleasePushL(*properties);
+	properties->SetString8L(KPropertyString8ShortcutName, aShortcutName);
+	iVM->AcceptCommandL(KCommandOnline, properties);
+	CleanupStack::PopAndDestroy(properties);
 
 	MEventQueue* queue = factory->EventQueue();
 	iMidpView->SetEventQueue(queue);
