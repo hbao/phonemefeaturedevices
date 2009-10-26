@@ -54,7 +54,6 @@ extern "C" {
 #include <pcsl_memory.h>
 #if (__S60_VERSION__ >= __S60_V3_FP0_VERSION_NUMBER__)
 #include <swinstapi.h>
-#elif (__UIQ_VERSION_NUMBER__ >= __UIQ_V3_FP0_VERSION_NUMBER__)
 #else
 #include <apacmdln.h>
 #include <eikdll.h>
@@ -366,7 +365,7 @@ KNIEXPORT KNI_RETURNTYPE_VOID Java_com_sun_midp_installer_GraphicalInstaller_000
 					location = parse.Drive();
 
 					options.iDrive = location[0];
-					options.iUntrusted = SwiUI::EPolicyNotAllowed;
+					options.iUntrusted = SwiUI::EPolicyAllowed;	// TODO: change to EPolicyNotAllowed when shortcuts are signed?
 					options.iCapabilities = SwiUI::EPolicyNotAllowed;
 
 					SwiUI::TInstallOptionsPckg optionsPckg = options;
@@ -376,7 +375,6 @@ KNIEXPORT KNI_RETURNTYPE_VOID Java_com_sun_midp_installer_GraphicalInstaller_000
 					User::WaitForRequest(status);
 					CleanupStack::PopAndDestroy(&installer);
 				}
-#elif (__UIQ_VERSION_NUMBER__ >= __UIQ_V3_FP0_VERSION_NUMBER__)
 #else
 				// start the installer
 				RApaLsSession apaLsSession;
@@ -399,6 +397,7 @@ KNIEXPORT KNI_RETURNTYPE_VOID Java_com_sun_midp_installer_GraphicalInstaller_000
 #endif
 
 #endif
+				TInt ignore = fs.Delete(shortcutPath);
 			}
 			CleanupStack::PopAndDestroy(&fs);
 		}

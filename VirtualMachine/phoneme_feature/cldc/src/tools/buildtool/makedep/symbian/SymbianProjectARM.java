@@ -250,6 +250,7 @@ class SymbianProjectARM extends SymbianIDEProjectARM
 		v.addElement("gsmu.lib");
 		v.addElement("etext.lib");
 		v.addElement("bafl.lib");
+		v.addElement("apgrfx.lib");
 		if (aOsVersion.equals("_s60v3fp0"))
 		{
 			v.addElement("swinstcli.lib");
@@ -353,7 +354,7 @@ class SymbianProjectARM extends SymbianIDEProjectARM
 			putln("TARGETTYPE\tdll");
 		}
 		putln("UID\t0x1000008d 0x2000E279");
-		putln("CAPABILITY\tNetworkServices ReadUserData WriteUserData ReadDeviceData WriteDeviceData");
+		putln("CAPABILITY\tNetworkServices ReadUserData WriteUserData ReadDeviceData WriteDeviceData TrustedUI");
 		putln();
 	}
 	
