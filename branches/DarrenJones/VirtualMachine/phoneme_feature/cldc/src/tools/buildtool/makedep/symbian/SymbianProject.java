@@ -84,7 +84,7 @@ class SymbianProject extends SymbianIDEProject
 				openOutputFile(getName()+ "\\" + getName() + osVersion + ".mmp");
 			}
 			writeHeader();
-			writeTarget();
+			writeTarget(osVersion);
 			writeDefines(osVersion);
 			writeSource();
 			writeInclude();
@@ -264,12 +264,19 @@ out.close();
         putln();
     }
     
-    void writeTarget()
+    void writeTarget(String aOsVersion)
     {
         putln("TARGET\t\t" + getName() + ".dll");
         putln("TARGETTYPE\tdll");
         putln("UID\t0x1000008d 0x2000E279");
-        putln("CAPABILITY\tNetworkServices ReadUserData WriteUserData ReadDeviceData WriteDeviceData TrustedUI");
+        if (aOsVersion.equals("_s60v3fp0"))
+        {
+			putln("CAPABILITY\tNetworkServices ReadUserData WriteUserData ReadDeviceData WriteDeviceData TrustedUI");
+		}
+		else if (aOsVersion.equals("_uiqv3fp0"))
+		{
+			putln("CAPABILITY\tNetworkServices ReadUserData WriteUserData ReadDeviceData WriteDeviceData");
+		}
         putln();
     }
     void addFile(Vector aElements, String aFile)
