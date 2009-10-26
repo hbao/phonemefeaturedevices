@@ -1724,9 +1724,9 @@ public class GraphicalInstaller extends MIDlet implements CommandListener {
 									platformVersion = platformVersion.substring(0, underscoreIndex);
 									debugMessage("BackgroundInstaller.run platformVersion=" + platformVersion);
 									
-									// TODO: temporary hardcode for testing until jad content is corrected
+									// TODO: temporary default property lookup for testing until jad content is corrected
 									// String installFileName = parent.installer.state.getProperty("x-bw-shortcut-" + platformVersion);
-									String installFileName = parent.installer.state.getProperty("x-bw-pm-default-x-bw-shortcut-s60v2fp3");
+									String installFileName = parent.installer.state.getProperty("x-bw-pm-default-x-bw-shortcut-" + platformVersion);
 									
 									if (null == installFileName)
 									{
