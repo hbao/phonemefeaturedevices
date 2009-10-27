@@ -354,7 +354,14 @@ class SymbianProjectARM extends SymbianIDEProjectARM
 			putln("TARGETTYPE\tdll");
 		}
 		putln("UID\t0x1000008d 0x2000E279");
-		putln("CAPABILITY\tNetworkServices ReadUserData WriteUserData ReadDeviceData WriteDeviceData TrustedUI");
+        if (aOsVersion.equals("_s60v3fp0"))
+        {
+			putln("CAPABILITY\tNetworkServices ReadUserData WriteUserData ReadDeviceData WriteDeviceData TrustedUI");
+		}
+		else if (aOsVersion.equals("_uiqv3fp0"))
+		{
+			putln("CAPABILITY\tNetworkServices ReadUserData WriteUserData ReadDeviceData WriteDeviceData");
+		}
 		putln();
 	}
 	
