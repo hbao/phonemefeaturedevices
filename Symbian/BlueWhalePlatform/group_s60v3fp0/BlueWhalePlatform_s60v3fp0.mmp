@@ -42,7 +42,7 @@ UID               0x100039CE 0x2000E27A
 TARGETPATH        \sys\bin
 
 VENDORID        0
-CAPABILITY     NetworkServices ReadUserData WriteUserData ReadDeviceData WriteDeviceData TrustedUI
+CAPABILITY     NetworkServices ReadUserData WriteUserData ReadDeviceData WriteDeviceData TrustedUI SwEvent
 epocstacksize 0x5000
 
 OPTION GCCE -O2 -fno-unit-at-a-time
