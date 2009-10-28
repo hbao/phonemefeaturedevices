@@ -19,6 +19,12 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA
  * 
+ * NOTICE: Portions Copyright (c) 2007-2009 Blue Whale Systems.
+ * This file has been modified by Blue Whale Systems on 27Oct2009.
+ * The changes are licensed under the terms of the GNU General Public
+ * License version 2. This notice was added to meet the conditions of
+ * Section 3.a of the GNU General Public License version 2.
+ * 
  * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa
  * Clara, CA 95054 or visit www.sun.com if you need additional
  * information or have any questions.
@@ -451,7 +457,9 @@ KNIDECL(com_sun_midp_midletsuite_MIDletSuiteStorage_getSuiteID) {
         case SUITE_CORRUPTED_ERROR:
             KNI_ThrowNew(midpIOException, NULL);
             break;
-        case NOT_FOUND: /* this is ok, a new suite ID was created */
+        case NOT_FOUND:
+			suiteId = UNUSED_SUITE_ID;
+			break;
         default:
             break;
     }
