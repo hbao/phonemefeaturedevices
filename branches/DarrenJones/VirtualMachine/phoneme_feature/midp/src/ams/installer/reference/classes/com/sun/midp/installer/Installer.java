@@ -1438,28 +1438,39 @@ public abstract class Installer {
 					nameMIDlet1 = nameMIDlet1.substring(0, commaIndex);
 				}
 				
-				try
+				if (nameMIDlet1.length() > 0)
 				{
-					MIDletSuiteStorage storage = MIDletSuiteStorage.getMIDletSuiteStorage();
-					int[] suiteIds = storage.getListOfSuites();
-
-					for (int i = 0; i < suiteIds.length; i++)
+					try
 					{
-						MIDletSuite suite = storage.getMIDletSuite(suiteIds[i], false);
-						String value = suite.getProperty("MIDlet-1");
-						suite.close();
-						if (null != value && nameMIDlet1.equals(value.substring(0, nameMIDlet1.length())))
+						MIDletSuiteStorage storage = MIDletSuiteStorage.getMIDletSuiteStorage();
+						int[] suiteIds = storage.getListOfSuites();
+
+						for (int i = 0; i < suiteIds.length; i++)
 						{
-							id = suiteIds[i];
-							break;
+							MIDletSuite suite = storage.getMIDletSuite(suiteIds[i], false);
+							String value = suite.getProperty("MIDlet-1");
+							suite.close();
+							if (null != value)
+							{
+								commaIndex = value.indexOf(',');
+								if (-1 != commaIndex)
+								{
+									value = value.substring(0, commaIndex);
+								}
+								if (nameMIDlet1.equals(value))
+								{
+									id = suiteIds[i];
+									break;
+								}
+							}
 						}
 					}
-				}
-				catch (Throwable t)
-				{
-					if (Logging.REPORT_LEVEL <= Logging.WARNING)
+					catch (Throwable t)
 					{
-						Logging.report(Logging.WARNING, LogChannels.LC_AMS, "Throwable during MIDlet-1 suite iteration");
+						if (Logging.REPORT_LEVEL <= Logging.WARNING)
+						{
+							Logging.report(Logging.WARNING, LogChannels.LC_AMS, "Throwable during MIDlet-1 suite iteration");
+						}
 					}
 				}
 			}
