@@ -246,7 +246,19 @@ public class Launcher extends MIDlet implements Runnable, CommandListener,MIDlet
                     downloadMidlet(jadUrl);
                 } else {
 					String smsBody = SMSTextReader.getInstallSMSBody("BlueWhale");
-					debugMessage("smsBody " + smsBody);
+					debugMessage("BlueWhale smsBody " + smsBody);
+					
+					// If null, try searching for partner mode sender strings.
+					// See ticket:3664 VM needs to recognize skymobileemail.com addresses in the SMS
+					if( null == smsBody ) {
+	                    smsBody = SMSTextReader.getInstallSMSBody("SkyMobile");
+	                    debugMessage("SkyMobile smsBody " + smsBody);
+	                    if( null == smsBody ) {
+	                        smsBody = SMSTextReader.getInstallSMSBody("SkyEmail");
+	                        debugMessage("SkyEmail smsBody " + smsBody);
+	                    }
+					}
+					
 					String jadUrl = parseJadDownloadURL(smsBody);
 					debugMessage("jadUrl " + jadUrl);
 					if (jadUrl == null) {
