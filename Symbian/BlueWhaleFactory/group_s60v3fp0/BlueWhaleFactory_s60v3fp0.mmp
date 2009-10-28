@@ -39,7 +39,7 @@ TARGET        BlueWhaleFactory.dll
 TARGETTYPE    dll
 UID           0x1000008d 0x2000E277
 
-CAPABILITY     NetworkServices ReadUserData WriteUserData ReadDeviceData WriteDeviceData TrustedUI
+CAPABILITY     NetworkServices ReadUserData WriteUserData ReadDeviceData WriteDeviceData TrustedUI SWEvent
 
 OPTION GCCE -O2 -fno-unit-at-a-time
 
