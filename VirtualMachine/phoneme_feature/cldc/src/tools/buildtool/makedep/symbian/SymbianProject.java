@@ -159,9 +159,8 @@ class SymbianProject extends SymbianIDEProject
         out.write("?ImplementationGroupProxy@@YAPBUTImplementationProxy@@AAH@Z @ 5 NONAME ; struct TImplementationProxy const * ImplementationGroupProxy(int &)\n".getBytes());
         out.write("?NewLC@CVMArguments@@SAPAV1@XZ @ 6 NONAME ; class CVMArguments * CVMArguments::NewLC(void)\n".getBytes());
         out.write("?NewLC@CVMProperties@@SAPAV1@XZ @ 7 NONAME ; class CVMProperties * CVMProperties::NewLC(void)\n".getBytes());
-        out.write("?RunVMCode@@YAHPBGPADAAVCVMProperties@@AAVCVMArguments@@PAVMApplication@@@Z @ 8 NONAME ; int RunVMCode(unsigned short const *, char *, class CVMProperties &, class CVMArguments &, class MApplication *)\n".getBytes());
-
-out.close();
+        out.write("?RunVMCode@@YAHPBGPADAAVCVMProperties@@AAVCVMArguments@@PAVMApplication@@PBD@Z @ 8 NONAME ; int RunVMCode(unsigned short const *, char *, class CVMProperties &, class CVMArguments &, class MApplication *, char const *)\n".getBytes());
+        out.close();
 	}
 	
     Vector getLibraries()
