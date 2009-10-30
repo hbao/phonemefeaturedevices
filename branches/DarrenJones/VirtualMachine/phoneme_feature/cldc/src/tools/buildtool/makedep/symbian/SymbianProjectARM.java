@@ -180,7 +180,7 @@ class SymbianProjectARM extends SymbianIDEProjectARM
 			out.write("EXPORTS\n".getBytes());
                     
             out.write("_Z24ImplementationGroupProxyRi @ 1 NONAME ; CODE\n".getBytes());
-            out.write("_Z9RunVMCodePKtPcR13CVMPropertiesR12CVMArgumentsP12MApplication @ 2 NONAME ; CODE\n".getBytes());
+            out.write("_Z9RunVMCodePKtPcR13CVMPropertiesR12CVMArgumentsP12MApplicationPKc @ 2 NONAME ; CODE\n".getBytes());
             out.write("_ZN13CVMProperties4AddLERK6TDesC8S2_ @ 3 NONAME ; CODE\n".getBytes());
             out.write("_ZN13CVMProperties5CountEv @ 4 NONAME ; CODE\n".getBytes());
             out.write("_ZN13CVMProperties5NewLCEv @ 5 NONAME ; CODE\n".getBytes());
