@@ -84,7 +84,7 @@ private: // CEikAppUi
 	static void BackgroundCallback(TAny* aThis);
 	static void ForegroundCallback(TAny* aThis);
 	static void ExitCallback(TAny* aThis);
-	void StartMidpL(const TDesC8& aShortcutName);
+	void StartMidpL(const TDesC8& aShortcutName, const TBool aAutoStarted);
 	static void ShowLowMemoryWarningL();
 	
 	MTimerStateMachine* iVM;

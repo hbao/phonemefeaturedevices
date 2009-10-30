@@ -218,17 +218,20 @@ void CBlueWhalePlatformAppUi::ExitCallback(TAny* aThis)
 #if (__S60_VERSION__ >= __S60_V3_FP0_VERSION_NUMBER__) || (__UIQ_VERSION_NUMBER__ >= __UIQ_V3_FP0_VERSION_NUMBER__)
 TBool CBlueWhalePlatformAppUi::ProcessCommandParametersL(CApaCommandLine& aCommandLine)
 {
+	TBool autoStarted = EFalse;
 	if(aCommandLine.Command() == EApaCommandBackground)
 	{
 		iEikonEnv->RootWin().SetOrdinalPosition(-1);
+		autoStarted = ETrue;
 	}
 	else
 	{
 		iEikonEnv->RootWin().SetOrdinalPosition(0);
+		autoStarted = EFalse;
 	}
 	
 	iView = GetOrCreateViewL(KCID_MBaseMIDPView,KCID_MBaseMIDPView,this,ETrue);
-	StartMidpL(aCommandLine.OpaqueData());
+	StartMidpL(aCommandLine.OpaqueData(), autoStarted);
 	return __BWM_APPUI__::ProcessCommandParametersL(aCommandLine);
 }
 #elif __S60_VERSION__ >= __S60_V2_FP1_VERSION_NUMBER__
@@ -238,14 +241,14 @@ TBool CBlueWhalePlatformAppUi::ProcessCommandParametersL(TApaCommand aCommand, T
 	{
 		iEikonEnv->RootWin().SetOrdinalPosition(0);
 	    iView = GetOrCreateViewL(KCID_MBaseMIDPView,KCID_MBaseMIDPView,this,ETrue);
-	    StartMidpL(aTail);
+	    StartMidpL(aTail, EFalse);
 	}
 	else
 	{
 		// autostarting - need to to bring the window to the front or midlet will fail to launch on s60v2fp2
 		iEikonEnv->RootWin().SetOrdinalPosition(0);
 	    iView = GetOrCreateViewL(KCID_MBaseMIDPView,KCID_MBaseMIDPView,this,ETrue);
-	    StartMidpL(aTail);
+	    StartMidpL(aTail, ETrue);
 	}
 	return CAknViewAppUi::ProcessCommandParametersL(aCommand, aDocumentName, aTail);
 }
@@ -261,7 +264,7 @@ void CBlueWhalePlatformAppUi::HandleCommandL(TInt aCommand)
 	}
 }
 
-void CBlueWhalePlatformAppUi::StartMidpL(const TDesC8& aShortcutName)
+void CBlueWhalePlatformAppUi::StartMidpL(const TDesC8& aShortcutName, const TBool aAutoStarted)
 {
 	MVMObjectFactory* factory = DiL(MVMObjectFactory);
 	CleanupReleasePushL(*factory);
@@ -285,6 +288,7 @@ void CBlueWhalePlatformAppUi::StartMidpL(const TDesC8& aShortcutName)
 	properties = DiL(MProperties);
 	CleanupReleasePushL(*properties);
 	properties->SetString8L(KPropertyString8ShortcutName, aShortcutName);
+	properties->SetIntL(KPropertyIntAutoStarted, aAutoStarted);
 	iVM->AcceptCommandL(KCommandOnline, properties);
 	CleanupStack::PopAndDestroy(properties);
 
