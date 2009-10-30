@@ -208,11 +208,11 @@ void CVMTimerStateMachine::DoReadyStateL(TCommand aCommand, MProperties* aComman
 		iDebugTimer = CPeriodic::NewL(CActive::EPriorityIdle);
 		if (aCommandProperties)
 		{		
-			CreateVML(aCommandProperties->GetString8L(KPropertyString8ShortcutName));
+			CreateVML(aCommandProperties->GetString8L(KPropertyString8ShortcutName), aCommandProperties->GetIntL(KPropertyIntAutoStarted));
 		}
 		else
 		{
-			CreateVML(KNullDesC8);
+			CreateVML(KNullDesC8, EFalse);
 		}
 		iVMManager->StartL();
 		iVMThread->StartL();
@@ -352,7 +352,7 @@ TBool CVMTimerStateMachine::AcceptCommandL(TCommand aCommand, MProperties * aCom
 void CVMTimerStateMachine::Reset()
 {}
 
-void CVMTimerStateMachine::CreateVML(const TDesC8& aShortcutName)
+void CVMTimerStateMachine::CreateVML(const TDesC8& aShortcutName, const TBool aAutoStarted)
 {
 	TBuf<32> name;
 	name.Format(KManThreadName(),iInstanceCount);
@@ -369,7 +369,7 @@ void CVMTimerStateMachine::CreateVML(const TDesC8& aShortcutName)
 
 	iVMThread = iFactory->CreateVMThreadObject(name);
 	
-	iJVM = new (ELeave) CJVMRunner(reinterpret_cast<MApplication*>(iApp), aShortcutName);
+	iJVM = new (ELeave) CJVMRunner(reinterpret_cast<MApplication*>(iApp), aShortcutName, aAutoStarted);
 	iVMThread->AddL(iJVM);
 	undertaker = new (ELeave)CMyUndertaker(&iVMThread->Thread(),this);
 	CleanupStack::PushL(undertaker);
@@ -493,7 +493,8 @@ TBool CVMTimerStateMachine::Offline() const
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
-CJVMRunner::CJVMRunner(MApplication* aApplication, const TDesC8& aShortcutName) : CActive(EPriorityNormal), iApplication(aApplication), iShortcutName(aShortcutName)
+CJVMRunner::CJVMRunner(MApplication* aApplication, const TDesC8& aShortcutName, const TBool aAutoStarted)
+: CActive(EPriorityNormal), iApplication(aApplication), iShortcutName(aShortcutName), iAutoStarted(aAutoStarted)
 {
 }
 
@@ -810,8 +811,41 @@ TInt CJVMRunner::RunVML()
     arguments->AddL(KTraceBytecodes());
     arguments->AddL(KTraceBytecodesStop());
 #endif
+	TBool nothingInstalled = ETrue;
+	RFs fs;
+	if (fs.Connect() == KErrNone)
+	{
+		CleanupClosePushL(fs);
+		TFindFile findFile(fs);
 
-	TInt ret = RunVMCode(NULL,(char*)mainClass.PtrZ(),*properties,*arguments,iApplication);
+		TBuf<2> drive;
+#ifdef __WINSCW__
+		drive = _L("c:"); 
+#else
+		TParsePtrC parse(RProcess().FileName());
+		drive = parse.Drive();
+#endif
+		_LIT(KLitJarsPath, "%S\\private\\%08x\\app\\");
+		TFileName pathToJars;
+		pathToJars.Format(KLitJarsPath, &drive, KUidBlueWhalePlatformApp);
+		CDir* dir = NULL;
+		if (findFile.FindWildByPath(_L("*.jar"), &pathToJars, dir) == KErrNone)
+		{
+			delete dir;
+			nothingInstalled = EFalse;
+		}
+		CleanupStack::PopAndDestroy(&fs);
+	}
+    
+	const char* launcher = "com.bluewhalesystems.midp.Launcher";
+	const char* browser = "com.sun.midp.appmanager.MVMManager";
+	const char* midlet = browser;
+	if (iShortcutName.Length() || nothingInstalled || iAutoStarted)
+	{
+		midlet = launcher;
+	}
+	
+	TInt ret = RunVMCode(NULL,(char*)mainClass.PtrZ(),*properties,*arguments,iApplication,midlet);
 	DEBUGMESSAGE1(_L("VM exited %d"),ret);
 	CleanupStack::PopAndDestroy(arguments);
 	CleanupStack::PopAndDestroy(properties);

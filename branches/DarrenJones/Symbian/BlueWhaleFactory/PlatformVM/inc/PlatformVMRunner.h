@@ -82,7 +82,7 @@ public:
 class CJVMRunner : public CActive, public MRunnable
 {
 	public:
-		CJVMRunner(MApplication* aApplication, const TDesC8& aShortcutName);
+		CJVMRunner(MApplication* aApplication, const TDesC8& aShortcutName, const TBool aAutoStarted);
 		~CJVMRunner();
 		void ConstructL();
 		void StartL(RThread& aThread);
@@ -103,6 +103,7 @@ class CJVMRunner : public CActive, public MRunnable
 		MApplication* iApplication;
 		MThread* iThread;
 		TBuf8<256> iShortcutName;
+		TBool iAutoStarted;
 };
 
 
