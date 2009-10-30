@@ -92,7 +92,7 @@ private:
 
 
 
-IMPORT_C TInt RunVMCode(const JvmPathChar * aClassPath,char* aMainClass,CVMProperties& aProperties,CVMArguments& aArguments,MApplication* aApp);
+IMPORT_C TInt RunVMCode(const JvmPathChar * aClassPath,char* aMainClass,CVMProperties& aProperties,CVMArguments& aArguments,MApplication* aApp,const char* aMIDlet);
 
 typedef enum
 {
