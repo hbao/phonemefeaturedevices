@@ -92,7 +92,7 @@ int resizeScreenBuffer()
     } 
 	else 
 	{
-        memset(gxj_system_screen_buffer.pixelData, 0, newScreenSize);
+        memset(gxj_system_screen_buffer.pixelData, 65535, newScreenSize);
     }
 	return result;
 }
