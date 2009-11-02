@@ -427,6 +427,7 @@ void CBlueWhaleStarter::FindAndLaunchPlatformL(RFs& aFs, TBool aBackground)
 	{
 		cmdLine->SetCommandL(EApaCommandRun);
 	}
+	cmdLine->SetTailEndL(_L8("Autostart"));
 
 	RApaLsSession lsSession;
 	User::LeaveIfError(lsSession.Connect());

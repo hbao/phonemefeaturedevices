@@ -219,15 +219,17 @@ void CBlueWhalePlatformAppUi::ExitCallback(TAny* aThis)
 TBool CBlueWhalePlatformAppUi::ProcessCommandParametersL(CApaCommandLine& aCommandLine)
 {
 	TBool autoStarted = EFalse;
+	if (aCommandLine.TailEnd() == _L8("Autostart"))
+	{
+		autoStarted = ETrue;
+	}
 	if(aCommandLine.Command() == EApaCommandBackground)
 	{
 		iEikonEnv->RootWin().SetOrdinalPosition(-1);
-		autoStarted = ETrue;
 	}
 	else
 	{
 		iEikonEnv->RootWin().SetOrdinalPosition(0);
-		autoStarted = EFalse;
 	}
 	
 	iView = GetOrCreateViewL(KCID_MBaseMIDPView,KCID_MBaseMIDPView,this,ETrue);
@@ -237,18 +239,25 @@ TBool CBlueWhalePlatformAppUi::ProcessCommandParametersL(CApaCommandLine& aComma
 #elif __S60_VERSION__ >= __S60_V2_FP1_VERSION_NUMBER__
 TBool CBlueWhalePlatformAppUi::ProcessCommandParametersL(TApaCommand aCommand, TFileName &aDocumentName, const TDesC8 &aTail)
 {
+	TBool autoStarted = ETrue;
+	TPtrC8 tail;
+	if (aTail != _L8("Autostart"))
+	{
+		autoStarted = EFalse;
+		tail.Set(aTail);
+	}
 	if (aCommand == EApaCommandRun)
 	{
 		iEikonEnv->RootWin().SetOrdinalPosition(0);
 	    iView = GetOrCreateViewL(KCID_MBaseMIDPView,KCID_MBaseMIDPView,this,ETrue);
-	    StartMidpL(aTail, EFalse);
+	    StartMidpL(tail, autoStarted);
 	}
 	else
 	{
-		// autostarting - need to to bring the window to the front or midlet will fail to launch on s60v2fp2
+		// should background here but can't - midlet will fail to launch on s60v2fp2
 		iEikonEnv->RootWin().SetOrdinalPosition(0);
 	    iView = GetOrCreateViewL(KCID_MBaseMIDPView,KCID_MBaseMIDPView,this,ETrue);
-	    StartMidpL(aTail, ETrue);
+	    StartMidpL(tail, autoStarted);
 	}
 	return CAknViewAppUi::ProcessCommandParametersL(aCommand, aDocumentName, aTail);
 }
