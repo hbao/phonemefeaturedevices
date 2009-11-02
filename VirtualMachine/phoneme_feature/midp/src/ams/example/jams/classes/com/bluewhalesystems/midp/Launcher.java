@@ -60,6 +60,7 @@ public class Launcher extends MIDlet implements Runnable, CommandListener,MIDlet
 	private String iMIDletName;
 	private String iMIDletFullName;
     private Form iForm;
+    private SplashScreenCanvas iSplashScreenCanvas;
     private StringItem iProgressString;
     private HttpConnection iHttpConnection;
     private JadProperties iCurrentProperties;
@@ -95,22 +96,7 @@ public class Launcher extends MIDlet implements Runnable, CommandListener,MIDlet
 		iMIDletName = System.getProperty("x-bw-app-name");
 		iMIDletFullName = System.getProperty("x-bw-app-full-name");
         midletProxyList.getMIDletProxyList().addListener(this);
-        iProgressString = new StringItem(null, "");
-        iForm = new Form(iMIDletName);
-        iLauncherCustomItem = new LauncherCustomItem(iForm);
-        iProgId = iForm.append(iProgressString);
-        iForm.append(iLauncherCustomItem);
 
-        iCommandCancel = new Command("Cancel", Command.CANCEL, 0);
-        iCommandMenuCancel = new Command("Cancel", Command.ITEM, 0);	// cancel options that appears in the menu rather than cba
-        iForm.addCommand(iCommandCancel);
-        iCommandExit = new Command("Exit", Command.BACK, 0);
-        iCommandYes = new Command("Yes", Command.BACK, 0);
-        iCommandNo = new Command("No", Command.ITEM, 0);
-        iCommandStopAutoStart = new Command("Stop Autostart", Command.ITEM, 1);
-        iCommandStartAutoStart = new Command("Autostart", Command.ITEM, 1);
-        iCommandRetry = new Command("Retry", Command.BACK, 0);
-        iForm.setCommandListener(this);
         iLock = new Object();
 
         MIDletProxy thisMidlet;
@@ -133,6 +119,23 @@ public class Launcher extends MIDlet implements Runnable, CommandListener,MIDlet
         midletProxyList.setDisplayController(iDisplayController);
 
         if (!isInstalled()) {
+			iProgressString = new StringItem(null, "");
+			iForm = new Form(iMIDletName);
+			iLauncherCustomItem = new LauncherCustomItem(iForm);
+			iProgId = iForm.append(iProgressString);
+			iForm.append(iLauncherCustomItem);
+
+			iCommandCancel = new Command("Cancel", Command.CANCEL, 0);
+			iCommandMenuCancel = new Command("Cancel", Command.ITEM, 0);	// cancel options that appears in the menu rather than cba
+			iForm.addCommand(iCommandCancel);
+			iCommandExit = new Command("Exit", Command.BACK, 0);
+			iCommandYes = new Command("Yes", Command.BACK, 0);
+			iCommandNo = new Command("No", Command.ITEM, 0);
+			iCommandStopAutoStart = new Command("Stop Autostart", Command.ITEM, 1);
+			iCommandStartAutoStart = new Command("Autostart", Command.ITEM, 1);
+			iCommandRetry = new Command("Retry", Command.BACK, 0);
+			iForm.setCommandListener(this);
+
             iProgressString.setText(iMIDletName + " needs to check for features specific to your phone. This will use airtime. Proceed?\n");
             iForm.removeCommand(iCommandCancel);
             iForm.addCommand(iCommandYes);
@@ -146,6 +149,7 @@ public class Launcher extends MIDlet implements Runnable, CommandListener,MIDlet
             }
             iStatus = DOWNLOAD_WAITING_FOR_USER;
         } else {
+			iSplashScreenCanvas = new SplashScreenCanvas();
             iStatus = DOWNLOAD_UNNECESSARY;
         }
         initializeListener();
@@ -286,8 +290,11 @@ public class Launcher extends MIDlet implements Runnable, CommandListener,MIDlet
             switch (iStatus) {
             case DOWNLOAD_UNNECESSARY:
                 debugMessage("MIDlet is installed\n");
-                iForm.removeCommand(iCommandCancel);
-                iForm.addCommand(iCommandExit);
+                if (null != iForm)
+                {
+					iForm.removeCommand(iCommandCancel);
+					iForm.addCommand(iCommandExit);
+				}
                 finished = true;
                 break;
             case DOWNLOAD_FAILED:
@@ -324,7 +331,14 @@ public class Launcher extends MIDlet implements Runnable, CommandListener,MIDlet
     }
 
     public void startApp() {
-        Display.getDisplay(this).setCurrent(iForm);
+		if (null != iForm)
+		{
+			Display.getDisplay(this).setCurrent(iForm);
+		}
+		else if (null != iSplashScreenCanvas)
+		{
+			Display.getDisplay(this).setCurrent(iSplashScreenCanvas);
+		}
         Thread t = new Thread(this);
         t.start();
     }
