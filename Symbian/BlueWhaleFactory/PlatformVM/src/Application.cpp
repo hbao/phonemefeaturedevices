@@ -640,7 +640,9 @@ void CMIDPApp::ConstructL()
 	}
 	if (!iPhoneCall)
 	{
+#ifndef __WINSCW__
 		TRAPD(ignore, iPhoneCall = CPhoneCall::NewL());	// don't let telephony failures stop us starting up
+#endif
 	}
 }
 
