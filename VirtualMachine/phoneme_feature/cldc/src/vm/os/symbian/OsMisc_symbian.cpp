@@ -39,10 +39,13 @@
 #include <midpport_eventqueue.h>
 #include <midpEventUtil.h>
 #include <keymap_input.h>
+#include <DeadlockFinder.hpp>
 
 #ifdef __WINSCW__
 //#define __DEBUGEVENTS__
 #endif
+
+//#define ENABLE_DEADLOCK_LOGGING
 
 extern "C" {
 #ifndef __WINS__
@@ -80,6 +83,9 @@ void JVMSPI_CheckEvents(JVMSPI_BlockedThreadInfo * blocked_threads,int blocked_t
 	
 	if(blocked_threads_count > 0)
 	{
+#ifdef ENABLE_DEADLOCK_LOGGING
+		DeadlockFinder::find_and_print_deadlocks(tty);
+#endif
 #ifdef __DEBUGEVENTS__
 		MidpReentryData* threadReentryData;
 		TBool doneHeader = EFalse;

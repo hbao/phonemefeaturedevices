@@ -19,6 +19,12 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA
  * 
+ * NOTICE: Portions Copyright (c) 2007-2009 Blue Whale Systems.
+ * This file has been modified by Blue Whale Systems on 04Nov2009.
+ * The changes are licensed under the terms of the GNU General Public
+ * License version 2. This notice was added to meet the conditions of
+ * Section 3.a of the GNU General Public License version 2.
+ * 
  * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa
  * Clara, CA 95054 or visit www.sun.com if you need additional
  * information or have any questions.
@@ -161,6 +167,7 @@ static void print_loop(BlockedThread* start, Stream* out) {
   out->print_cr("DEADLOCK:");
   do {
     Thread::Raw thread = bt->thread;
+	thread().trace_stack(out);			// Added by BlueWhaleSystems to provide more information
     out->print("  ");
     thread().print_value_on(out);
     Oop::Raw o = bt->sl->owner();
