@@ -337,7 +337,9 @@ KNIEXPORT KNI_RETURNTYPE_VOID Java_com_sun_midp_installer_GraphicalInstaller_000
 		RFs fs;
 		if (fs.Connect() == KErrNone)
 		{
-			CleanupClosePushL(fs);
+#if __UIQ_VERSION_NUMBER__ >= __UIQ_V3_FP0_VERSION_NUMBER__
+			fs.ShareProtected();
+#endif
 			TFileName shortcutPath(static_cast<MApplication*>(Dll::Tls())->GetFullPath(KShortcutsPath));
 			TInt ignore = fs.MkDirAll(shortcutPath);
 			shortcutPath += fileName;
@@ -354,7 +356,6 @@ KNIEXPORT KNI_RETURNTYPE_VOID Java_com_sun_midp_installer_GraphicalInstaller_000
 				SwiUI::RSWInstSilentLauncher installer;
 				if (installer.Connect() == KErrNone)
 				{
-					CleanupClosePushL(installer);
 					SwiUI::TInstallOptions options;
 					options.iUpgrade = SwiUI::EPolicyAllowed;
 					options.iOCSP = SwiUI::EPolicyNotAllowed;
@@ -373,33 +374,56 @@ KNIEXPORT KNI_RETURNTYPE_VOID Java_com_sun_midp_installer_GraphicalInstaller_000
 					TRequestStatus status;
 					installer.SilentInstall(status, shortcutPath, optionsPckg);
 					User::WaitForRequest(status);
-					CleanupStack::PopAndDestroy(&installer);
+				}
+#elif __UIQ_VERSION_NUMBER__ >= __UIQ_V3_FP0_VERSION_NUMBER__
+				// start the installer
+				RApaLsSession apaLsSession;
+				if (apaLsSession.Connect() == KErrNone)
+				{
+					RFile file;
+					if (file.Open(fs, shortcutPath, EFileRead) == KErrNone)
+					{
+						TThreadId threadId;
+						if (apaLsSession.StartDocument(file, threadId) == KErrNone)
+						{
+							RThread thread;
+							if (thread.Open(threadId) == KErrNone)
+							{
+								TRequestStatus requestStatus;
+								thread.Logon(requestStatus);
+								User::WaitForRequest(requestStatus);
+								thread.Close();
+							}
+						}
+						file.Close();
+					}
+					apaLsSession.Close();
 				}
 #else
 				// start the installer
 				RApaLsSession apaLsSession;
-				User::LeaveIfError(apaLsSession.Connect());
-				CleanupClosePushL(apaLsSession);
-				TThreadId threadId;
-				if (apaLsSession.StartDocument(shortcutPath, threadId) == KErrNone)
+				if (apaLsSession.Connect() == KErrNone)
 				{
-					RThread thread;
-					if (thread.Open(threadId) == KErrNone)
+					TThreadId threadId;
+					if (apaLsSession.StartDocument(shortcutPath, threadId) == KErrNone)
 					{
-						TRequestStatus requestStatus;
-						thread.Logon(requestStatus);
-						User::WaitForRequest(requestStatus);
-						thread.Close();
+						RThread thread;
+						if (thread.Open(threadId) == KErrNone)
+						{
+							TRequestStatus requestStatus;
+							thread.Logon(requestStatus);
+							User::WaitForRequest(requestStatus);
+							thread.Close();
+						}
 					}
+					apaLsSession.Close();
 				}
-
-				CleanupStack::PopAndDestroy(&apaLsSession);
 #endif
 
 #endif
 				TInt ignore = fs.Delete(shortcutPath);
 			}
-			CleanupStack::PopAndDestroy(&fs);
+			fs.Close();
 		}
 	}
 
