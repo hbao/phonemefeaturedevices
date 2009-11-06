@@ -37,7 +37,7 @@ _LIT(KPersistSisFileName, "sisfilename.txt");
 #if __S60_VERSION__ >= __S60_V3_FP0_VERSION_NUMBER__
 _LIT(KDownloadDirC, "c:\\system\\dmgr\\");
 _LIT(KDownloadDirE, "e:\\system\\dmgr\\");
-_LIT(KInstallDir, "c:\\data\\installs\\;e:\\data\\installs\\");
+_LIT(KInstallDir, "c:\\data\\installs\\;e:\\;e:\\data\\installs\\");
 #elif __S60_VERSION__ >= __S60_V2_FP1_VERSION_NUMBER__
 _LIT(KInstallDir, "c:\\nokia\\installs\\;c:\\system\\install\\;e:\\;e:\\system\\install\\");
 #elif __UIQ_VERSION_NUMBER__ >= __UIQ_V3_FP0_VERSION_NUMBER__
