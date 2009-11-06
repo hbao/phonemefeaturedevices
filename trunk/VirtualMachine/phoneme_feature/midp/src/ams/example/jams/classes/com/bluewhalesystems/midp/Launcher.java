@@ -84,6 +84,7 @@ public class Launcher extends MIDlet implements Runnable, CommandListener,MIDlet
 	private EventQueue iEventQueue;
 	private BWMDisplayController iDisplayController;
     private String iUrl = null;
+    private String iDefaultUrl;
     
     private static void debugMessage(String aMessage) {
         if (iDebug) {
@@ -96,6 +97,27 @@ public class Launcher extends MIDlet implements Runnable, CommandListener,MIDlet
 		iMIDletName = System.getProperty("x-bw-app-name");
 		iMIDletFullName = System.getProperty("x-bw-app-full-name");
         midletProxyList.getMIDletProxyList().addListener(this);
+        iDefaultUrl = new String(DEFAULT_URL);
+        String installFileName = System.getProperty("x-bw-vm-install-filename");
+        if (null != installFileName)
+		{
+			String bluewhale = new String("bluewhale");
+			int bluewhaleIndex = installFileName.indexOf(bluewhale);
+			if (-1 != bluewhaleIndex)
+			{
+				int underscoreIndex = installFileName.indexOf("_", bluewhaleIndex);
+				if (-1 != underscoreIndex)
+				{
+					String partner = installFileName.substring(bluewhaleIndex + bluewhale.length(), underscoreIndex);
+					if (partner.length() > 2)
+					{
+						// strip the surrounding hyphens
+						partner = partner.substring(1, partner.length() - 1);
+						iDefaultUrl = new String(iDefaultUrl + "&x-bw-pm=" + partner);
+					}
+				}
+			}
+		}
 
         iLock = new Object();
 
@@ -246,7 +268,7 @@ public class Launcher extends MIDlet implements Runnable, CommandListener,MIDlet
                     iStatus = DOWNLOAD_UNNECESSARY;
                 } else if (iLauncherCustomItem.getPreprod()) {
                     setAutoAPN();
-                    String jadUrl = switchToDebugURL(DEFAULT_URL);
+                    String jadUrl = switchToDebugURL(iDefaultUrl);
                     downloadMidlet(jadUrl);
                 } else {
 					String smsBody = SMSTextReader.getInstallSMSBody("BlueWhale");
@@ -266,7 +288,7 @@ public class Launcher extends MIDlet implements Runnable, CommandListener,MIDlet
 					String jadUrl = parseJadDownloadURL(smsBody);
 					debugMessage("jadUrl " + jadUrl);
 					if (jadUrl == null) {
-					jadUrl = DEFAULT_URL;
+					jadUrl = iDefaultUrl;
 					}
 
                     downloadMidlet(jadUrl);
