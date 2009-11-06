@@ -591,6 +591,7 @@ abstract class SymbianMIDPBase extends NMakefile
 		
         // Bluewhale systems AMS code
         v.addElement("$(MIDP_SRC_DIR)\\ams\\example\\jams\\classes\\com\\bluewhalesystems\\midp\\Launcher.java");
+        v.addElement("$(MIDP_SRC_DIR)\\ams\\example\\jams\\classes\\com\\bluewhalesystems\\midp\\SplashScreenCanvas.java");
         v.addElement("$(MIDP_SRC_DIR)\\ams\\example\\jams\\classes\\com\\bluewhalesystems\\midp\\LauncherCustomItem.java");
 		v.addElement("$(MIDP_SRC_DIR)\\ams\\example\\jams\\classes\\com\\bluewhalesystems\\midp\\BWMDisplayController.java");
         v.addElement("$(MIDP_SRC_DIR)\\ams\\example\\jams\\classes\\com\\bluewhalesystems\\midp\\PlatformRequestListener.java");
