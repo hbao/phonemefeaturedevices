@@ -195,9 +195,9 @@ static LRESULT processKey(HWND hwnd, UINT action, int key);
 static LRESULT processSystemKey(HWND hwnd, int key);
 static void updateEditorForRotation();
 
-#if !ENABLE_CDC
-void JVMSPI_SetSystemProperty(const char* property_name, const char* property_value);
-#endif
+// #if !ENABLE_CDC
+// void JVMSPI_SetSystemProperty(const char* property_name, const char* property_value);
+// #endif
 
 /**
  * @file
