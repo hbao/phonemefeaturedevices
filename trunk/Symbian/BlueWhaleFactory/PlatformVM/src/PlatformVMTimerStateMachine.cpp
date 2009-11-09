@@ -818,11 +818,12 @@ TInt CJVMRunner::RunVML()
 		CleanupClosePushL(fs);
 		TFindFile findFile(fs);
 
-		TBuf<2> drive;
+		TFileName drive;
 #ifdef __WINSCW__
 		drive = _L("c:"); 
 #else
-		TParsePtrC parse(RProcess().FileName());
+		Dll::FileName(drive);
+		TParsePtrC parse(drive);
 		drive = parse.Drive();
 #endif
 		_LIT(KLitJarsPath, "%S\\private\\%08x\\app\\");
