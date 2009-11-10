@@ -19,6 +19,12 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA
  * 
+ * NOTICE: Portions Copyright (c) 2007-2009 Blue Whale Systems.
+ * This file has been modified by Blue Whale Systems on 27Oct2009.
+ * The changes are licensed under the terms of the GNU General Public
+ * License version 2. This notice was added to meet the conditions of
+ * Section 3.a of the GNU General Public License version 2.
+ * 
  * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa
  * Clara, CA 95054 or visit www.sun.com if you need additional
  * information or have any questions.
@@ -583,6 +589,7 @@ public abstract class Installer {
         }
 
         info.id = state.midletSuiteStorage.createSuiteID();
+		info.iMIDlet1 = state.jadProps.getProperty("MIDlet-1");
 
         checkPreviousVersion();
         state.nextStep++;
@@ -923,6 +930,7 @@ public abstract class Installer {
                 // if already installed, check the domain of the JAR URL
 
                 info.id = state.midletSuiteStorage.createSuiteID();
+				info.iMIDlet1 = state.jarProps.getProperty("MIDlet-1");
 
                 checkPreviousVersion();
             }
@@ -1416,9 +1424,62 @@ public abstract class Installer {
 
         // Check if app already exists
         id = MIDletSuiteStorage.getSuiteID(info.suiteVendor, info.suiteName);
-        if (id == MIDletSuite.UNUSED_SUITE_ID) {
-            // there is no previous version
-            return;
+        if (id == MIDletSuite.UNUSED_SUITE_ID)
+        {
+			if (null != info.iMIDlet1)
+			{
+				// try to match based on "MIDlet-1" property
+
+				// only use the first of the comma-separated values
+				String nameMIDlet1 = new String(info.iMIDlet1);
+				int commaIndex = nameMIDlet1.indexOf(',');
+				if (-1 != commaIndex)
+				{
+					nameMIDlet1 = nameMIDlet1.substring(0, commaIndex);
+				}
+				
+				if (nameMIDlet1.length() > 0)
+				{
+					try
+					{
+						MIDletSuiteStorage storage = MIDletSuiteStorage.getMIDletSuiteStorage();
+						int[] suiteIds = storage.getListOfSuites();
+
+						for (int i = 0; i < suiteIds.length; i++)
+						{
+							MIDletSuite suite = storage.getMIDletSuite(suiteIds[i], false);
+							String value = suite.getProperty("MIDlet-1");
+							suite.close();
+							if (null != value)
+							{
+								commaIndex = value.indexOf(',');
+								if (-1 != commaIndex)
+								{
+									value = value.substring(0, commaIndex);
+								}
+								if (nameMIDlet1.equals(value))
+								{
+									id = suiteIds[i];
+									break;
+								}
+							}
+						}
+					}
+					catch (Throwable t)
+					{
+						if (Logging.REPORT_LEVEL <= Logging.WARNING)
+						{
+							Logging.report(Logging.WARNING, LogChannels.LC_AMS, "Throwable during MIDlet-1 suite iteration");
+						}
+					}
+				}
+			}
+
+			if (id == MIDletSuite.UNUSED_SUITE_ID)
+			{
+				// there is no previous version
+				return;
+			}
         }
 
         try {

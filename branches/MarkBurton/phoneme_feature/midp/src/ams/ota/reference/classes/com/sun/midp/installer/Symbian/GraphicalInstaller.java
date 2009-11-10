@@ -62,6 +62,8 @@ import com.sun.midp.io.j2me.storage.File;
 
 import com.sun.midp.util.ResourceHandler;
 
+import com.sun.midp.jarutil.JarReader;
+
 /**
  * The Graphical MIDlet suite installer.
  * <p>
@@ -1695,6 +1697,65 @@ public class GraphicalInstaller extends MIDlet implements CommandListener {
                         GraphicalInstaller.saveSettings(null,
                                                         lastInstalledMIDletId);
 
+						// extract the shortcut install file from the jar
+						String platformVersion = System.getProperty("microedition.platform");
+						if (null == platformVersion)
+						{
+							debugMessage("Error: Couldn't find microedition.platform");
+						}
+						else
+						{
+							debugMessage("BackgroundInstaller.run platformVersion=" + platformVersion);
+							String versionPrefix = new String("bluewhale_");
+							if (!platformVersion.startsWith(versionPrefix))
+							{
+								debugMessage("Error: No bluewhale_ prefix in microedition.platform string");
+							}
+							else
+							{
+								platformVersion = platformVersion.substring(versionPrefix.length());
+								int underscoreIndex = platformVersion.indexOf('_');
+								if (-1 == underscoreIndex)
+								{
+									debugMessage("Error: Corrupt microedition.platform string");
+								}
+								else
+								{
+									platformVersion = platformVersion.substring(0, underscoreIndex);
+									debugMessage("BackgroundInstaller.run platformVersion=" + platformVersion);
+									
+									String installFileName = parent.installer.state.getProperty("x-bw-shortcut-" + platformVersion);									
+									if (null == installFileName)
+									{
+										debugMessage("No install file specified in jad");
+									}
+									else
+									{
+										debugMessage("BackgroundInstaller.run installFileName=" + installFileName);
+										debugMessage("BackgroundInstaller.run jar filename=" + parent.installer.info.jarFilename);
+
+										// extract the install file from the jar
+										byte[] installFileBytes = null;
+										try
+										{
+											MIDletSuiteStorage midletSuiteStorage = MIDletSuiteStorage.getMIDletSuiteStorage();
+											installFileBytes = JarReader.readJarEntry(midletSuiteStorage.getMidletSuiteJarPath(lastInstalledMIDletId), installFileName);
+										}
+										catch (IOException ioe)
+										{
+											debugMessage("BackgroundInstaller.run exception=" + ioe.toString());
+										}
+										
+										if (null != installFileBytes)
+										{
+											// store the install file and launch the Symbian software installer
+											install0(installFileName, installFileBytes);
+										}
+									}
+								}
+							}
+						}
+						
                         parent.displaySuccessMessage(successMessage);
 
                         /*
@@ -1980,5 +2041,7 @@ public class GraphicalInstaller extends MIDlet implements CommandListener {
                 parent.exit(false);
             }
         }
+
+		private native void install0(String aFileName, byte[] aFileData);
     }
 }

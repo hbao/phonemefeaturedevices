@@ -92,7 +92,7 @@ int resizeScreenBuffer()
     } 
 	else 
 	{
-        memset(gxj_system_screen_buffer.pixelData, 0, newScreenSize);
+        memset(gxj_system_screen_buffer.pixelData, 65535, newScreenSize);
     }
 	return result;
 }
@@ -133,7 +133,7 @@ const TInt KIID_MVirtualMachine = 0x59332912;
 class MVirtualMachine : public MUnknown
 {
 public:
-	virtual void RunVMCode(const JvmPathChar * aClassPath,char* aMainClass,MApplication* aApp) = 0;
+	virtual void RunVMCode(const JvmPathChar * aClassPath,char* aMainClass,MApplication* aApp,const char* aMIDlet) = 0;
 
 protected:
 	virtual ~MVirtualMachine() {}
@@ -146,7 +146,7 @@ class CVirtualMachine : public CEComPlusRefCountedBase, public MVirtualMachine
 public:
 	static MVirtualMachine * NewL(TAny * aConstructionParameters );
 
-	virtual void RunVMCode(const JvmPathChar * aClassPath,char* aMainClass,MApplication* aApp);
+	virtual void RunVMCode(const JvmPathChar * aClassPath,char* aMainClass,MApplication* aApp,const char* aMIDlet);
 
 	MUnknown * QueryInterfaceL( TInt aInterfaceId);
 	void AddRef() { CEComPlusRefCountedBase::AddRef(); }
@@ -262,7 +262,7 @@ EXPORT_C const TInt CVMProperties::Count()
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     
     
-EXPORT_C TInt RunVMCode(const JvmPathChar * aClassPath,char* aMainClass,CVMProperties& aProperties,CVMArguments& aArguments,MApplication* aApp)
+EXPORT_C TInt RunVMCode(const JvmPathChar * aClassPath,char* aMainClass,CVMProperties& aProperties,CVMArguments& aArguments,MApplication* aApp,const char* aMIDlet)
 {
 	TInt status = -1;
 	if(aApp)
@@ -319,9 +319,8 @@ EXPORT_C TInt RunVMCode(const JvmPathChar * aClassPath,char* aMainClass,CVMPrope
 
 		MIDPCommandState* commandState = midpGetCommandState();
 
-		const jbyte name[] = "com.bluewhalesystems.midp.Launcher";
-		int len = strlen((const char *)name);
-		pcsl_string_convert_from_utf8(name,len,&commandState->midletClassName);
+		int len = strlen(aMIDlet);
+		pcsl_string_convert_from_utf8((const signed char*)aMIDlet,len,&commandState->midletClassName);
 		
 		const jbyte arg1[] = "http://www.bluewhalesystems.com/download/xhtml/bluewhalemail_midlet.jad";
 		len = strlen((const char *)arg1);
@@ -380,9 +379,9 @@ MVirtualMachine * CVirtualMachine::NewL(TAny * aConstructionParameters )
 	return virtualMachineInterface;
 }
 
-void CVirtualMachine::RunVMCode(const JvmPathChar * aClassPath,char* aMainClass,MApplication* aApp)
+void CVirtualMachine::RunVMCode(const JvmPathChar * aClassPath,char* aMainClass,MApplication* aApp,const char* aMIDlet)
 {
-	RunVMCode(aClassPath,aMainClass,aApp);
+	RunVMCode(aClassPath,aMainClass,aApp,aMIDlet);
 }
 
 
