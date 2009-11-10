@@ -84,7 +84,7 @@ class SymbianProject extends SymbianIDEProject
 				openOutputFile(getName()+ "\\" + getName() + osVersion + ".mmp");
 			}
 			writeHeader();
-			writeTarget();
+			writeTarget(osVersion);
 			writeDefines(osVersion);
 			writeSource();
 			writeInclude();
@@ -159,9 +159,8 @@ class SymbianProject extends SymbianIDEProject
         out.write("?ImplementationGroupProxy@@YAPBUTImplementationProxy@@AAH@Z @ 5 NONAME ; struct TImplementationProxy const * ImplementationGroupProxy(int &)\n".getBytes());
         out.write("?NewLC@CVMArguments@@SAPAV1@XZ @ 6 NONAME ; class CVMArguments * CVMArguments::NewLC(void)\n".getBytes());
         out.write("?NewLC@CVMProperties@@SAPAV1@XZ @ 7 NONAME ; class CVMProperties * CVMProperties::NewLC(void)\n".getBytes());
-        out.write("?RunVMCode@@YAHPBGPADAAVCVMProperties@@AAVCVMArguments@@PAVMApplication@@@Z @ 8 NONAME ; int RunVMCode(unsigned short const *, char *, class CVMProperties &, class CVMArguments &, class MApplication *)\n".getBytes());
-
-out.close();
+        out.write("?RunVMCode@@YAHPBGPADAAVCVMProperties@@AAVCVMArguments@@PAVMApplication@@PBD@Z @ 8 NONAME ; int RunVMCode(unsigned short const *, char *, class CVMProperties &, class CVMArguments &, class MApplication *, char const *)\n".getBytes());
+        out.close();
 	}
 	
     Vector getLibraries()
@@ -264,12 +263,19 @@ out.close();
         putln();
     }
     
-    void writeTarget()
+    void writeTarget(String aOsVersion)
     {
         putln("TARGET\t\t" + getName() + ".dll");
         putln("TARGETTYPE\tdll");
         putln("UID\t0x1000008d 0x2000E279");
-        putln("CAPABILITY\tNetworkServices ReadUserData WriteUserData ReadDeviceData WriteDeviceData");
+        if (aOsVersion.equals("_s60v3fp0"))
+        {
+			putln("CAPABILITY\tNetworkServices ReadUserData WriteUserData ReadDeviceData WriteDeviceData TrustedUI SWEvent");
+		}
+		else if (aOsVersion.equals("_uiqv3fp0"))
+		{
+			putln("CAPABILITY\tNetworkServices ReadUserData WriteUserData ReadDeviceData WriteDeviceData");
+		}
         putln();
     }
     void addFile(Vector aElements, String aFile)

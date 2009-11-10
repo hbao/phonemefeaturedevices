@@ -57,7 +57,10 @@ public class Launcher extends MIDlet implements Runnable, CommandListener,MIDlet
     private static final int DOWNLOAD_WAITING_FOR_USER = 5;
     private static final String SONY_ERICSSON_AUTOSTART	= "autostart://:";
 	private static final String INSTALLER = "com.sun.midp.installer.GraphicalInstaller";
+	private String iMIDletName;
+	private String iMIDletFullName;
     private Form iForm;
+    private SplashScreenCanvas iSplashScreenCanvas;
     private StringItem iProgressString;
     private HttpConnection iHttpConnection;
     private JadProperties iCurrentProperties;
@@ -81,6 +84,7 @@ public class Launcher extends MIDlet implements Runnable, CommandListener,MIDlet
 	private EventQueue iEventQueue;
 	private BWMDisplayController iDisplayController;
     private String iUrl = null;
+    private String iDefaultUrl;
     
     private static void debugMessage(String aMessage) {
         if (iDebug) {
@@ -90,24 +94,31 @@ public class Launcher extends MIDlet implements Runnable, CommandListener,MIDlet
 
     public Launcher() {
         MIDletProxyList midletProxyList = MIDletProxyList.getMIDletProxyList();
-
+		iMIDletName = System.getProperty("x-bw-app-name");
+		iMIDletFullName = System.getProperty("x-bw-app-full-name");
         midletProxyList.getMIDletProxyList().addListener(this);
-        iProgressString = new StringItem(null, "");
-        iForm = new Form("BlueWhaleMail");
-        iLauncherCustomItem = new LauncherCustomItem(iForm);
-        iProgId = iForm.append(iProgressString);
-        iForm.append(iLauncherCustomItem);
+        iDefaultUrl = new String(DEFAULT_URL);
+        String installFileName = System.getProperty("x-bw-vm-install-filename");
+        if (null != installFileName)
+		{
+			String bluewhale = new String("bluewhale");
+			int bluewhaleIndex = installFileName.indexOf(bluewhale);
+			if (-1 != bluewhaleIndex)
+			{
+				int underscoreIndex = installFileName.indexOf("_", bluewhaleIndex);
+				if (-1 != underscoreIndex)
+				{
+					String partner = installFileName.substring(bluewhaleIndex + bluewhale.length(), underscoreIndex);
+					if (partner.length() > 2)
+					{
+						// strip the surrounding hyphens
+						partner = partner.substring(1, partner.length() - 1);
+						iDefaultUrl = new String(iDefaultUrl + "&x-bw-pm=" + partner);
+					}
+				}
+			}
+		}
 
-        iCommandCancel = new Command("Cancel", Command.CANCEL, 0);
-        iCommandMenuCancel = new Command("Cancel", Command.ITEM, 0);	// cancel options that appears in the menu rather than cba
-        iForm.addCommand(iCommandCancel);
-        iCommandExit = new Command("Exit", Command.BACK, 0);
-        iCommandYes = new Command("Yes", Command.BACK, 0);
-        iCommandNo = new Command("No", Command.ITEM, 0);
-        iCommandStopAutoStart = new Command("Stop Autostart", Command.ITEM, 1);
-        iCommandStartAutoStart = new Command("Autostart", Command.ITEM, 1);
-        iCommandRetry = new Command("Retry", Command.BACK, 0);
-        iForm.setCommandListener(this);
         iLock = new Object();
 
         MIDletProxy thisMidlet;
@@ -130,7 +141,24 @@ public class Launcher extends MIDlet implements Runnable, CommandListener,MIDlet
         midletProxyList.setDisplayController(iDisplayController);
 
         if (!isInstalled()) {
-            iProgressString.setText("BlueWhaleMail needs to check for features specific to your phone. This will use airtime. Proceed?\n");
+			iProgressString = new StringItem(null, "");
+			iForm = new Form(iMIDletName);
+			iLauncherCustomItem = new LauncherCustomItem(iForm);
+			iProgId = iForm.append(iProgressString);
+			iForm.append(iLauncherCustomItem);
+
+			iCommandCancel = new Command("Cancel", Command.CANCEL, 0);
+			iCommandMenuCancel = new Command("Cancel", Command.ITEM, 0);	// cancel options that appears in the menu rather than cba
+			iForm.addCommand(iCommandCancel);
+			iCommandExit = new Command("Exit", Command.BACK, 0);
+			iCommandYes = new Command("Yes", Command.BACK, 0);
+			iCommandNo = new Command("No", Command.ITEM, 0);
+			iCommandStopAutoStart = new Command("Stop Autostart", Command.ITEM, 1);
+			iCommandStartAutoStart = new Command("Autostart", Command.ITEM, 1);
+			iCommandRetry = new Command("Retry", Command.BACK, 0);
+			iForm.setCommandListener(this);
+
+            iProgressString.setText(iMIDletName + " needs to check for features specific to your phone. This will use airtime. Proceed?\n");
             iForm.removeCommand(iCommandCancel);
             iForm.addCommand(iCommandYes);
             iForm.addCommand(iCommandNo);
@@ -143,6 +171,7 @@ public class Launcher extends MIDlet implements Runnable, CommandListener,MIDlet
             }
             iStatus = DOWNLOAD_WAITING_FOR_USER;
         } else {
+			iSplashScreenCanvas = new SplashScreenCanvas();
             iStatus = DOWNLOAD_UNNECESSARY;
         }
         initializeListener();
@@ -239,15 +268,27 @@ public class Launcher extends MIDlet implements Runnable, CommandListener,MIDlet
                     iStatus = DOWNLOAD_UNNECESSARY;
                 } else if (iLauncherCustomItem.getPreprod()) {
                     setAutoAPN();
-                    String jadUrl = switchToDebugURL(DEFAULT_URL);
+                    String jadUrl = switchToDebugURL(iDefaultUrl);
                     downloadMidlet(jadUrl);
                 } else {
 					String smsBody = SMSTextReader.getInstallSMSBody("BlueWhale");
-					debugMessage("smsBody " + smsBody);
+					debugMessage("BlueWhale smsBody " + smsBody);
+					
+					// If null, try searching for partner mode sender strings.
+					// See ticket:3664 VM needs to recognize skymobileemail.com addresses in the SMS
+					if( null == smsBody ) {
+	                    smsBody = SMSTextReader.getInstallSMSBody("SkyMobile");
+	                    debugMessage("SkyMobile smsBody " + smsBody);
+	                    if( null == smsBody ) {
+	                        smsBody = SMSTextReader.getInstallSMSBody("SkyEmail");
+	                        debugMessage("SkyEmail smsBody " + smsBody);
+	                    }
+					}
+					
 					String jadUrl = parseJadDownloadURL(smsBody);
 					debugMessage("jadUrl " + jadUrl);
 					if (jadUrl == null) {
-					jadUrl = DEFAULT_URL;
+					jadUrl = iDefaultUrl;
 					}
 
                     downloadMidlet(jadUrl);
@@ -255,7 +296,7 @@ public class Launcher extends MIDlet implements Runnable, CommandListener,MIDlet
                 finished = (iStatus != DOWNLOAD_FAILED);
             } catch (ConnectionNotFoundException e) {
                 iForm.deleteAll();
-                iProgressString.setText("Download problem: BlueWhaleMail can't connect to the internet. Please make sure you are in good coverage.\nIf you are asked to \"Select access point\" from a list, pick \"BlueWhale\" if it's there, otherwise just pick one. If it does not work, try again with a different one.\nConsult http://www.bluewhalemail.com/forum/ for help.\n");
+                iProgressString.setText("Download problem: " + iMIDletName + " can't connect to the internet. Please make sure you are in good coverage.\nIf you are asked to \"Select access point\" from a list, pick \"BlueWhale\" if it's there, otherwise just pick one. If it does not work, try again with a different one.\nConsult http://www.bluewhalemail.com/forum/ for help.\n");
                 iProgId = iForm.append(iProgressString);
                 iForm.append(iLauncherCustomItem);
                 iForm.removeCommand(iCommandExit);
@@ -283,8 +324,11 @@ public class Launcher extends MIDlet implements Runnable, CommandListener,MIDlet
             switch (iStatus) {
             case DOWNLOAD_UNNECESSARY:
                 debugMessage("MIDlet is installed\n");
-                iForm.removeCommand(iCommandCancel);
-                iForm.addCommand(iCommandExit);
+                if (null != iForm)
+                {
+					iForm.removeCommand(iCommandCancel);
+					iForm.addCommand(iCommandExit);
+				}
                 finished = true;
                 break;
             case DOWNLOAD_FAILED:
@@ -321,7 +365,14 @@ public class Launcher extends MIDlet implements Runnable, CommandListener,MIDlet
     }
 
     public void startApp() {
-        Display.getDisplay(this).setCurrent(iForm);
+		if (null != iForm)
+		{
+			Display.getDisplay(this).setCurrent(iForm);
+		}
+		else if (null != iSplashScreenCanvas)
+		{
+			Display.getDisplay(this).setCurrent(iSplashScreenCanvas);
+		}
         Thread t = new Thread(this);
         t.start();
     }
@@ -518,7 +569,7 @@ public class Launcher extends MIDlet implements Runnable, CommandListener,MIDlet
                     }
 
                     MIDletInfo midlet = new MIDletInfo(value);
-                    if (midlet.classname.equals("com.bluewhalesystems.client.midlet.BlueWhaleMail")) {
+                    if (midlet.classname.equals(iMIDletFullName)) {
                         suiteId = suiteIds[i];
                     }
                 }
@@ -650,7 +701,7 @@ public class Launcher extends MIDlet implements Runnable, CommandListener,MIDlet
             // notifyPaused();
 
             Isolate runTask = AmsUtil.startMidletInNewIsolate(suiteId,
-                                     "com.bluewhalesystems.client.midlet.BlueWhaleMail", "BlueWhaleMail", null, null, null);
+                                     iMIDletFullName, iMIDletName, null, null, null);
 
             //runTask.waitForExit();
             
@@ -666,13 +717,19 @@ public class Launcher extends MIDlet implements Runnable, CommandListener,MIDlet
     
     public void midletUpdated(MIDletProxy midlet, int fieldId)
     {
-        debugMessage("midletUpdated " + midlet);
+        debugMessage("midletUpdated " + midlet + "\nReason " + aReason);
+		if(midlet.getClassName().equals(iMIDletFullName)
+			&& midlet.getMidletState() == MIDletProxy.MIDLET_ACTIVE
+			&& midlet.wantsForeground())
+			{
+				BWMDisplayController.requestForeground0(midlet.getDisplayId(),midlet.getIsolateId());
+			}
     }
     
     public void midletRemoved(MIDletProxy midlet)
     {
 		debugMessage("midletRemoved " + midlet);
-		if(midlet.getClassName().equals("com.bluewhalesystems.client.midlet.BlueWhaleMail"))
+		if(midlet.getClassName().equals(iMIDletFullName))
         {
             if(iUrl != null)
             {
