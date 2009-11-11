@@ -39,6 +39,10 @@
 const TInt KCID_MVMObjectFactory = 0xA0003F57;
 const TInt KIID_MVMObjectFactory = 0xA0003F58;
 const TInt KIID_MVMObjectFactoryClient = 0xA0003F50;
+const TInt KIID_MShortcutName = 0xA0003F52;
+const TString8UniqueKey KPropertyString8ShortcutName		= { KIID_MShortcutName, 10101 };
+const TInt KIID_MAutoStarted = 0xA0003F53;
+const TIntUniqueKey KPropertyIntAutoStarted					= { KIID_MAutoStarted, 10101 };
 
 class MVMObjectFactory : public MUnknown
 {

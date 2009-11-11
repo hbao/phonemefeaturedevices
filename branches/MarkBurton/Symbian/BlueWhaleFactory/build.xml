@@ -76,9 +76,9 @@
 
 	<target name="all" depends="update,bluewhalefactory_uiqv3fp0_winscw,bluewhalefactory_uiqv3fp0_arm,bluewhalefactory_s60v3fp0_winscw,bluewhalefactory_s60v3fp0_arm,bluewhalefactory_s60v2fp3_winscw,bluewhalefactory_s60v2fp3_arm,bluewhalefactory_s60v2fp2_winscw,bluewhalefactory_s60v2fp2_arm" />
 
-	<target name="cruisecontrol_bluewhalefactory_uiqv3fp0_arm" depends="copy_vm_s60v3fp0,update,bluewhalefactory_uiqv3fp0_arm" />
+	<target name="cruisecontrol_bluewhalefactory_uiqv3fp0_arm" depends="update,bluewhalefactory_uiqv3fp0_arm" />
 
-	<target name="cruisecontrol_bluewhalefactory_uiqv3fp0_winscw" depends="copy_vm_s60v3fp0,update,update_tests,bluewhalefactory_uiqv3fp0_winscw,bluewhalefactory_test_uiqv3fp0_winscw" />
+	<target name="cruisecontrol_bluewhalefactory_uiqv3fp0_winscw" depends="update,update_tests,bluewhalefactory_uiqv3fp0_winscw,bluewhalefactory_test_uiqv3fp0_winscw" />
 
 	<target name="cruisecontrol_bluewhalefactory_s60v3fp0_arm" depends="update,bluewhalefactory_s60v3fp0_arm" />
 
@@ -111,43 +111,6 @@
 		<svn javasvn="no">
 			<update dir="${basedir}\..\SymbianOSUnit" />
 		</svn>
-	</target>
-
-	<target name="copy_vm_s60v3fp0">
-		<copy file="C:\Symbian\9.1\S60_3rd\epoc32\include\commonKNIMacros.h" tofile="c:\symbian\uiq3sdk\epoc32\include\commonKNIMacros.h"/>
-		<copy file="C:\Symbian\9.1\S60_3rd\epoc32\include\gx_image.h" tofile="c:\symbian\uiq3sdk\epoc32\include\gx_image.h"/>
-		<copy file="C:\Symbian\9.1\S60_3rd\epoc32\include\gxapi_graphics.h" tofile="c:\symbian\uiq3sdk\epoc32\include\gxapi_graphics.h"/>
-		<copy file="C:\Symbian\9.1\S60_3rd\epoc32\include\gxj_putpixel.h" tofile="c:\symbian\uiq3sdk\epoc32\include\gxj_putpixel.h"/>
-		<copy file="C:\Symbian\9.1\S60_3rd\epoc32\include\gxutl_image_errorcodes.h" tofile="c:\symbian\uiq3sdk\epoc32\include\gxutl_image_errorcodes.h"/>
-		<copy file="C:\Symbian\9.1\S60_3rd\epoc32\include\java_types.h" tofile="c:\symbian\uiq3sdk\epoc32\include\java_types.h"/>
-		<copy file="C:\Symbian\9.1\S60_3rd\epoc32\include\jvm.h" tofile="c:\symbian\uiq3sdk\epoc32\include\jvm.h"/>
-		<copy file="C:\Symbian\9.1\S60_3rd\epoc32\include\jvmconfig.h" tofile="c:\symbian\uiq3sdk\epoc32\include\jvmconfig.h"/>
-		<copy file="C:\Symbian\9.1\S60_3rd\epoc32\include\keymap_input.h" tofile="c:\symbian\uiq3sdk\epoc32\include\keymap_input.h"/>
-		<copy file="C:\Symbian\9.1\S60_3rd\epoc32\include\kni.h" tofile="c:\symbian\uiq3sdk\epoc32\include\kni.h"/>
-		<copy file="C:\Symbian\9.1\S60_3rd\epoc32\include\kni_md.h" tofile="c:\symbian\uiq3sdk\epoc32\include\kni_md.h"/>
-		<copy file="C:\Symbian\9.1\S60_3rd\epoc32\include\midp_global_status.h" tofile="c:\symbian\uiq3sdk\epoc32\include\midp_global_status.h"/>
-		<copy file="C:\Symbian\9.1\S60_3rd\epoc32\include\midperror.h" tofile="c:\symbian\uiq3sdk\epoc32\include\midperror.h"/>
-		<copy file="C:\Symbian\9.1\S60_3rd\epoc32\include\nim.h" tofile="c:\symbian\uiq3sdk\epoc32\include\nim.h"/>
-		<copy file="C:\Symbian\9.1\S60_3rd\epoc32\include\os_symbian.hpp" tofile="c:\symbian\uiq3sdk\epoc32\include\os_symbian.hpp"/>
-		<copy file="C:\Symbian\9.1\S60_3rd\epoc32\include\osversion.h" tofile="c:\symbian\uiq3sdk\epoc32\include\osversion.h"/>
-		<copy file="C:\Symbian\9.1\S60_3rd\epoc32\include\pcsl_datagram.h" tofile="c:\symbian\uiq3sdk\epoc32\include\pcsl_datagram.h"/>
-		<copy file="C:\Symbian\9.1\S60_3rd\epoc32\include\pcsl_network.h" tofile="c:\symbian\uiq3sdk\epoc32\include\pcsl_network.h"/>
-		<copy file="C:\Symbian\9.1\S60_3rd\epoc32\include\pcsl_network_md.h" tofile="c:\symbian\uiq3sdk\epoc32\include\pcsl_network_md.h"/>
-		<copy file="C:\Symbian\9.1\S60_3rd\epoc32\include\pcsl_socket.h" tofile="c:\symbian\uiq3sdk\epoc32\include\pcsl_socket.h"/>
-		<copy file="C:\Symbian\9.1\S60_3rd\epoc32\include\pcsl_string.h" tofile="c:\symbian\uiq3sdk\epoc32\include\pcsl_string.h"/>
-		<copy file="C:\Symbian\9.1\S60_3rd\epoc32\include\pcsl_string_md.h" tofile="c:\symbian\uiq3sdk\epoc32\include\pcsl_string_md.h"/>
-		<copy file="C:\Symbian\9.1\S60_3rd\epoc32\include\pcsl_string_status.h" tofile="c:\symbian\uiq3sdk\epoc32\include\pcsl_string_status.h"/>
-		<copy file="C:\Symbian\9.1\S60_3rd\epoc32\include\romstructs.h" tofile="c:\symbian\uiq3sdk\epoc32\include\romstructs.h"/>
-
-		<mkdir dir="c:\symbian\uiq3sdk\epoc32\winscw\c\private\2000e27a\vm\resources"/>
-		<copy todir="c:\symbian\uiq3sdk\epoc32\winscw\c\private\2000e27a\vm\resources">
-			<fileset dir="C:\Symbian\9.1\S60_3rd\epoc32\winscw\c\private\2000e27a\vm\resources"/>
-		</copy>		
-		
-		<copy file="C:\Symbian\9.1\S60_3rd\epoc32\release\winscw\udeb\cldc_vm_lib.lib" tofile="c:\symbian\uiq3sdk\epoc32\release\winscw\udeb\cldc_vm_lib.lib"/>
-		<copy file="C:\Symbian\9.1\S60_3rd\epoc32\release\armv5\lib\cldc_vm_lib.dso" tofile="c:\symbian\uiq3sdk\epoc32\release\armv5\lib\cldc_vm_lib.dso"/>
-		<copy file="C:\Symbian\9.1\S60_3rd\epoc32\release\armv5\lib\cldc_vm_lib{000a0000}.dso" tofile="c:\symbian\uiq3sdk\epoc32\release\armv5\lib\cldc_vm_lib{000a0000}.dso"/>
-		<copy file="C:\Symbian\9.1\S60_3rd\epoc32\release\gcce\urel\cldc_vm_lib.dll" tofile="c:\symbian\uiq3sdk\epoc32\release\gcce\urel\cldc_vm_lib.dll"/>
 	</target>
 	
 	<!-- Calls a python script which replaces the specified string '0000' in the pkg file with the -->
