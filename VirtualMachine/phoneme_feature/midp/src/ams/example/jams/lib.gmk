@@ -19,6 +19,12 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
 # 02110-1301 USA
 # 
+# NOTICE: Portions Copyright (c) 2007-2009 Blue Whale Systems.
+# This file has been modified by Blue Whale Systems on 07Nov2009.
+# The changes are licensed under the terms of the GNU General Public
+# License version 2. This notice was added to meet the conditions of
+# Section 3.a of the GNU General Public License version 2.
+# 
 # Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa
 # Clara, CA 95054 or visit www.sun.com if you need additional
 # information or have any questions.
@@ -53,7 +59,8 @@ SUBSYSTEM_AMS_EXTRA_INCLUDES += \
 ifeq ($(TARGET_VM), cldc_vm)
   AMS_RUNMIDLET_NATIVE_FILES = \
     runMidlet.c \
-    NativeCode.c
+    NativeCode.c \
+    SplashScreenCanvas.c
 
   AMS_RUNMIDLET_OBJ_FILES = $(patsubst %.c,$(OBJ_DIR)/%.o,\
     $(AMS_RUNMIDLET_NATIVE_FILES))
@@ -199,6 +206,7 @@ ifeq ($(USE_SCRIPT_UTILS), true)
     $(SUBSYSTEM_DIR)/ams/example/jams/classes/com/sun/midp/scriptutil/SuiteRemover.java \
     $(SUBSYSTEM_DIR)/ams/example/jams/classes/com/sun/midp/scriptutil/CommandLineInstaller.java \
     $(SUBSYSTEM_DIR)/ams/example/jams/classes/com/bluewhalesystems/midp/Launcher.java \
+    $(SUBSYSTEM_DIR)/ams/example/jams/classes/com/bluewhalesystems/midp/SplashScreenCanvas.java \
     $(SUBSYSTEM_DIR)/ams/example/jams/classes/com/bluewhalesystems/midp/LauncherCustomItem.java \
     $(SUBSYSTEM_DIR)/ams/example/jams/classes/com/bluewhalesystems/midp/BWMDisplayController.java \
     $(SUBSYSTEM_DIR)/ams/example/jams/classes/com/bluewhalesystems/midp/PlatformRequestListener.java \
