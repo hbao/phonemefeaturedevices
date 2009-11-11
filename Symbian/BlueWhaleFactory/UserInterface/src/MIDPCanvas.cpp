@@ -122,7 +122,18 @@ void CMIDPCanvas::ConstructL(const TRect& aRect,MViewAppUiCallback* aViewAppUiCa
 	iDrawer->StartL();
 	iMidpControl = CMidpScreenControl::NewL(this);
 	iMidpControl->SetContainerWindowL(*this);
-	SetRect(aRect);
+	SetExtentToWholeScreen();
+	iFullScreen = ETrue;
+#if __S60_VERSION__ >= __S60_V2_FP1_VERSION_NUMBER__
+	iCanvasRect = Rect();
+#elif __UIQ_VERSION_NUMBER__ >= __UIQ_V3_FP0_VERSION_NUMBER__
+	TQikViewMode mode(iView->ViewMode());
+	mode.SetButtonOrSoftkeyBar(EFalse);
+	mode.SetAppTitleBar(EFalse);
+	mode.SetStatusBar(EFalse);
+	mode.SetToolbar(EFalse);
+	iView->SetViewModeL(mode);
+#endif
 	ActivateL();
 	User::LeaveIfError(iCommandMutex.CreateLocal());
 	User::LeaveIfError(iMenuSync.CreateLocal(0));
