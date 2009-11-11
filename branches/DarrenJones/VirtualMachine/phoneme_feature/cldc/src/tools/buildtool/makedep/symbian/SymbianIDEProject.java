@@ -150,6 +150,7 @@ abstract class SymbianIDEProject extends IDEProject
 				lst.addElement("..\\..\\..\\..\\midp\\src\\ams\\suitestore\\internal_api\\reference\\native\\suitestore_otanotifier_kni.c");
                 lst.addElement("..\\..\\..\\..\\midp\\src\\media\\reference\\classes\\javax\\microedition\\media\\Symbian\\native\\myplayer.cpp");
                 lst.addElement("..\\..\\..\\..\\midp\\src\\ams\\example\\jams\\native\\Symbian\\NativeCode.cpp");
+                lst.addElement("..\\..\\..\\..\\midp\\src\\ams\\example\\jams\\native\\SplashScreenCanvas.c");                
                 lst.addElement("..\\..\\..\\..\\midp\\src\\protocol\\gcf\\reference\\native\\gcf_export.c");
                 lst.addElement("..\\..\\..\\..\\midp\\src\\protocol\\socket\\reference\\native\\socketProtocol.c");
                 lst.addElement("..\\..\\..\\..\\midp\\src\\configuration\\properties\\reference\\native\\properties_kni.c");
