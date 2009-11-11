@@ -41,77 +41,11 @@ public class SplashScreenCanvas extends Canvas
         setFullScreenMode( true );
     }
 
-    private Image iCachedImage;
-
-    private int   iStartColor = 0x44BEF6;
-    private int   iEndColor   = 0x142A64;
-
-    private int adjustColor( int aStartColor, int aEndColor, int aTotal, int aCurrent )
-    {
-        if( aStartColor == aEndColor )
-        {
-            return aStartColor;
-        }
-        float proportion = ( (float) aCurrent ) / ( (float) aTotal );
-        int delta = (int) ( Math.abs( aEndColor - aStartColor ) * proportion );
-        if( aStartColor > aEndColor )
-        {
-            return aStartColor - delta;
-        }
-        else
-        {
-            return aStartColor + delta;
-        }
-    }
-
-    public void fillRadialGradient( Graphics aGraphics, int aStartColor, int aEndColor, int x, int y, int aWidth, int aHeight )
-    {
-        int startRed = aStartColor >> 16 & 0xff;
-        int startGreen = aStartColor >> 8 & 0xff;
-        int startBlue = aStartColor & 0xff;
-        int endRed = aEndColor >> 16 & 0xff;
-        int endGreen = aEndColor >> 8 & 0xff;
-        int endBlue = aEndColor & 0xff;
-        int oldColor = aGraphics.getColor();
-        int currentHeight = aHeight;
-        while( ( 0 < aWidth ) && ( 0 < aHeight ) )
-        {
-            int r = adjustColor( startRed, endRed, aHeight, currentHeight );
-            int g = adjustColor( startGreen, endGreen, aHeight, currentHeight );
-            int b = adjustColor( startBlue, endBlue, aHeight, currentHeight );
-            int color = ( ( r << 16 ) & 0xff0000 ) | ( ( g << 8 ) & 0xff00 ) | ( b & 0xff );
-            aGraphics.setColor( color );
-
-            aGraphics.fillArc( x, y, aWidth, currentHeight, 0, 360 );
-            x++;
-            y++;
-            aWidth -= 2;
-            currentHeight -= 2;
-        }
-        aGraphics.setColor( oldColor );
-    }
-
     public void paint( Graphics aGraphics )
     {
-        // Don't leave the background colour up to chance.
-        // Set it explicitly -- see ticket:2366 "Symbian: Seeing a black screen instead of the splash screen on startup."
-        aGraphics.setColor( 0xFFFFFF /* white to avoid flashing since first screen is white in MR3 VM */);
-
-        int x = aGraphics.getClipX();
-        int y = aGraphics.getClipY();
-        int width = aGraphics.getClipWidth();
-        int height = aGraphics.getClipHeight();
-
-        int size = 2 * Math.max( width, height );
-        if( null == iCachedImage || iCachedImage.getWidth() != size )
-        {
-            iCachedImage = Image.createImage( size, size );
-            Graphics g2 = iCachedImage.getGraphics();
-
-            g2.setColor( iEndColor );
-            g2.fillRect( 0, 0, size, size );
-            fillRadialGradient( g2, iStartColor, iEndColor, 0, 0, size, size );
-        }
-        aGraphics.drawImage( iCachedImage, width - size / 2, y - size / 2, Graphics.TOP | Graphics.LEFT );
+		DrawSplashScreen0();
     }
+
+	private native void DrawSplashScreen0();
+	
 }

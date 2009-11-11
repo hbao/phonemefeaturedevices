@@ -34,6 +34,8 @@
 #include <midpCommandState.h>
 #include <midpams.h>
 
+extern "C" void DrawSplashScreen();
+
 #if ENABLE_PCSL
 extern "C" {
 #include <pcsl_memory.h>
@@ -80,19 +82,23 @@ int resizeScreenBuffer()
     int newHeight = lcdlf_get_screen_height();
     int newScreenSize = sizeof(gxj_pixel_type) * newWidth * newHeight;
 
-    gxj_system_screen_buffer.width = newWidth;
-    gxj_system_screen_buffer.height = newHeight;
-    gxj_system_screen_buffer.alphaData = NULL;
+	if ((newWidth != gxj_system_screen_buffer.width) || (newHeight != gxj_system_screen_buffer.height))
+	{
 
-    gxj_system_screen_buffer.pixelData = (gxj_pixel_type *)static_cast<MApplication*>(Dll::Tls())->CreateScreen(newWidth,newHeight);
-	
+		gxj_system_screen_buffer.width = newWidth;
+		gxj_system_screen_buffer.height = newHeight;
+		gxj_system_screen_buffer.alphaData = NULL;
+
+		gxj_system_screen_buffer.pixelData = (gxj_pixel_type *)static_cast<MApplication*>(Dll::Tls())->CreateScreen(newWidth,newHeight);
+	}
+
     if (gxj_system_screen_buffer.pixelData == NULL) 
 	{
 		result = KErrNoMemory;
     } 
 	else 
 	{
-        memset(gxj_system_screen_buffer.pixelData, 65535, newScreenSize);
+        memset(gxj_system_screen_buffer.pixelData, 255, newScreenSize);
     }
 	return result;
 }
@@ -269,6 +275,8 @@ EXPORT_C TInt RunVMCode(const JvmPathChar * aClassPath,char* aMainClass,CVMPrope
 	{
 		Dll::SetTls((TAny*) aApp);
 		status = resizeScreenBuffer();
+		DrawSplashScreen();
+		aApp->Refresh(0, 0, lcdlf_get_screen_width(), lcdlf_get_screen_height());
 		if (status != KErrNone)
 			{
 			return status;
