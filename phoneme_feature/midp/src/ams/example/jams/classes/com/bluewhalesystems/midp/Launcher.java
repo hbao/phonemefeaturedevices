@@ -57,8 +57,7 @@ public class Launcher extends MIDlet implements Runnable, CommandListener,MIDlet
     private static final int DOWNLOAD_WAITING_FOR_USER = 5;
     private static final String SONY_ERICSSON_AUTOSTART	= "autostart://:";
 	private static final String INSTALLER = "com.sun.midp.installer.GraphicalInstaller";
-	private String iMIDletName;
-	private String iMIDletFullName;
+	private static final String BLUEWHALEMIDLET = "com.bluewhalesystems.client.midlet.BlueWhaleMail";
     private Form iForm;
     private SplashScreenCanvas iSplashScreenCanvas;
     private StringItem iProgressString;
@@ -569,7 +568,7 @@ public class Launcher extends MIDlet implements Runnable, CommandListener,MIDlet
                     }
 
                     MIDletInfo midlet = new MIDletInfo(value);
-                    if (midlet.classname.equals(iMIDletFullName)) {
+                    if (midlet.classname.equals(BLUEWHALEMIDLET)) {
                         suiteId = suiteIds[i];
                     }
                 }
@@ -701,7 +700,7 @@ public class Launcher extends MIDlet implements Runnable, CommandListener,MIDlet
             // notifyPaused();
 
             Isolate runTask = AmsUtil.startMidletInNewIsolate(suiteId,
-                                     iMIDletFullName, iMIDletName, null, null, null);
+                                     BLUEWHALEMIDLET, "BlueWhaleMail", null, null, null);
 
             //runTask.waitForExit();
             
@@ -715,10 +714,10 @@ public class Launcher extends MIDlet implements Runnable, CommandListener,MIDlet
         debugMessage("midletAdded " + midlet);
 	}
     
-    public void midletUpdated(MIDletProxy midlet, int fieldId)
+    public void midletUpdated(MIDletProxy midlet, int aReason)
     {
         debugMessage("midletUpdated " + midlet + "\nReason " + aReason);
-		if(midlet.getClassName().equals(iMIDletFullName)
+		if(midlet.getClassName().equals(BLUEWHALEMIDLET)
 			&& midlet.getMidletState() == MIDletProxy.MIDLET_ACTIVE
 			&& midlet.wantsForeground())
 			{
@@ -729,7 +728,7 @@ public class Launcher extends MIDlet implements Runnable, CommandListener,MIDlet
     public void midletRemoved(MIDletProxy midlet)
     {
 		debugMessage("midletRemoved " + midlet);
-		if(midlet.getClassName().equals(iMIDletFullName))
+		if(midlet.getClassName().equals(BLUEWHALEMIDLET))
         {
             if(iUrl != null)
             {
