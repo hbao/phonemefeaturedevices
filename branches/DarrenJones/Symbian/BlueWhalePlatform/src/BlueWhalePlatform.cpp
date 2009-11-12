@@ -84,7 +84,7 @@ GLDEF_C TInt E32Dll(TDllReason)
     return KErrNone;
 }
 
-// Create an BlueWhaleMail application, and return a pointer to it
+// Create a BlueWhale application, and return a pointer to it
 EXPORT_C CApaApplication* NewApplication()
 {
     return (new CBlueWhalePlatformApplication);

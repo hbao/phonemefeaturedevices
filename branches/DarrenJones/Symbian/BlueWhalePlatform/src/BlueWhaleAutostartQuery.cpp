@@ -38,7 +38,7 @@
 
 void DoQueryL()
 {
-	_LIT(KAutoStartText, "Allow BlueWhaleMail to start automatically?");
+	_LIT(KAutoStartText, "Allow BlueWhale to start automatically?");
 	TRequestStatus status;
 	TBool autoStart = EFalse;
 
