@@ -95,11 +95,15 @@ public:
 	void testLosingNetwork();
 	void testNetworkChange();
 	void testUserChooseAPN();
+	void testNoNetworkNoWLAN();
+	void testNoNetworkWithWLAN();
 private:
 	static MUnknown * APNManagerWrapperCreate(TUid aImplementationUid, TUid aInterfaceUid, TAny* aConstructionParameters);
 	static MUnknown * APNManagerTimedWrapperCreate(TUid aImplementationUid, TUid aInterfaceUid, TAny* aConstructionParameters);
 	static MUnknown * NetworkLossCreate(TUid aImplementationUid, TUid aInterfaceUid, TAny* aConstructionParameters);
 	static MUnknown * APNManagerTimedWrapperWithIAPCreate(TUid aImplementationUid, TUid aInterfaceUid, TAny* aConstructionParameters);
+	static MUnknown * APNManagerNoNetworkNoWLAN(TUid aImplementationUid, TUid aInterfaceUid, TAny* aConstructionParameters);
+	static MUnknown * APNManagerNoNetworkWithWLAN(TUid aImplementationUid, TUid aInterfaceUid, TAny* aConstructionParameters);
 };
 
 #endif 

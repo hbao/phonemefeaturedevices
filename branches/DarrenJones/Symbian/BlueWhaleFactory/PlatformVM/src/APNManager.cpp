@@ -209,7 +209,11 @@ void CAPNManager::BuildCurrentValidIAPsL()
 #endif
 	// if all else fails, ask the user
 	// iap of zero prompts the user
-	iCurrentIAPList.AppendL(TIAPWithPort(0,0,KUserPickPriority));
+	// only do this if there are no stored APNs
+	if(current.Count() == 0)
+	{
+		iCurrentIAPList.AppendL(TIAPWithPort(0,0,KUserPickPriority));
+	}
 	DEBUGMSG(_L("BuildCurrentValidIAPsL<-"));
 		
 }
@@ -236,11 +240,11 @@ TInt CAPNManager::GetIAP(TInt aIndex,TInt aPort)
 		DEBUGMSG2(_L("Found %d at %d"),iap,index);
 	}
 #endif
-	if((iNetWorkInfo->IsRegisteredOnNetwork()
+	if( ( iNetWorkInfo->IsRegisteredOnNetwork() || iWlanCount > 0  
 #ifdef __WINSCW__
 		||	!iBeingTested
 #endif
-		|| iCurrentIAPList.Count() > 0)/*	&& iap == KErrNotFound*/)
+		) && iCurrentIAPList.Count() > 0)
 	{
 		if(aIndex < iCurrentIAPList.Count())
 		{
