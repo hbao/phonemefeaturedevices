@@ -195,6 +195,10 @@ static LRESULT processKey(HWND hwnd, UINT action, int key);
 static LRESULT processSystemKey(HWND hwnd, int key);
 static void updateEditorForRotation();
 
+// #if !ENABLE_CDC
+// void JVMSPI_SetSystemProperty(const char* property_name, const char* property_value);
+// #endif
+
 /**
  * @file
  * Additional porting API for Java Widgets based port of abstract
@@ -658,6 +662,19 @@ static BOOL InitInstance(HINSTANCE hInstance, int CmdShow) {
     GXOpenInput();
 #endif
 
+#endif
+
+/*
+    #3721: WinCE: MIDlet install shows "null needs to check for
+    features specific to your phone." and does not start midlet
+
+    Add missing x-bw-* system properties.
+*/
+
+#if !ENABLE_CDC
+    JVMSPI_SetSystemProperty("x-bw-platform-name", "BlueWhale");
+    JVMSPI_SetSystemProperty("x-bw-app-name", "BlueWhaleMail");
+    JVMSPI_SetSystemProperty("x-bw-app-full-name", "com.bluewhalesystems.client.midlet.BlueWhaleMail");
 #endif
 
     MSGQUEUEOPTIONS msgQueueOptions = {0};

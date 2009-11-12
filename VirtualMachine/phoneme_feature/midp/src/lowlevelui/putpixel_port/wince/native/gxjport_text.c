@@ -29,6 +29,11 @@
 #include <gxj_putpixel.h>
 #include "font_internal.h"
 
+/* convert color to 16bit color */
+#define RGB24TORGB16(x) (((( x ) & 0x00F80000) >> 8) + \
+                         ((( x ) & 0x0000FC00) >> 5) + \
+                         ((( x ) & 0x000000F8) >> 3) )
+
 /**
  * @file
  *
@@ -44,6 +49,14 @@ int gxjport_draw_chars(jint pixel, const jshort *clip,
         gfFontInit = 1;
         wince_init_fonts();
     }
+
+    // #3577: UIQ, WinCE,LWUIT: fonts of the text in the body area are now green
+    //
+    // Davy: The green color is caused by a missing conversion from the original
+    // 24-bit RGB grey Java color (being 0x676767) to a 16-bit RGB color on WinCE.
+    // Make sure to convert 24-bit RGB colors to 16-bit RGB (5/6/5) before passing
+    // along the color to gx_port_draw_chars (in font.c)
+    pixel = RGB24TORGB16(pixel);
 
     gx_port_draw_chars(pixel, clip, sbuf, dotted,
         face, style, size, x, y, (TOP | LEFT), charArray, n);
