@@ -60,7 +60,7 @@
 
   <integer
         Key="SCREEN_COLOR_FG"
-      Value="0x6b696b"/>
+      Value="0x676767"/>
 
   <integer
         Key="SCREEN_COLOR_BG_HL"

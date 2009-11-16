@@ -167,13 +167,13 @@ class AppManagerUI extends Form
      * The color used to draw midlet name
      * for the hilighted non-running running midlet representation.
      */
-    private static final int ICON_HL_TEXT = 0x000B2876;
+    private static final int ICON_HL_TEXT = 0x00a56633;
 
     /**
      * The color used to draw the shadow of the midlet name
      * for the non hilighted non-running midlet representation.
      */
-    private static final int ICON_TEXT = 0x003177E2;
+    private static final int ICON_TEXT = 0x00676767;
 
     /**
      * The color used to draw the midlet name
@@ -1017,71 +1017,6 @@ class AppManagerUI extends Form
         boolean newlyAdded;
 
         suiteIds = midletSuiteStorage.getListOfSuites();
-
-        // Add the Installer as the first installed midlet
-        if (mciVector.size() > 0) {
-            msi = ((MidletCustomItem)mciVector.elementAt(0)).msi;
-        }
-
-        if (msi == null || msi.midletToRun == null ||
-            !msi.midletToRun.equals(DISCOVERY_APP)) {
-
-            msi = new RunningMIDletSuiteInfo(MIDletSuite.INTERNAL_SUITE_ID,
-                DISCOVERY_APP,
-                Resource.getString(ResourceConstants.INSTALL_APPLICATION),
-                true) {
-                    public boolean equals(MIDletProxy midlet) {
-                        if (super.equals(midlet)) {
-                            return true;
-                        }
-
-                        // there is one exception when 2 midlets belong to the
-                        // same icon: Discovery app & Graphical installer.
-                        // Graphical Installer can be launched by Discover app
-                        // or when MIdlet update is needed.
-                        // In such cases we simply need to set the proxy on
-                        // corresponding icon (MidletCustomItem).
-                        // Note that when Discovery app exits and
-                        // Installer is launched
-                        // notifyMidletExited() will not find corresponding
-                        // icon in the list of MidletCustomItems.
-                        // (that midlet exit will be ignored).
-                        return (INSTALLER.equals(midlet.getClassName()));
-                    }
-                };
-
-            append(msi);
-        }
-
-        if (caManagerIncluded) {
-            // Add the CA manager as the second installed midlet
-            if (mciVector.size() > 1) {
-                msi = ((MidletCustomItem)mciVector.elementAt(1)).msi;
-            }
-
-            if (msi == null || msi.midletToRun == null ||
-                !msi.midletToRun.equals(CA_MANAGER)) {
-                msi = new RunningMIDletSuiteInfo(MIDletSuite.INTERNAL_SUITE_ID,
-                  CA_MANAGER,
-                  Resource.getString(ResourceConstants.CA_MANAGER_APP), true);
-                append(msi);
-            }
-        }
-
-        if (oddEnabled) {
-            // Add the ODT Agent midlet as the third installed midlet
-            if (mciVector.size() > 2) {
-                msi = ((MidletCustomItem)mciVector.elementAt(2)).msi;
-            }
-
-            if (msi == null || msi.midletToRun == null ||
-                !msi.midletToRun.equals(ODT_AGENT)) {
-                msi = new RunningMIDletSuiteInfo(MIDletSuite.INTERNAL_SUITE_ID,
-                  ODT_AGENT,
-                  Resource.getString(ResourceConstants.ODT_AGENT_MIDLET), true);
-                append(msi);
-            }
-        }
 
         // Add the rest of the installed midlets
         for (int lowest, i = 0; i < suiteIds.length; i++) {
