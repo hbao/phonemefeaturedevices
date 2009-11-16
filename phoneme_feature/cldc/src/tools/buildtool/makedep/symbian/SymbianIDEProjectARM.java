@@ -47,6 +47,9 @@ abstract class SymbianIDEProjectARM extends SymbianIDEProject
             env.put("ENABLE_INTERPRETER_GENERATOR__BY", "idetool");
             env.put("ENABLE_ROM_GENERATOR",             "true");
             env.put("ENABLE_ROM_GENERATOR__BY",         "idetool");
+            env.put("ENABLE_SOFT_FLOAT", "true");
+			env.put("ENABLE_SOFT_FLOAT__BY", "idetool");
+
 			extra.addElement("MSW_FIRST_FOR_DOUBLE=0");
 		   	extra.addElement("TARGET_MSW_FIRST_FOR_DOUBLE=1");
 		    extra.addElement("TARGET_MSW_FIRST_FOR_LONG=0");
@@ -60,6 +63,9 @@ abstract class SymbianIDEProjectARM extends SymbianIDEProject
             env.put("ENABLE_INTERPRETER_GENERATOR__BY", "idetool");
             env.put("ENABLE_ROM_GENERATOR",             "true");
             env.put("ENABLE_ROM_GENERATOR__BY",         "idetool");
+            env.put("ENABLE_SOFT_FLOAT", "true");
+			env.put("ENABLE_SOFT_FLOAT__BY", "idetool");
+
 			extra.addElement("MSW_FIRST_FOR_DOUBLE=1");
             break;
         case TARGET:
@@ -74,6 +80,8 @@ abstract class SymbianIDEProjectARM extends SymbianIDEProject
 			env.put("ENABLE_ROM_DEBUG_SYMBOLS__BY", "idetool");
 			env.put("ENABLE_ROM_GENERATOR",     "false");
 			env.put("ENABLE_ROM_GENERATOR__BY", "idetool");
+			env.put("ENABLE_SOFT_FLOAT", "true");
+			env.put("ENABLE_SOFT_FLOAT__BY", "idetool");
 			extra.addElement("MSW_FIRST_FOR_DOUBLE=1");
 			break;
         }
