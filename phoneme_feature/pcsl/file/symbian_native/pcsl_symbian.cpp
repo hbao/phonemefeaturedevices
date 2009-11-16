@@ -503,6 +503,7 @@ class CDirIterator : public CBase
 		}
 		~CDirIterator()
 		{
+            delete iPath;
             delete iWild;
 			iEntries.Close();
 		}
