@@ -107,7 +107,7 @@ abstract class SymbianMIDPBase extends NMakefile
         {
             putln((String)jav.elementAt(i) + " : " + (String)jpp.elementAt(i));
             puttabln("@echo Preproccesing " + (String)jpp.elementAt(i));
-			puttabln("$(JAVA6) -classpath ..\\buildtool Jpp " + (String)jpp.elementAt(i) + " -DENABLE_PUBLICKEYSTORE -DENABLE_CHAMELEON -DENABLE_JSR_75 -DENABLE_JSR_211 -d " + (String)dir.elementAt(i));
+			puttabln("$(JAVA6) -classpath ..\\buildtool Jpp " + (String)jpp.elementAt(i) + " -DENABLE_PUBLICKEYSTORE -DENABLE_CHAMELEON -DENABLE_JSR_75 -DENABLE_JSR_211 -DENABLE_SSL -d " + (String)dir.elementAt(i));
 			putln();
 		}
         putln();
@@ -160,6 +160,13 @@ abstract class SymbianMIDPBase extends NMakefile
 		v.addElement("$(RESTRICTED_CRYPTO_DIR)\\restricted_crypto\\reference\\classes\\com\\sun\\midp\\crypto\\RSA.java");
 		v.addElement("$(RESTRICTED_CRYPTO_DIR)\\restricted_crypto\\reference\\classes\\com\\sun\\midp\\crypto\\RsaShaSig.java");
 		v.addElement("$(RESTRICTED_CRYPTO_DIR)\\restricted_crypto\\reference\\classes\\com\\sun\\midp\\crypto\\RsaSig.java");
+
+        v.addElement("$(RESTRICTED_CRYPTO_DIR)\\ssl\\reference\\classes\\com\\sun\\midp\\ssl\\Handshake.java");
+        v.addElement("$(RESTRICTED_CRYPTO_DIR)\\ssl\\reference\\classes\\com\\sun\\midp\\ssl\\In.java"); 
+        v.addElement("$(RESTRICTED_CRYPTO_DIR)\\ssl\\reference\\classes\\com\\sun\\midp\\ssl\\Out.java");
+        v.addElement("$(RESTRICTED_CRYPTO_DIR)\\ssl\\reference\\classes\\com\\sun\\midp\\ssl\\Record.java");
+        v.addElement("$(RESTRICTED_CRYPTO_DIR)\\ssl\\reference\\classes\\com\\sun\\midp\\ssl\\SSLStreamConnection.java");
+
 		// Sun AMS stuff
 		v.addElement("$(GENERATED_DIR)\\ams\\ams_util\\mvm\\classes\\com\\sun\\midp\\main\\IsolateUtil.java");
 		v.addElement("$(MIDP_SRC_DIR)\\ams\\ams_base_cldc\\reference\\classes\\com\\sun\\midp\\main\\MIDletSuiteLoader.java");
@@ -252,6 +259,7 @@ abstract class SymbianMIDPBase extends NMakefile
 		v.addElement("$(MIDP_SRC_DIR)\\security\\crypto\\reference\\classes\\com\\sun\\midp\\crypto\\CryptoParameter.java");
 		v.addElement("$(MIDP_SRC_DIR)\\security\\crypto\\reference\\classes\\com\\sun\\midp\\crypto\\InvalidAlgorithmParameterException.java");
 		v.addElement("$(MIDP_SRC_DIR)\\security\\crypto\\reference\\classes\\com\\sun\\midp\\crypto\\BadPaddingException.java");
+		v.addElement("$(MIDP_SRC_DIR)\\security\\crypto\\reference\\classes\\com\\sun\\midp\\crypto\\SecretKey.java");
 		v.addElement("$(GENERATED_DIR)\\security\\internal_api_protection\\reference\\classes\\com\\sun\\midp\\security\\SecurityInitializer.java");
 		v.addElement("$(MIDP_SRC_DIR)\\security\\internal_api_protection\\reference\\classes\\com\\sun\\midp\\security\\SecurityInitializerImpl.java");
 		v.addElement("$(MIDP_SRC_DIR)\\security\\internal_api_protection\\reference\\classes\\com\\sun\\midp\\security\\SecurityToken.java");
@@ -301,8 +309,12 @@ abstract class SymbianMIDPBase extends NMakefile
 		v.addElement("$(MIDP_SRC_DIR)\\security\\access_controller_cldc_port\\classes\\com\\sun\\j2me\\security\\InterruptedSecurityException.java");
 		v.addElement("$(MIDP_SRC_DIR)\\protocol\\socket\\reference\\classes\\com\\sun\\midp\\io\\j2me\\socket\\Protocol.java");
 		v.addElement("$(MIDP_SRC_DIR)\\protocol\\https\\classes\\javax\\microedition\\io\\HttpsConnection.java");
-		v.addElement("$(MIDP_SRC_DIR)\\protocol\\ssl\\classes\\javax\\microedition\\io\\SecurityInfo.java");
-  		v.addElement("$(GENERATED_DIR)\\protocol\\gcf\\reference\\classes\\com\\sun\\midp\\io\\ConnectionBaseAdapter.java");
+		
+        v.addElement("$(MIDP_SRC_DIR)\\protocol\\ssl\\reference\\classes\\com\\sun\\midp\\io\\j2me\\ssl\\Protocol.java");
+  		v.addElement("$(MIDP_SRC_DIR)\\protocol\\ssl\\classes\\javax\\microedition\\io\\SecurityInfo.java");
+        v.addElement("$(MIDP_SRC_DIR)\\protocol\\ssl\\classes\\javax\\microedition\\io\\SecureConnection.java");
+        
+        v.addElement("$(GENERATED_DIR)\\protocol\\gcf\\reference\\classes\\com\\sun\\midp\\io\\ConnectionBaseAdapter.java");
         v.addElement("$(GENERATED_DIR)\\Constants.java");
         v.addElement("$(GENERATED_DIR)\\LogChannels.java");
 		v.addElement("$(GENERATED_DIR)\\AlertTypeConstants.java");
@@ -334,7 +346,10 @@ abstract class SymbianMIDPBase extends NMakefile
   		v.addElement("$(MIDP_SRC_DIR)\\protocol\\http\\reference\\classes\\com\\sun\\midp\\io\\j2me\\http\\symbian\\Protocol.java");
   		v.addElement("$(MIDP_SRC_DIR)\\protocol\\http\\reference\\classes\\com\\sun\\midp\\io\\j2me\\http\\StreamConnectionElement.java");
   		v.addElement("$(MIDP_SRC_DIR)\\protocol\\http\\reference\\classes\\com\\sun\\midp\\io\\j2me\\http\\StreamConnectionPool.java");
-  		v.addElement("$(MIDP_SRC_DIR)\\configuration\\properties\\reference\\classes\\com\\sun\\midp\\main\\Configuration.java");
+  		
+  		v.addElement("$(MIDP_SRC_DIR)\\protocol\\https\\reference\\classes\\com\\sun\\midp\\io\\j2me\\https\\Protocol.java");
+  		
+        v.addElement("$(MIDP_SRC_DIR)\\configuration\\properties\\reference\\classes\\com\\sun\\midp\\main\\Configuration.java");
 		v.addElement("$(MIDP_SRC_DIR)\\core\\jarutil\\reference\\classes\\com\\sun\\midp\\jarutil\\JarReader.java");
 		v.addElement("$(MIDP_SRC_DIR)\\ams\\installer\\reference\\classes\\com\\sun\\midp\\installer\\InvalidJadException.java");
 		v.addElement("$(MIDP_SRC_DIR)\\ams\\installer\\reference\\classes\\com\\sun\\midp\\installer\\JadProperties.java");
