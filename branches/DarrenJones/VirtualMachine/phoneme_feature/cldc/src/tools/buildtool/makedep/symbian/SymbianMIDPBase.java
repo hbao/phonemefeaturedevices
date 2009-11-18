@@ -124,7 +124,7 @@ abstract class SymbianMIDPBase extends NMakefile
 		v.addElement("$(MIDP_SRC_DIR)\\ams\\appmanager_ui\\reference\\classes\\com\\sun\\midp\\appmanager\\DisplayError.java");
 		v.addElement("$(MIDP_SRC_DIR)\\ams\\appmanager_ui\\reference\\classes\\com\\sun\\midp\\appmanager\\MIDletSwitcher.java");
 		v.addElement("$(MIDP_SRC_DIR)\\ams\\appmanager_ui\\reference\\classes\\com\\sun\\midp\\appmanager\\FolderList.java");
-		v.addElement("$(MIDP_SRC_DIR)\\ams\\appmanager_ui\\reference\\classes\\com\\sun\\midp\\appmanager\\SplashScreen.java");
+		v.addElement("$(MIDP_SRC_DIR)\\ams\\appmanager_ui\\reference\\classes\\com\\sun\\midp\\appmanager\\symbian\\SplashScreen.java");
 		v.addElement("$(MIDP_SRC_DIR)\\ams\\appmanager_ui\\reference\\classes\\com\\sun\\midp\\appmanager\\AppInfo.java");
 		v.addElement("$(MIDP_SRC_DIR)\\ams\\appmanager_ui\\reference\\classes\\com\\sun\\midp\\appmanager\\AppSettings.java");
 		v.addElement("$(MIDP_SRC_DIR)\\ams\\appmanager_ui\\reference\\classes\\com\\sun\\midp\\appmanager\\MIDletSelector.java");
