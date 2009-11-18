@@ -42,7 +42,7 @@ void CTestVM::setUp()
 void CTestVM::tearDown()
 {}
 
-MUnknown * CTestVM::CreateL(TUid aImplementationUid, TUid aInterfaceUid, TAny* aConstructionParameters)
+MUnknown * CTestVM::CreateL(TUid /*aImplementationUid*/, TUid aInterfaceUid, TAny* /*aConstructionParameters*/)
 {
 	RDebug::Print(_L("Create 0x%08x"),aInterfaceUid);
 	return NULL;

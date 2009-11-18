@@ -175,7 +175,7 @@ public:
 		{
 			HBufC* key = iStrings[i]->iKey;
 			HBufC* value = iStrings[i]->iValue;
-			RDebug::Print(_L("%S %S"),&(key->Des()),&(value->Des()));
+			RDebug::Print(_L("%S %S"),key,value);
 		}
 		c = iIntegers.Count();
 		for(TInt i=0;i<c;i++)
@@ -188,7 +188,7 @@ public:
 		TInt c = iStrings.Count();
 		for(TInt i=0;i<c;i++)
 		{
-			RDebug::Print(_L("Row %d %S"),i,&(iStrings[i]->iKey->Des()));
+			RDebug::Print( _L("Row %d %S") , i , iStrings[i]->iKey );
 			if(iStrings[i]->iKey->Des().Compare(aKey) == 0 && iStrings[i]->iValue->Des().Compare(aValue) == 0)
 			{
 				return ETrue;
@@ -365,8 +365,10 @@ public:
 		iTable.iData[iIndex]->WriteUintL(aColumn,aValue);
 	}
 	
-	TInt PutRecordChanges(TBool aHidden, TBool aReadOnly)
-	{}
+	TInt PutRecordChanges(TBool /*aHidden*/, TBool /*aReadOnly*/)
+	{
+		return KErrNone;
+	}
 	
 	virtual TInt DeleteRecord()
 	{
