@@ -183,10 +183,14 @@ public:
 		AddOutgoingGPRSTableL();
 	}
 	TInt BeginTransaction()
-	{}
+	{
+		return KErrNone;
+	}
 	
 	TInt CommitTransaction()
-	{}
+	{
+		return KErrNone;
+	}
 	
 	void RollbackTransaction()
 	{}
@@ -226,6 +230,7 @@ public:
 			AddRef();
 			return static_cast<MCommDBWrapper*>(this);
 		}
+		return NULL;
 	}
 	void AddRef(){ iRef++;}
 	void Release()
@@ -262,7 +267,7 @@ public:
 	RArray<TTable> iDatabase;
 };
 
-MUnknown * CTestCommDBUtil::CommDBWrapperCreate(TUid aImplementationUid, TUid aInterfaceUid, TAny* aConstructionParameters)
+MUnknown * CTestCommDBUtil::CommDBWrapperCreate(TUid aImplementationUid, TUid /*aInterfaceUid*/, TAny* /*aConstructionParameters*/)
 {
 	switch(aImplementationUid.iUid)
 	{

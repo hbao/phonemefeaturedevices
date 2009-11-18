@@ -168,6 +168,7 @@ public:
 			AddRef();
 			return static_cast<MCommDBWrapper*>(this);
 		}
+		return NULL;
 	}
 	void AddRef(){ iRef++;}
 	void Release()
