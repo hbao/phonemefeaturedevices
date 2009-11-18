@@ -46,6 +46,6 @@ public class SplashScreenCanvas extends Canvas
 		DrawSplashScreen0();
     }
 
-	private native void DrawSplashScreen0();
+	public native static void DrawSplashScreen0();
 	
 }
