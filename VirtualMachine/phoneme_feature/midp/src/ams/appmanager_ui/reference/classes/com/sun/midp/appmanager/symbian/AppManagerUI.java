@@ -54,6 +54,9 @@ import java.io.*;
 import javax.microedition.rms.*;
 import java.util.*;
 
+import com.bluewhalesystems.midp.PlatformRequestListener;
+import com.sun.midp.events.EventQueue;
+
 /**
  * The Graphical MIDlet selector Screen.
  * <p>
@@ -103,7 +106,7 @@ import java.util.*;
  * by the color of their name.
  */
 class AppManagerUI extends Form
-    implements ItemCommandListener, CommandListener {
+    implements ItemCommandListener, CommandListener, PlatformRequestListener.PlatformRequestListenerHandler {
 
     /** Constant for the discovery application class name. */
     private static final String DISCOVERY_APP =
@@ -191,6 +194,9 @@ class AppManagerUI extends Form
      * Tha pad between custom item's icon and text
      */
     private static final int ITEM_PAD = 2;
+
+    private static PlatformRequestListener iPlatformRequestListener;
+    private String iUrl = null;
 
     /**
      * Cashed truncation mark
@@ -383,6 +389,8 @@ class AppManagerUI extends Form
         folderList.setCommandListener(this);
         foldersOn = false;
 
+        iPlatformRequestListener = new PlatformRequestListener(EventQueue.getEventQueue(),this);
+
         mciVector = new Vector();
 
         try {
@@ -466,6 +474,10 @@ class AppManagerUI extends Form
         }
     }
 
+    public void installRequest(String aUrl)
+    {
+        iUrl = aUrl;
+    }
 
     /**
      * Selects specified item. If necessary changes folder to items folder. 
@@ -844,6 +856,30 @@ class AppManagerUI extends Form
         }
     }
 
+    void handlePlatformRequest(MIDletProxy midlet)
+    {
+        if(iUrl != null)
+        {
+            try
+            {
+                 AmsUtil.startMidletInNewIsolate(MIDletSuite.INTERNAL_SUITE_ID,
+                                                 INSTALLER, "Installer",
+                                                 "FU", iUrl, null);
+            }
+            catch(Exception err)
+            {
+                // failed to start installer, rerun midlet
+                String name = System.getProperty("x-bw-app-name");
+                String fullName = System.getProperty("x-bw-app-full-name");
+                AmsUtil.startMidletInNewIsolate(midlet.getSuiteId(), fullName, name, null, null, null);
+            }
+            finally
+            {
+                iUrl = null;
+            }
+        }
+    }
+
     /**
      * Called when a running midlet exited.
      *
@@ -918,6 +954,7 @@ class AppManagerUI extends Form
                         ci.update();
                     }
 
+                    handlePlatformRequest(midlet);
                     return;
                 }
             }
@@ -925,6 +962,13 @@ class AppManagerUI extends Form
 
         // Midlet quited; display the application Selector
         display.setCurrent(this);
+        if (INSTALLER.equals(midletClassName))
+        {
+            // start the newly-installed MIDlet
+            String name = System.getProperty("x-bw-app-name");
+            String fullName = System.getProperty("x-bw-app-full-name");
+            AmsUtil.startMidletInNewIsolate(getLastInstalledMIDlet(), fullName, name, null, null, null);
+        }
     }
 
     /**
