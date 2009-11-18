@@ -51,7 +51,7 @@ protected:
 	virtual void CancelAsyncRequest(TInt aReqToCancel);
 	
 	// MUnknown implementation.
-	virtual MUnknown * QueryInterfaceL( TInt aInterfaceId )
+	virtual MUnknown * QueryInterfaceL( TInt /*aInterfaceId*/ )
 	{
 		return NULL;
 	}
@@ -97,6 +97,8 @@ public:
 	void testUserChooseAPN();
 	void testNoNetworkNoWLAN();
 	void testNoNetworkWithWLAN();
+	void testWithOngoingCall();
+
 private:
 	static MUnknown * APNManagerWrapperCreate(TUid aImplementationUid, TUid aInterfaceUid, TAny* aConstructionParameters);
 	static MUnknown * APNManagerTimedWrapperCreate(TUid aImplementationUid, TUid aInterfaceUid, TAny* aConstructionParameters);
@@ -104,6 +106,7 @@ private:
 	static MUnknown * APNManagerTimedWrapperWithIAPCreate(TUid aImplementationUid, TUid aInterfaceUid, TAny* aConstructionParameters);
 	static MUnknown * APNManagerNoNetworkNoWLAN(TUid aImplementationUid, TUid aInterfaceUid, TAny* aConstructionParameters);
 	static MUnknown * APNManagerNoNetworkWithWLAN(TUid aImplementationUid, TUid aInterfaceUid, TAny* aConstructionParameters);
+	static MUnknown * APNManagerWithOngoingCall(TUid aImplementationUid, TUid aInterfaceUid, TAny* aConstructionParameters);
 };
 
 #endif 

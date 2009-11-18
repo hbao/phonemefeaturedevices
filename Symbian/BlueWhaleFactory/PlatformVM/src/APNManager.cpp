@@ -240,6 +240,11 @@ TInt CAPNManager::GetIAP(TInt aIndex,TInt aPort)
 		DEBUGMSG2(_L("Found %d at %d"),iap,index);
 	}
 #endif
+	if(iNetWorkInfo->IsCallOngoing())
+	{
+		DEBUGMSG(_L("Ongoing call"));
+		return iap;
+	}
 	if( ( iNetWorkInfo->IsRegisteredOnNetwork() || iWlanCount > 0  
 #ifdef __WINSCW__
 		||	!iBeingTested

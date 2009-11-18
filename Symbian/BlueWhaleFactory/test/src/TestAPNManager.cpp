@@ -70,21 +70,21 @@ TInt CTestAPNManagerConnectionMonitorWrapper::ConnectL()
 	return KErrNone;
 }
 
-TInt CTestAPNManagerConnectionMonitorWrapper::NotifyEventL( MConnectionMonitorObserver& aObserver )
+TInt CTestAPNManagerConnectionMonitorWrapper::NotifyEventL( MConnectionMonitorObserver& /*aObserver*/ )
 {
 	return KErrNone;
 }
 
-TInt CTestAPNManagerConnectionMonitorWrapper::GetConnectionInfo( const TUint aIndex,TUint& aConnectionId,TUint& aSubConnectionCount ) const
+TInt CTestAPNManagerConnectionMonitorWrapper::GetConnectionInfo( const TUint /*aIndex*/,TUint& /*aConnectionId*/,TUint& /*aSubConnectionCount*/ ) const
 {
 	return KErrNone;
 }
-void CTestAPNManagerConnectionMonitorWrapper::GetStringAttribute( const TUint aConnectionId,const TUint aSubConnectionId,const TUint aAttribute,TDes& aValue,TRequestStatus& aStatus ) const
+void CTestAPNManagerConnectionMonitorWrapper::GetStringAttribute( const TUint /*aConnectionId*/,const TUint /*aSubConnectionId*/,const TUint /*aAttribute*/,TDes& /*aValue*/,TRequestStatus& /*aStatus*/ ) const
 {
 	User::Invariant();
 }
 
-void CTestAPNManagerConnectionMonitorWrapper::GetPckgAttribute( const TUint aConnectionId,const TUint aSubConnectionId,const TUint aAttribute,TDes8& aValue,TRequestStatus& aStatus ) const
+void CTestAPNManagerConnectionMonitorWrapper::GetPckgAttribute( const TUint /*aConnectionId*/,const TUint /*aSubConnectionId*/,const TUint aAttribute,TDes8& aValue,TRequestStatus& aStatus ) const
 {
 	iClientStatus = &aStatus;
 	*iClientStatus = KRequestPending;
@@ -146,7 +146,7 @@ void CTestAPNManagerConnectionMonitorWrapper::GetConnectionCount( TUint& aConnec
 	User::RequestComplete(status,KErrNone);
 }
 
-void CTestAPNManagerConnectionMonitorWrapper::CancelAsyncRequest(TInt aReqToCancel)
+void CTestAPNManagerConnectionMonitorWrapper::CancelAsyncRequest(TInt /*aReqToCancel*/)
 {
 	if(iClientStatus)
 	{
@@ -162,7 +162,7 @@ void CTestAPNManagerConnectionMonitorWithIAPWrapper::GetConnectionCount( TUint& 
 	User::RequestComplete(status,KErrNone);
 }
 
-void CTestAPNManagerConnectionMonitorWithIAPWrapper::GetStringAttribute( const TUint aConnectionId,const TUint aSubConnectionId,const TUint aAttribute,TDes& aValue,TRequestStatus& aStatus ) const
+void CTestAPNManagerConnectionMonitorWithIAPWrapper::GetStringAttribute( const TUint /*aConnectionId*/,const TUint /*aSubConnectionId*/,const TUint aAttribute,TDes& aValue,TRequestStatus& aStatus ) const
 {
 	switch(aAttribute)
 	{
@@ -197,13 +197,13 @@ public: // MTelephonyWrapper
 		User::RequestComplete(status,KErrNone);
 	}
 	
-	virtual void NotifyChange(TRequestStatus& aReqStatus, const CTelephony::TNotificationEvent& aEvent, TDes8& aDes) const
+	virtual void NotifyChange(TRequestStatus& aReqStatus, const CTelephony::TNotificationEvent& /*aEvent*/, TDes8& /*aDes*/) const
 	{
 		const_cast<CTestAPNManagerTelephonyWrapper*>(this)->iClientStatus = (TRequestStatus*)&aReqStatus;
 		*iClientStatus = KRequestPending;
 	}
 	
-	virtual TInt CancelAsync(CTelephony::TCancellationRequest aCancel) const
+	virtual TInt CancelAsync(CTelephony::TCancellationRequest /*aCancel*/) const
 	{
 		if(iClientStatus)
 		{
@@ -212,7 +212,7 @@ public: // MTelephonyWrapper
 		return KErrNone;
 	}
 public: // MUnknown implementation.
-	virtual MUnknown * QueryInterfaceL( TInt aInterfaceId )
+	virtual MUnknown * QueryInterfaceL( TInt /*aInterfaceId*/ )
 	{
 		return NULL;
 	}
@@ -220,6 +220,39 @@ public: // MUnknown implementation.
 	void Release() 
 	{
 		delete this;
+	}
+};
+
+class CTestAPNManagerTelephonyWrapperWithCall : public CTestAPNManagerTelephonyWrapper
+{
+public:
+	virtual TInt GetLineStatus(const CTelephony::TPhoneLine & /*aLine*/, TDes8 &aStatus) const
+		{
+			CTelephony::TCallStatusV1 info;
+			CTelephony::TCallStatusV1Pckg infoPckg(info);
+			info.iStatus = CTelephony::EStatusConnected;
+			aStatus.Copy(infoPckg);
+			return KErrNone;
+		}
+	virtual void GetCurrentNetworkInfo(TRequestStatus& aReqStatus, TDes8& aNetworkInfo) const
+		{
+			CTelephony::TNetworkInfoV1 info;
+			CTelephony::TNetworkInfoV1Pckg infoPckg(info);
+			
+			info.iCountryCode.Copy(KCountry);
+			info.iNetworkId.Copy(KNetwork);
+			info.iLongName.Copy(_L("T-Mobile"));
+			info.iStatus = CTelephony::ENetworkStatusCurrent;
+			aNetworkInfo.Copy(infoPckg);
+			TRequestStatus* status = &aReqStatus; 
+			User::RequestComplete(status,KErrNone);
+
+		}
+	virtual void NotifyChange(TRequestStatus& aReqStatus, const CTelephony::TNotificationEvent& /*aEvent*/, TDes8& /*aDes*/) const
+	{
+		TRequestStatus* reqStatus = &aReqStatus;
+		User::RequestComplete(reqStatus,KErrCancel);
+		CActiveScheduler::Stop();
 	}
 };
 
@@ -252,7 +285,7 @@ public:
 		}
 	}
 
-	virtual TInt CancelAsync(CTelephony::TCancellationRequest aCancel) const
+	virtual TInt CancelAsync(CTelephony::TCancellationRequest /*aCancel*/) const
 	{
 		if(iClientStatus)
 		{
@@ -262,6 +295,7 @@ public:
 		{
 			User::RequestComplete((TRequestStatus*&)iClientStatus2,KErrNone);
 		}
+		return KErrNone;
 	}
 
 	static TInt TimeOut(TAny* aThis)
@@ -468,6 +502,7 @@ public:
 			AddRef();
 			return static_cast<MCommDBWrapper*>(this);
 		}
+		return NULL;
 	}
 	void AddRef(){ iRef++;}
 	void Release()
@@ -533,7 +568,7 @@ MUnknown * CTestAPNManager::NetworkLossCreate(TUid aImplementationUid, TUid aInt
 	return ret;
 }
 
-MUnknown * CTestAPNManager::APNManagerTimedWrapperCreate(TUid aImplementationUid, TUid aInterfaceUid, TAny* aConstructionParameters)
+MUnknown * CTestAPNManager::APNManagerTimedWrapperCreate(TUid aImplementationUid, TUid /*aInterfaceUid*/, TAny* /*aConstructionParameters*/)
 {
 	RDebug::Print(_L("APNManagerWrapperCreate 0x%08x"),aImplementationUid);
 	MUnknown * ret = NULL;
@@ -557,7 +592,7 @@ MUnknown * CTestAPNManager::APNManagerTimedWrapperCreate(TUid aImplementationUid
 	return ret;
 }
 
-MUnknown * CTestAPNManager::APNManagerWrapperCreate(TUid aImplementationUid, TUid aInterfaceUid, TAny* aConstructionParameters)
+MUnknown * CTestAPNManager::APNManagerWrapperCreate(TUid aImplementationUid, TUid /*aInterfaceUid*/, TAny* /*aConstructionParameters*/)
 {
 	RDebug::Print(_L("APNManagerWrapperCreate 0x%08x"),aImplementationUid);
 	MUnknown * ret = NULL;
@@ -579,6 +614,30 @@ MUnknown * CTestAPNManager::APNManagerWrapperCreate(TUid aImplementationUid, TUi
 	}
 	return ret;
 }
+
+MUnknown * CTestAPNManager::APNManagerWithOngoingCall(TUid aImplementationUid, TUid /*aInterfaceUid*/, TAny* /*aConstructionParameters*/)
+{
+	RDebug::Print(_L("APNManagerWrapperCreate 0x%08x"),aImplementationUid);
+	MUnknown * ret = NULL;
+	switch(aImplementationUid.iUid)
+	{
+		case KCID_MCommDBWrapper:
+			CTestAPNManagerCommDBWrapper* db = new (ELeave) CTestAPNManagerCommDBWrapper;
+			db->ConstructL();
+			ret = db;
+			break;
+		case KCID_MTelephonyWrapper:
+			ret = new (ELeave) CTestAPNManagerTelephonyWrapperWithCall;
+			break;
+		case KCID_MConnectionMonitorWrapper:
+			ret = new (ELeave) CTestAPNManagerConnectionMonitorWrapper;
+			break;
+		default:
+			User::Invariant();
+	}
+	return ret;
+}
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void CTestAPNManager::testCreateAPNManager()
 {
@@ -910,26 +969,27 @@ public:
 		}
 		virtual TInt GotoFirstRecord(){return 0;}
 		virtual TInt GotoNextRecord() {return -1;}
-		virtual TInt InsertRecord(TUint32& aId) {return 0;}
+		virtual TInt InsertRecord(TUint32& /*aId*/) {return 0;}
 		virtual TInt UpdateRecord() {return 0;}
-		virtual void ReadTextL(const TDesC& aColumn, TDes16& aValue) 
+		virtual void ReadTextL(const TDesC& /*aColumn*/, TDes16& aValue) 
 		{
 			aValue.Copy(KTestWlanWithIAP);
 		}
-		virtual void ReadUintL(const TDesC& aColumn, TUint32& aValue) 
+		virtual void ReadUintL(const TDesC& /*aColumn*/, TUint32& aValue) 
 		{
 			aValue = 1;
 		}
-		virtual void WriteTextL(const TDesC& aColumn, const TDesC16& aValue) {}
-		virtual void WriteLongTextL(const TDesC& aColumn, const TDesC& aValue) {}
-		virtual void WriteUintL(const TDesC& aColumn, const TUint32& aValue) {}
-		virtual void WriteBoolL(const TDesC& aColumn, const TBool& aValue) {}
-		virtual TInt PutRecordChanges(TBool aHidden = EFalse, TBool aReadOnly = EFalse) {return 0;}
+		virtual void WriteTextL(const TDesC& /*aColumn*/, const TDesC16& /*aValue*/) {}
+		virtual void WriteLongTextL(const TDesC& /*aColumn*/, const TDesC& /*aValue*/) {}
+		virtual void WriteUintL(const TDesC& /*aColumn*/, const TUint32& /*aValue*/) {}
+		virtual void WriteBoolL(const TDesC& /*aColumn*/, const TBool& /*aValue*/) {}
+		virtual TInt PutRecordChanges(TBool /*aHidden = EFalse*/, TBool /*aReadOnly = EFalse*/) {return 0;}
 		virtual TInt DeleteRecord() {return 0;}
 	};
-	MCCommsDbTableViewWrapper* OpenTableL(const TDesC& aTableName)
+	MCCommsDbTableViewWrapper* OpenTableL(const TDesC& /*aTableName*/)
 	{
 		iWrapper = new (ELeave)CTestSimpleCommsDbTableViewWrapper;
+		return iWrapper; 
 	}
 	CTestSimpleCommsDbTableViewWrapper* iWrapper;
 	TInt iRef;
@@ -956,7 +1016,7 @@ MUnknown * CTestAPNManager::APNManagerNoNetworkWithWLAN(TUid aImplementationUid,
 
 void CTestAPNManager::testNoNetworkWithWLAN()
 {
-MProperties* properties = DiL(MProperties);
+	MProperties* properties = DiL(MProperties);
 	CleanupReleasePushL(*properties);
 	
 	REComPlusSession::SetDelegate(APNManagerNoNetworkWithWLAN);
@@ -979,3 +1039,29 @@ MProperties* properties = DiL(MProperties);
 	CleanupStack::PopAndDestroy(properties);
 	
 }
+
+void CTestAPNManager::testWithOngoingCall()
+{
+	MProperties* properties = DiL(MProperties);
+	CleanupReleasePushL(*properties);
+	
+	REComPlusSession::SetDelegate(APNManagerWithOngoingCall);
+		
+	CAPNManager* manager = CAPNManager::NewL(properties);
+	CleanupStack::PushL(manager);
+
+	manager->SetBeingTested();
+
+	CActiveScheduler::Start();
+
+	MIAPSession* session = manager->StartIAPSession();
+	TInt iap = session->GetNextIAP(0);
+	RDebug::Print(_L("IAP %d"),iap);
+	TS_ASSERT(iap == -1);	
+	CleanupReleasePushL(*session);
+	
+	CleanupStack::PopAndDestroy(session);
+	CleanupStack::PopAndDestroy(manager);
+	CleanupStack::PopAndDestroy(properties);
+}
+

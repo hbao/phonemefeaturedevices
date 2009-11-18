@@ -55,21 +55,21 @@ protected:
 		return KErrNone;
 	}
 
-	virtual TInt NotifyEventL( MConnectionMonitorObserver& aObserver )
+	virtual TInt NotifyEventL( MConnectionMonitorObserver& /*aObserver*/ )
 	{
 		return KErrNone;
 	}
 
-	virtual TInt GetConnectionInfo( const TUint aIndex,TUint& aConnectionId,TUint& aSubConnectionCount ) const
+	virtual TInt GetConnectionInfo( const TUint /*aIndex*/,TUint& /*aConnectionId*/,TUint& /*aSubConnectionCount*/ ) const
 
 	{
 		return KErrNone;
 	}
 
-	virtual void GetStringAttribute( const TUint aConnectionId,const TUint aSubConnectionId,const TUint aAttribute,TDes& aValue,TRequestStatus& aStatus ) const
+	virtual void GetStringAttribute( const TUint /*aConnectionId*/,const TUint /*aSubConnectionId*/,const TUint /*aAttribute*/,TDes& /*aValue*/,TRequestStatus& /*aStatus*/ ) const
 	{}
 
-	virtual void GetPckgAttribute( const TUint aConnectionId,const TUint aSubConnectionId,const TUint aAttribute,TDes8& aValue,TRequestStatus& aStatus ) const
+	virtual void GetPckgAttribute( const TUint /*aConnectionId*/,const TUint /*aSubConnectionId*/,const TUint aAttribute,TDes8& aValue,TRequestStatus& aStatus ) const
 
 	{
 		iClientStatus = &aStatus;
@@ -125,7 +125,7 @@ protected:
 		User::RequestComplete(status,KErrNone);
 	}
 
-	virtual void CancelAsyncRequest(TInt aReqToCancel)
+	virtual void CancelAsyncRequest(TInt /*aReqToCancel*/)
 
 	{
 		if(iClientStatus)
@@ -137,7 +137,7 @@ protected:
 
 	
 	// MUnknown implementation.
-	virtual MUnknown * QueryInterfaceL( TInt aInterfaceId )
+	virtual MUnknown * QueryInterfaceL( TInt /*aInterfaceId*/ )
 	{
 		return NULL;
 	}
