@@ -40,7 +40,7 @@ _LIT(KNetwork2,"33"); // Orange
 
 static CTestSimpleCommDBWrapper* gCurrentDB = NULL;
 
-MUnknown * CTestAPNManagerWithPorts::Create(TUid aImplementationUid, TUid aInterfaceUid, TAny* aConstructionParameters)
+MUnknown * CTestAPNManagerWithPorts::Create(TUid aImplementationUid, TUid /*aInterfaceUid*/, TAny* /*aConstructionParameters*/)
 {
 	MUnknown * ret = NULL;
 	switch(aImplementationUid.iUid)
