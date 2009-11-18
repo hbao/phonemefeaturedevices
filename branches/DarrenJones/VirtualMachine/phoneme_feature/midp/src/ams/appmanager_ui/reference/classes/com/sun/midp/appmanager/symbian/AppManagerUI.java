@@ -193,7 +193,7 @@ class AppManagerUI extends Form
     /**
      * Tha pad between custom item's icon and text
      */
-    private static final int ITEM_PAD = 2;
+    private static final int ITEM_PAD = 4;
 
     private static PlatformRequestListener iPlatformRequestListener;
     private String iUrl = null;
