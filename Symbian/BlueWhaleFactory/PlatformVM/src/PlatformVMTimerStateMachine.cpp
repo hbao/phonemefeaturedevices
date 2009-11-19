@@ -74,6 +74,9 @@
 _LIT(KVMThreadName,"_BWMVMT%d");
 _LIT(KManThreadName,"_BWMMan%d");
 
+_LIT8(KPartner1, "sky");
+_LIT8(KPartner1DisplayName, "SkyMobileEmail");
+
 class CSymbianSocket;
 class CTicker;
 class CSocketFactoryServer;
@@ -791,7 +794,34 @@ TInt CJVMRunner::RunVML()
 	properties->AddL(KAppFullNameKey(), KDefaultAppFullName());
 	if (iShortcutName.Length() == 0)
 	{
-		properties->AddL(KAppnameKey(), KDefaultAppName());
+		TBool foundPartner = EFalse;
+		if (installFileName.Length())
+		{
+			_LIT8(KBlueWhaleString, "bluewhale");
+			TInt bluewhaleIndex = installFileName.FindF(KBlueWhaleString);
+			if (KErrNotFound != bluewhaleIndex)
+			{
+				TInt underscoreIndex = installFileName.Mid(bluewhaleIndex).Locate(TChar('_'));
+				if (KErrNotFound != underscoreIndex)
+				{
+					TPtr8 partner = installFileName.MidTPtr(bluewhaleIndex + KBlueWhaleString().Length(), underscoreIndex - KBlueWhaleString().Length());
+					if (partner.Length() > 2)
+					{
+						// strip the surrounding hyphens
+						partner = partner.Mid(1, partner.Length() - 2);
+						if (partner.CompareF(KPartner1) == 0)
+						{
+							properties->AddL(KAppnameKey(), KPartner1DisplayName);
+							foundPartner = ETrue;
+						}
+					}
+				}
+			}
+		}
+		if (!foundPartner)
+		{
+			properties->AddL(KAppnameKey(), KDefaultAppName());
+		}
 	}
 	else
 	{
