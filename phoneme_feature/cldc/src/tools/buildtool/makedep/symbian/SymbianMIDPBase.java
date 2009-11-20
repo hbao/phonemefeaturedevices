@@ -120,11 +120,11 @@ abstract class SymbianMIDPBase extends NMakefile
 		v.addElement("$(MIDP_SRC_DIR)\\ams\\jams\\mvm\\classes\\com\\sun\\midp\\appmanager\\MVMManager.java");
 		v.addElement("$(MIDP_SRC_DIR)\\ams\\on_device_debug_stubs\\reference\\classes\\com\\sun\\midp\\appmanager\\ODTControllerEventConsumer.java");
 		v.addElement("$(MIDP_SRC_DIR)\\ams\\on_device_debug_stubs\\reference\\classes\\com\\sun\\midp\\appmanager\\ODTControllerEventListener.java");
-		v.addElement("$(MIDP_SRC_DIR)\\ams\\appmanager_ui\\reference\\classes\\com\\sun\\midp\\appmanager\\AppManagerUI.java");
+		v.addElement("$(MIDP_SRC_DIR)\\ams\\appmanager_ui\\reference\\classes\\com\\sun\\midp\\appmanager\\symbian\\AppManagerUI.java");
 		v.addElement("$(MIDP_SRC_DIR)\\ams\\appmanager_ui\\reference\\classes\\com\\sun\\midp\\appmanager\\DisplayError.java");
 		v.addElement("$(MIDP_SRC_DIR)\\ams\\appmanager_ui\\reference\\classes\\com\\sun\\midp\\appmanager\\MIDletSwitcher.java");
 		v.addElement("$(MIDP_SRC_DIR)\\ams\\appmanager_ui\\reference\\classes\\com\\sun\\midp\\appmanager\\FolderList.java");
-		v.addElement("$(MIDP_SRC_DIR)\\ams\\appmanager_ui\\reference\\classes\\com\\sun\\midp\\appmanager\\SplashScreen.java");
+		v.addElement("$(MIDP_SRC_DIR)\\ams\\appmanager_ui\\reference\\classes\\com\\sun\\midp\\appmanager\\symbian\\SplashScreen.java");
 		v.addElement("$(MIDP_SRC_DIR)\\ams\\appmanager_ui\\reference\\classes\\com\\sun\\midp\\appmanager\\AppInfo.java");
 		v.addElement("$(MIDP_SRC_DIR)\\ams\\appmanager_ui\\reference\\classes\\com\\sun\\midp\\appmanager\\AppSettings.java");
 		v.addElement("$(MIDP_SRC_DIR)\\ams\\appmanager_ui\\reference\\classes\\com\\sun\\midp\\appmanager\\MIDletSelector.java");
