@@ -265,7 +265,11 @@ public class MenuLayer extends ScrollablePopupLayer {
             }
         } else if (keyCode == Constants.KEYCODE_SELECT) {
             if (btnLayer != null && !showSubMenu(selI)) {
-                btnLayer.commandSelected(menuCmds[selI]);
+                // #3575: WinCE: problem in the VM with the native MIDP menu
+                // Fix crash when stylus touches the space between command menu and command bar
+	        if (selI >= 0 && selI < menuCmds.length) {
+                    btnLayer.commandSelected(menuCmds[selI]);
+		}
             }
         } else {
             int max = 0;
@@ -489,6 +493,11 @@ public class MenuLayer extends ScrollablePopupLayer {
      */
     private boolean showSubMenu(int index) {
         boolean ret = false;
+        // #3575: WinCE: problem in the VM with the native MIDP menu
+        // Fix crash when stylus touches the space between command menu and command bar
+	if (index < 0 || index >= menuCmds.length) {
+	    return ret;
+	}
         if (menuCmds[index] instanceof SubMenuCommand) {
             SubMenuCommand subMenu = (SubMenuCommand)menuCmds[index];
             cascadeMenu.setMenuCommands(subMenu.getSubCommands(), this);
