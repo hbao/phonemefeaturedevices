@@ -236,6 +236,7 @@ private:
 	RArray<TKeyEvent> iPressedKeys;
 	TInt iMachineUidValue;
 	TInt iCursorPosition;
+	TInt iCommandsLength;
 	};
 
 
