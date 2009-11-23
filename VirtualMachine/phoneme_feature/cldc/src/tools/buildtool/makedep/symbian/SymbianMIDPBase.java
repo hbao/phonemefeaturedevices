@@ -795,7 +795,7 @@ void writeRules() throws Exception
 		puttabln("$(INT_SYMBIAN_XML_DIR)\\skin.xml \\");
 		puttabln("$(INT_COMMON_XML_DIR)\\constants.xml \\");
 		puttabln("$(INT_COMMON_XML_DIR)\\i18n_constants.xml \\");
-		puttabln("$(INT_COMMON_XML_DIR)\\l10n\\en-US.xml \\");
+		puttabln("$(INT_SYMBIAN_XML_DIR)\\l10n\\en-US.xml \\");
 		puttabln("$(INT_COMMON_XML_DIR)\\chameleon\\skin_constants.xml \\");
 		puttabln("$(INT_COMMON_XML_DIR)\\suitestore_constants.xml \\");
 		puttabln("$(INT_COMMON_XML_DIR)\\alert_type_constants.xml \\");
