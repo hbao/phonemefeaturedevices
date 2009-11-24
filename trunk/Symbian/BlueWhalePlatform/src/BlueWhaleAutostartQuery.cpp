@@ -38,7 +38,7 @@
 
 void DoQueryL()
 {
-	_LIT(KAutoStartText, "Allow BlueWhale to start automatically?");
+	_LIT(KAutoStartText, "Allow application to start automatically?");
 	TRequestStatus status;
 	TBool autoStart = EFalse;
 
@@ -55,7 +55,7 @@ void DoQueryL()
 		return;
 	}
 	TInt result = 0;
-	notifier.Notify(_L("BlueWhale"), KAutoStartText, _L("Yes"), _L("No"), result, status); // "Yes" => result is 0
+	notifier.Notify(_L("Autostart"), KAutoStartText, _L("Yes"), _L("No"), result, status); // "Yes" => result is 0
 	User::WaitForRequest(status);
 	notifier.Close();
 	autoStart = !result;
