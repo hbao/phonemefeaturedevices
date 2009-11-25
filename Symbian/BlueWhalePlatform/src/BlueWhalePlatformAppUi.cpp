@@ -218,10 +218,16 @@ void CBlueWhalePlatformAppUi::ExitCallback(TAny* aThis)
 #if (__S60_VERSION__ >= __S60_V3_FP0_VERSION_NUMBER__) || (__UIQ_VERSION_NUMBER__ >= __UIQ_V3_FP0_VERSION_NUMBER__)
 TBool CBlueWhalePlatformAppUi::ProcessCommandParametersL(CApaCommandLine& aCommandLine)
 {
-	TBool autoStarted = EFalse;
-	if (aCommandLine.TailEnd() == _L8("Autostart"))
+	TBool autoStarted = ETrue;
+	// Use opaque data from the Platform rather than tail data from BlueWhaleStarter
+	// because UIQ offers its own autostart after install so the tail data is not reliable
+	// Can't use the same technique for S60 V2 because its APP_REGISTRATION_INFO has no opaque data field
+	// but this is not a problem because the tail data there is correct
+	HBufC8* opaqueData = aCommandLine.OpaqueData().AllocLC(); 
+	if (*opaqueData == _L8("Platform"));
 	{
-		autoStarted = ETrue;
+		opaqueData->Des().Zero();
+		autoStarted = EFalse;
 	}
 	if(aCommandLine.Command() == EApaCommandBackground)
 	{
@@ -233,7 +239,8 @@ TBool CBlueWhalePlatformAppUi::ProcessCommandParametersL(CApaCommandLine& aComma
 	}
 	
 	iView = GetOrCreateViewL(KCID_MBaseMIDPView,KCID_MBaseMIDPView,this,ETrue);
-	StartMidpL(aCommandLine.OpaqueData(), autoStarted);
+	StartMidpL(*opaqueData, autoStarted);
+	CleanupStack::PopAndDestroy(opaqueData);
 	return __BWM_APPUI__::ProcessCommandParametersL(aCommandLine);
 }
 #elif __S60_VERSION__ >= __S60_V2_FP1_VERSION_NUMBER__
