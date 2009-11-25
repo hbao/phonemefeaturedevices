@@ -951,8 +951,14 @@ void CMIDPCanvas::DoFullScreen()
 	{
 		TQikViewMode mode(iView->ViewMode());
 		mode.SetButtonOrSoftkeyBar(iCommands.Count());
+#ifdef __WINSCW__
+		// in the emulator the menu is on the toolbar so don't hide it 
 		mode.SetAppTitleBar(!iFullScreen);
 		mode.SetStatusBar(!iFullScreen);
+#else
+		mode.SetAppTitleBar(EFalse);
+		mode.SetStatusBar(EFalse);
+#endif
 		mode.SetToolbar(!iFullScreen);
 		iView->SetViewModeL(mode);
 		if (iFullScreen && !iCommands.Count())
