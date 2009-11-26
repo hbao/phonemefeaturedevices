@@ -41,7 +41,7 @@ _LIT(KInstallDir, "c:\\data\\installs\\;c:\\system\\temp\\browser\\;e:\\;e:\\dat
 #elif __S60_VERSION__ >= __S60_V2_FP1_VERSION_NUMBER__
 _LIT(KInstallDir, "c:\\nokia\\installs\\;c:\\system\\install\\;e:\\;e:\\system\\install\\");
 #elif __UIQ_VERSION_NUMBER__ >= __UIQ_V3_FP0_VERSION_NUMBER__
-_LIT(KInstallDir, "c:\\system\\temp\\;d:\\system\\temp\\");
+_LIT(KInstallDir, "c:\\system\\temp\\;d:\\system\\temp\\;d:\\");
 #endif
 
 CBlueWhaleSisReader* CBlueWhaleSisReader::NewL()
