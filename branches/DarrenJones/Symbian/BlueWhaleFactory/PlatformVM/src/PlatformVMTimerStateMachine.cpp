@@ -554,49 +554,50 @@ const TInt KArgCount = 17;
 TFileName CJVMRunner::VMInstallFileName()
 {
 	TFileName sisFileName;
-
-	_LIT(KBlueWhaleSisReaderExe, "bluewhalesisreader.exe");
+	if (RProperty::Get(KUidSisReaderExe, KUidSisFileName.iUid, sisFileName) != KErrNone)
+	{
+		_LIT(KBlueWhaleSisReaderExe, "bluewhalesisreader.exe");
 #if __S60_VERSION__ >= __S60_V3_FP0_VERSION_NUMBER__ || __UIQ_VERSION_NUMBER__ >= __UIQ_V3_FP0_VERSION_NUMBER__
-	TFileName sisReaderExe(KBlueWhaleSisReaderExe);
-
-	TUidType uidType(KNullUid, KNullUid, KUidSisReaderExe);
-	RProcess proc;
-	if (proc.Create(sisReaderExe, KNullDesC, uidType) == KErrNone)
-	{
-		proc.Resume();
-		TRequestStatus requestStatus;
-		proc.Logon(requestStatus);
-		User::WaitForRequest(requestStatus);
-		proc.Close();
-	}
-#elif !defined(__WINSCW__)
-	TFileName drive;
-	Dll::FileName(drive); // Get the drive letter
-	TParsePtrC parse(drive);
-	TFileName sisReaderExe(parse.Drive());
-
-	sisReaderExe.Append(_L("\\system\\apps\\BlueWhalePlatform\\"));
-	sisReaderExe.Append(KBlueWhaleSisReaderExe);
-
-	EikDll::StartExeL(sisReaderExe);
-
-	TFileName matchName(_L("BlueWhaleSisReader*"));
-	TFindProcess finder(matchName);
-	TFileName result;
-	if (finder.Next(result) == KErrNone)
-	{
+		TFileName sisReaderExe(KBlueWhaleSisReaderExe);
+	
+		TUidType uidType(KNullUid, KNullUid, KUidSisReaderExe);
 		RProcess proc;
-		if (proc.Open(finder) == KErrNone)
+		if (proc.Create(sisReaderExe, KNullDesC, uidType) == KErrNone)
 		{
+			proc.Resume();
 			TRequestStatus requestStatus;
 			proc.Logon(requestStatus);
 			User::WaitForRequest(requestStatus);
 			proc.Close();
 		}
-	}
+#elif !defined(__WINSCW__)
+		TFileName drive;
+		Dll::FileName(drive); // Get the drive letter
+		TParsePtrC parse(drive);
+		TFileName sisReaderExe(parse.Drive());
+	
+		sisReaderExe.Append(_L("\\system\\apps\\BlueWhalePlatform\\"));
+		sisReaderExe.Append(KBlueWhaleSisReaderExe);
+	
+		EikDll::StartExeL(sisReaderExe);
+	
+		TFileName matchName(_L("BlueWhaleSisReader*"));
+		TFindProcess finder(matchName);
+		TFileName result;
+		if (finder.Next(result) == KErrNone)
+		{
+			RProcess proc;
+			if (proc.Open(finder) == KErrNone)
+			{
+				TRequestStatus requestStatus;
+				proc.Logon(requestStatus);
+				User::WaitForRequest(requestStatus);
+				proc.Close();
+			}
+		}
 #endif
-
-	TInt err = RProperty::Get(KUidSisReaderExe, KUidSisFileName.iUid, sisFileName);
+		TInt ignore = RProperty::Get(KUidSisReaderExe, KUidSisFileName.iUid, sisFileName);
+	}
 
 	return sisFileName;
 }
