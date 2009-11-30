@@ -1081,12 +1081,27 @@ class TextFieldLFImpl extends ItemLFImpl implements
 		int currentLength = tf.buffer.length();
 		int newLength = input.length();
 		
+		String oldContents = tf.buffer.toString();
+		tf.delete(0, currentLength);
+		boolean inserted = false;
+		try
+		{
+			tf.insert(input, 0);
+			inserted = true;
+		}
+		finally
+		{
+			if (!inserted)
+			{
+				tf.insert(oldContents, 0);
+				setString0(this.hashCode(), tf.buffer, (this.item.owner == null) ? 0 : this.item.owner.hashCode());
+				setCursorPos0(this.hashCode(),cursor.index);
+			}
+		}
 		if ((getConstraints() & TextField.PASSWORD) == TextField.PASSWORD && !tf.buffer.toString().equals(input))
 		{
 			iModifiedByUser = true;
 		}
-		tf.delete(0, currentLength);
-	    tf.insert(input, 0);
 		setCaretPosition(oldIndex + newLength - currentLength);
 		tf.notifyStateChanged();
 			
