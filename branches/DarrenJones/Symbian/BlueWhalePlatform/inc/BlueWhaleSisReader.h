@@ -37,6 +37,11 @@
 #include <e32property.h>
 #include "Application.h"
 
+class CDirPlus : public CDir
+{
+public:
+	void AddL(const TEntry &anEntry) { CDir::AddL(anEntry); };
+};
 
 class CBlueWhaleSisReader : public CBase
 {
@@ -49,11 +54,12 @@ protected:
 	CBlueWhaleSisReader();
 	void ConstructL();
 	void FindAndPublishSisFileNameL();
-	TBool FindFileInSubDirsL(const TFileName& aDir);
+	void FindFileInSubDirsL(const TFileName& aDir);
 	void PersistFileNameL(const TFileName& aSisFileName);
 private:
 	RFs iFs;
 	TFileName iPersistSisFileName;
+	CDir* iDir;
 };
 
 #endif

@@ -34,15 +34,6 @@
 
 _LIT(KSisPattern, "*bluewhale*.sis*");
 _LIT(KPersistSisFileName, "sisfilename.txt");
-#if __S60_VERSION__ >= __S60_V3_FP0_VERSION_NUMBER__
-_LIT(KDownloadDirC, "c:\\system\\dmgr\\");
-_LIT(KDownloadDirE, "e:\\system\\dmgr\\");
-_LIT(KInstallDir, "c:\\data\\installs\\;c:\\system\\temp\\browser\\;e:\\;e:\\data\\installs\\");
-#elif __S60_VERSION__ >= __S60_V2_FP1_VERSION_NUMBER__
-_LIT(KInstallDir, "c:\\nokia\\installs\\;c:\\system\\install\\;e:\\;e:\\system\\install\\");
-#elif __UIQ_VERSION_NUMBER__ >= __UIQ_V3_FP0_VERSION_NUMBER__
-_LIT(KInstallDir, "c:\\system\\temp\\;d:\\system\\temp\\;d:\\");
-#endif
 
 CBlueWhaleSisReader* CBlueWhaleSisReader::NewL()
 {
@@ -80,13 +71,12 @@ void CBlueWhaleSisReader::PersistFileNameL(const TFileName& aSisFileName)
 	}
 }
 
-TBool CBlueWhaleSisReader::FindFileInSubDirsL(const TFileName& aDir)
+void CBlueWhaleSisReader::FindFileInSubDirsL(const TFileName& aDir)
 {
-	TBool result = EFalse;	
 	CDir* dir = NULL;
 	TFindFile findFile(iFs);
 	CDirScan* dirScan = CDirScan::NewLC(iFs);
-	dirScan->SetScanDataL(aDir, KEntryAttDir | KEntryAttMatchExclusive, ESortNone);
+	dirScan->SetScanDataL(aDir, KEntryAttDir | KEntryAttNormal | KEntryAttMatchExclusive, ESortNone);
 	TRAPD(err, dirScan->NextL(dir));
 	if (err == KErrNone)
 	{
@@ -95,12 +85,18 @@ TBool CBlueWhaleSisReader::FindFileInSubDirsL(const TFileName& aDir)
 			CDir* subDir = NULL;
 			if (findFile.FindWildByPath(KSisPattern, &dirScan->FullPath(), subDir) == KErrNone && subDir->Count())
 			{
-				subDir->Sort(ESortByDate | EDescending);
-				TInt ignore = RProperty::Set(KUidSisReaderExe, KUidSisFileName.iUid, (*subDir)[0].iName);
-				PersistFileNameL((*subDir)[0].iName);
-				result = ETrue;
-				delete subDir;
-				break;
+				if (iDir == NULL)
+				{
+					iDir = subDir;
+				}
+				else
+				{
+					for (TInt i = 0; i < subDir->Count(); i++)
+					{
+						reinterpret_cast<CDirPlus*>(iDir)->AddL((*subDir)[i]);
+					}
+					delete subDir;
+				}
 			}
 			delete dir;
 			dir = NULL;
@@ -110,12 +106,11 @@ TBool CBlueWhaleSisReader::FindFileInSubDirsL(const TFileName& aDir)
 		dir = NULL;
 	}
 	CleanupStack::PopAndDestroy(dirScan);
-	return result;
 }
 
 void CBlueWhaleSisReader::FindAndPublishSisFileNameL()
 {
-	TBool found = EFalse;
+	TFileName sisFileName;
 	TInt ignore = RProperty::Define(KUidSisReaderExe, KUidSisFileName.iUid, RProperty::EText);
 	ignore = RProperty::Set(KUidSisReaderExe, KUidSisFileName.iUid, KNullDesC);
 	
@@ -138,24 +133,26 @@ void CBlueWhaleSisReader::FindAndPublishSisFileNameL()
 	
 	TFindFile findFile(iFs);
 
-#if __S60_VERSION__ >= __S60_V3_FP0_VERSION_NUMBER__
-	found = FindFileInSubDirsL(KDownloadDirC());
-	if (!found)
+	FindFileInSubDirsL(_L("c:\\"));
+	TVolumeInfo volumeInfo;
+	if (iFs.Volume(volumeInfo, EDriveE) == KErrNone)
 	{
-		found = FindFileInSubDirsL(KDownloadDirE());
+		FindFileInSubDirsL(_L("e:\\"));
 	}
-#endif
+	else if (iFs.Volume(volumeInfo, EDriveD) == KErrNone)
+	{
+		FindFileInSubDirsL(_L("d:\\"));
+	}
 
-	CDir* dir = NULL;
-	if (!found && findFile.FindWildByPath(KSisPattern, &KInstallDir, dir) == KErrNone && dir->Count())
+	if (iDir && iDir->Count())
 	{
-		dir->Sort(ESortByDate | EDescending);
-		ignore = RProperty::Set(KUidSisReaderExe, KUidSisFileName.iUid, (*dir)[0].iName);
-		PersistFileNameL((*dir)[0].iName);
+		iDir->Sort(ESortByDate | EDescending);
+		TInt ignore = RProperty::Set(KUidSisReaderExe, KUidSisFileName.iUid, (*iDir)[0].iName);
+		PersistFileNameL((*iDir)[0].iName);
+		delete iDir;
+		iDir = NULL;
 	}
-	delete dir;
-	
-	if (!found)
+	else
 	{
 		// try to read in the name from the persist file
 		RFile file;
