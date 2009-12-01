@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
-<!DOCTYPE configuration SYSTEM "../configuration.dtd">
+<!DOCTYPE configuration SYSTEM "../../share/configuration.dtd">
 <!--
 
 
@@ -283,7 +283,7 @@
 <localized_string Key="AMS_EXTRENAL_STORAGE_NAME"
                 Value="Memory card "/>
 <localized_string Key="AMS_MGR_TITLE"
-                 Value="Applications"/>
+                 Value="BlueWhale"/>
 <localized_string Key="AMS_MGR_SETTINGS"
                 Value="Settings"/>
 <localized_string Key="AMS_MGR_PREFERENCES"
