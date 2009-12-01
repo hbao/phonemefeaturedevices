@@ -74,6 +74,9 @@
 _LIT(KVMThreadName,"_BWMVMT%d");
 _LIT(KManThreadName,"_BWMMan%d");
 
+_LIT8(KPartner1, "sky");
+_LIT8(KPartner1DisplayName, "Sky Mobile Email");
+
 class CSymbianSocket;
 class CTicker;
 class CSocketFactoryServer;
@@ -551,49 +554,50 @@ const TInt KArgCount = 17;
 TFileName CJVMRunner::VMInstallFileName()
 {
 	TFileName sisFileName;
-
-	_LIT(KBlueWhaleSisReaderExe, "bluewhalesisreader.exe");
+	if (RProperty::Get(KUidSisReaderExe, KUidSisFileName.iUid, sisFileName) != KErrNone)
+	{
+		_LIT(KBlueWhaleSisReaderExe, "bluewhalesisreader.exe");
 #if __S60_VERSION__ >= __S60_V3_FP0_VERSION_NUMBER__ || __UIQ_VERSION_NUMBER__ >= __UIQ_V3_FP0_VERSION_NUMBER__
-	TFileName sisReaderExe(KBlueWhaleSisReaderExe);
-
-	TUidType uidType(KNullUid, KNullUid, KUidSisReaderExe);
-	RProcess proc;
-	if (proc.Create(sisReaderExe, KNullDesC, uidType) == KErrNone)
-	{
-		proc.Resume();
-		TRequestStatus requestStatus;
-		proc.Logon(requestStatus);
-		User::WaitForRequest(requestStatus);
-		proc.Close();
-	}
-#elif !defined(__WINSCW__)
-	TFileName drive;
-	Dll::FileName(drive); // Get the drive letter
-	TParsePtrC parse(drive);
-	TFileName sisReaderExe(parse.Drive());
-
-	sisReaderExe.Append(_L("\\system\\apps\\BlueWhalePlatform\\"));
-	sisReaderExe.Append(KBlueWhaleSisReaderExe);
-
-	EikDll::StartExeL(sisReaderExe);
-
-	TFileName matchName(_L("BlueWhaleSisReader*"));
-	TFindProcess finder(matchName);
-	TFileName result;
-	if (finder.Next(result) == KErrNone)
-	{
+		TFileName sisReaderExe(KBlueWhaleSisReaderExe);
+	
+		TUidType uidType(KNullUid, KNullUid, KUidSisReaderExe);
 		RProcess proc;
-		if (proc.Open(finder) == KErrNone)
+		if (proc.Create(sisReaderExe, KNullDesC, uidType) == KErrNone)
 		{
+			proc.Resume();
 			TRequestStatus requestStatus;
 			proc.Logon(requestStatus);
 			User::WaitForRequest(requestStatus);
 			proc.Close();
 		}
-	}
+#elif !defined(__WINSCW__)
+		TFileName drive;
+		Dll::FileName(drive); // Get the drive letter
+		TParsePtrC parse(drive);
+		TFileName sisReaderExe(parse.Drive());
+	
+		sisReaderExe.Append(_L("\\system\\apps\\BlueWhalePlatform\\"));
+		sisReaderExe.Append(KBlueWhaleSisReaderExe);
+	
+		EikDll::StartExeL(sisReaderExe);
+	
+		TFileName matchName(_L("BlueWhaleSisReader*"));
+		TFindProcess finder(matchName);
+		TFileName result;
+		if (finder.Next(result) == KErrNone)
+		{
+			RProcess proc;
+			if (proc.Open(finder) == KErrNone)
+			{
+				TRequestStatus requestStatus;
+				proc.Logon(requestStatus);
+				User::WaitForRequest(requestStatus);
+				proc.Close();
+			}
+		}
 #endif
-
-	TInt err = RProperty::Get(KUidSisReaderExe, KUidSisFileName.iUid, sisFileName);
+		TInt ignore = RProperty::Get(KUidSisReaderExe, KUidSisFileName.iUid, sisFileName);
+	}
 
 	return sisFileName;
 }
@@ -791,7 +795,34 @@ TInt CJVMRunner::RunVML()
 	properties->AddL(KAppFullNameKey(), KDefaultAppFullName());
 	if (iShortcutName.Length() == 0)
 	{
-		properties->AddL(KAppnameKey(), KDefaultAppName());
+		TBool foundPartner = EFalse;
+		if (installFileName.Length())
+		{
+			_LIT8(KBlueWhaleString, "bluewhale");
+			TInt bluewhaleIndex = installFileName.FindF(KBlueWhaleString);
+			if (KErrNotFound != bluewhaleIndex)
+			{
+				TInt underscoreIndex = installFileName.Mid(bluewhaleIndex).Locate(TChar('_'));
+				if (KErrNotFound != underscoreIndex)
+				{
+					TPtr8 partner = installFileName.MidTPtr(bluewhaleIndex + KBlueWhaleString().Length(), underscoreIndex - KBlueWhaleString().Length());
+					if (partner.Length() > 2)
+					{
+						// strip the surrounding hyphens
+						partner = partner.Mid(1, partner.Length() - 2);
+						if (partner.CompareF(KPartner1) == 0)
+						{
+							properties->AddL(KAppnameKey(), KPartner1DisplayName);
+							foundPartner = ETrue;
+						}
+					}
+				}
+			}
+		}
+		if (!foundPartner)
+		{
+			properties->AddL(KAppnameKey(), KDefaultAppName());
+		}
 	}
 	else
 	{
