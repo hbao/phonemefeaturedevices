@@ -384,14 +384,7 @@ void CMIDPCanvas::SetCbaL()
 
 	if ((iCommands.Count() != iPreviousCommandsCount) && (iCommands.Count() == 0 || iPreviousCommandsCount == 0))
 	{
-		TQikViewMode mode(iView->ViewMode());
-		mode.SetButtonOrSoftkeyBar(iCommands.Count());
-		iView->SetViewModeL(mode);
-		SetRect(iView->ContainerWindow().Rect());
-
-		TEventInfo event;
-	    event.iEvent = KMIDPScreenChangeEvent;
-	    iQueue->AddEvent(event);
+		DoFullScreen();
 	}
 #endif
 }
@@ -868,13 +861,6 @@ CFbsBitmap* CMIDPCanvas::Bitmap()
 TUint32* CMIDPCanvas::CreateDisplayBitmap(TInt aWidth,TInt aHeight)
 {
 	DEBUGMSG2(_L("CreateDisplayBitmap %d %d"),aWidth,aHeight);
-#if __UIQ_VERSION_NUMBER__ >= __UIQ_V3_FP0_VERSION_NUMBER__
-	if(iScreenModeChanging && iFullScreen)
-	{
-		iScreenModeChanging = EFalse;
-		iDoChange = ETrue;
-	}
-#endif
 	return iMidpControl->CreateDisplayBitmap(aWidth,aHeight);	
 }
 
@@ -887,19 +873,8 @@ void CMIDPCanvas::Refresh(const TRect& aRect)
 void CMIDPCanvas::SetFullScreenMode(TBool aFullscreen)
 {
 	DEBUGMSG1(_L("CMIDPCanvas::SetFullScreenMode %d"),aFullscreen);
-#if __UIQ_VERSION_NUMBER__ >= __UIQ_V3_FP0_VERSION_NUMBER__
-	iScreenModeChanging = (iFullScreen != aFullscreen);
-	iFullScreen = aFullscreen;
-	if(iScreenModeChanging && !iFullScreen)
-	{
-		iScreenModeChanging = EFalse;
-		iDoChange = ETrue;
-		iThreadRunner->DoSyncCallback(SetFullScreenModeCallback,this);
-	}
-#else
 	iFullScreen = aFullscreen;
 	iThreadRunner->DoSyncCallback(SetFullScreenModeCallback,this);
-#endif
 }
 
 #if __S60_VERSION__ >= __S60_V2_FP1_VERSION_NUMBER__
@@ -947,21 +922,22 @@ void CMIDPCanvas::DoFullScreen()
 		iDrawingState = KWaitingForDisplayableChange;
 	}
 #elif __UIQ_VERSION_NUMBER__ >= __UIQ_V3_FP0_VERSION_NUMBER__
-	if(iView && iDoChange)
+	if (iView)
 	{
 		TQikViewMode mode(iView->ViewMode());
-		mode.SetButtonOrSoftkeyBar(iCommands.Count());
+		mode.SetButtonOrSoftkeyBar(!iFullScreen && iCommands.Count());
 #ifdef __WINSCW__
 		// in the emulator the menu is on the toolbar so don't hide it 
 		mode.SetAppTitleBar(!iFullScreen);
 		mode.SetStatusBar(!iFullScreen);
+		mode.SetToolbar(!iFullScreen);
 #else
 		mode.SetAppTitleBar(EFalse);
 		mode.SetStatusBar(EFalse);
+		mode.SetToolbar(EFalse);
 #endif
-		mode.SetToolbar(!iFullScreen);
 		iView->SetViewModeL(mode);
-		if (iFullScreen && !iCommands.Count())
+		if (iFullScreen)
 		{
 			SetRect(CEikonEnv::Static()->ScreenDevice()->SizeInPixels());
 		}
@@ -969,7 +945,6 @@ void CMIDPCanvas::DoFullScreen()
 		{
 			SetRect(iView->ContainerWindow().Rect());
 		}
-		iDoChange = EFalse;
 		TEventInfo event;
 	    event.iEvent = KMIDPScreenChangeEvent;
 	    iQueue->AddEvent(event);
