@@ -166,9 +166,6 @@ private:
 		void RunL()
 		{
 			iParent->Window().Invalidate(iRect);
-#if __UIQ_VERSION_NUMBER__ >= __UIQ_V3_FP0_VERSION_NUMBER__
-			iParent->DoFullScreen();
-#endif
 		}
 		void DoCancel()
 		{}
@@ -218,10 +215,7 @@ private:
 	TBool iTextEdit;
 	CBaseMIDPView* iView;
 	TBool iFullScreen;
-#if __UIQ_VERSION_NUMBER__ >= __UIQ_V3_FP0_VERSION_NUMBER__
-	TBool iScreenModeChanging;
-	TBool iDoChange;
-#elif __S60_VERSION__ >= __S60_V2_FP1_VERSION_NUMBER__
+#if __S60_VERSION__ >= __S60_V2_FP1_VERSION_NUMBER__
 	enum TDrawingState
 	{
 		KDrawingNormally,
