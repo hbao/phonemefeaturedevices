@@ -91,12 +91,16 @@ public:
 	void SetParentId(TInt aParentId){iParentId = aParentId;};
 	TBool ModifiedByUser(){return iModifiedByUser;};
 	void SetModifiedByUser(TBool aModifiedByUser){iModifiedByUser = aModifiedByUser;};
+	TInt MaxSize(){return iMaxSize;};
+	void SetMaxSize(TInt aMaxSize){iMaxSize = aMaxSize;};
+
 private:
 	TInt iId;
 	HBufC* iText;
 	TInt iEditPoint;
 	TInt iParentId;
 	TBool iModifiedByUser;
+	TInt iMaxSize;
 };
 
 class MFEPInputCoreObserver
@@ -119,6 +123,7 @@ public:
 	static void DeUnicodeBuffer(TPtr aTextBuffer);
 	virtual ~CFEPInputCore();
 	TInt DocumentLengthForFep() const;
+	TInt DocumentMaximumLengthForFep() const;
 	TKeyResponse OfferKeyEventL(const TKeyEvent& aKeyEvent, TEventCode aType);
 	void SendTextUpdateEvent();
 	TInt GetNextState();
