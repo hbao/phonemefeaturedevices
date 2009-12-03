@@ -483,10 +483,7 @@ void CSocketEngine::SetupConnectionL()
 			{
 				if(iConnection.Attach(info,RConnection::EAttachTypeNormal) == KErrNone)
 				{
-					startConnection = EFalse;
-					TRequestStatus* status = &iStatus;
-					User::RequestComplete(status,KErrNone);
-					SetActive();
+					startConnection = ETrue;
 					break;
 				}
 			}
