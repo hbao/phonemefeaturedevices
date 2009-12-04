@@ -1082,6 +1082,11 @@ class TextFieldLFImpl extends ItemLFImpl implements
 		int currentLength = tf.buffer.length();
 		int newLength = input.length();
 		
+		boolean oldModifiedByUser = iModifiedByUser;
+		if ((getConstraints() & TextField.PASSWORD) == TextField.PASSWORD && !tf.buffer.toString().equals(input))
+		{
+			iModifiedByUser = true;
+		}
 		String oldContents = tf.buffer.toString();
 		tf.delete(0, currentLength);
 		boolean inserted = false;
@@ -1094,14 +1099,11 @@ class TextFieldLFImpl extends ItemLFImpl implements
 		{
 			if (!inserted)
 			{
+				iModifiedByUser = oldModifiedByUser;
 				tf.insert(oldContents, 0);
 				setString0(this.hashCode(), tf.buffer, (this.item.owner == null) ? 0 : this.item.owner.hashCode(), tf.getMaxSize());
 				setCursorPos0(this.hashCode(),cursor.index);
 			}
-		}
-		if ((getConstraints() & TextField.PASSWORD) == TextField.PASSWORD && !tf.buffer.toString().equals(input))
-		{
-			iModifiedByUser = true;
 		}
 		setCaretPosition(oldIndex + newLength - currentLength);
 		tf.notifyStateChanged();
