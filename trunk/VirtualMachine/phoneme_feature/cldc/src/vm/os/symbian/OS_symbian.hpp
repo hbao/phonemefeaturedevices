@@ -213,7 +213,7 @@ public:
 	// text field things
 	virtual TInt GetNextState() = 0;
 	virtual HBufC* GetTextFieldString(TInt aId)= 0;
-	virtual TInt SetTextFieldString(TInt aId, HBufC* aText, TInt aParentId) = 0;
+	virtual TInt SetTextFieldString(TInt aId, HBufC* aText, TInt aParentId, TInt aMaxSize) = 0;
 	virtual void SetCursorPosition(TInt aPosition) = 0;
 	virtual void GetEditData(TInt& aEditPos, TInt& aEditLength) =0;
 	virtual TBool GetUnderline() = 0;

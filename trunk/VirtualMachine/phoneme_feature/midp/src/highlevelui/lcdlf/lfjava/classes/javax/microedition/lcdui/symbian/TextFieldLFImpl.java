@@ -183,7 +183,7 @@ class TextFieldLFImpl extends ItemLFImpl implements
     // *****************************************************
     // Public methods defined in interfaces
     // *****************************************************
-	protected native void setString0(int nativeId, DynamicCharacterArray buffer, int parentId);
+	protected native void setString0(int nativeId, DynamicCharacterArray buffer, int parentId, int maxSize);
 	protected native String getString0(int nativeId);
 	protected native void setCursorPos0(int nativeId,int position);
 	protected native void setEditPos0(int nativeId);
@@ -208,7 +208,7 @@ class TextFieldLFImpl extends ItemLFImpl implements
         if (!editable) {
             resetUneditable();
         }
-		setString0(this.hashCode(), tf.buffer, (this.item.owner == null) ? 0 : this.item.owner.hashCode());
+		setString0(this.hashCode(), tf.buffer, (this.item.owner == null) ? 0 : this.item.owner.hashCode(), tf.getMaxSize());
 		setCursorPos0(this.hashCode(),cursor.index);
         lRequestPaint();
     }
@@ -270,6 +270,7 @@ class TextFieldLFImpl extends ItemLFImpl implements
             cursor.index = max;
         }
         lRequestInvalidate(true, true);
+        setString0(this.hashCode(), tf.buffer, this.item.owner == null ? 0 : this.item.owner.hashCode(), max);
     }
 
     /**
@@ -1081,12 +1082,27 @@ class TextFieldLFImpl extends ItemLFImpl implements
 		int currentLength = tf.buffer.length();
 		int newLength = input.length();
 		
+		String oldContents = tf.buffer.toString();
+		tf.delete(0, currentLength);
+		boolean inserted = false;
+		try
+		{
+			tf.insert(input, 0);
+			inserted = true;
+		}
+		finally
+		{
+			if (!inserted)
+			{
+				tf.insert(oldContents, 0);
+				setString0(this.hashCode(), tf.buffer, (this.item.owner == null) ? 0 : this.item.owner.hashCode(), tf.getMaxSize());
+				setCursorPos0(this.hashCode(),cursor.index);
+			}
+		}
 		if ((getConstraints() & TextField.PASSWORD) == TextField.PASSWORD && !tf.buffer.toString().equals(input))
 		{
 			iModifiedByUser = true;
 		}
-		tf.delete(0, currentLength);
-	    tf.insert(input, 0);
 		setCaretPosition(oldIndex + newLength - currentLength);
 		tf.notifyStateChanged();
 			
@@ -1142,7 +1158,7 @@ class TextFieldLFImpl extends ItemLFImpl implements
         synchronized (Display.LCDUILock) {
             try {
                 tf.delete(cursor.index - num, num);
-				setString0(this.hashCode(), tf.buffer, (this.item.owner == null) ? 0 : this.item.owner.hashCode());
+				setString0(this.hashCode(), tf.buffer, (this.item.owner == null) ? 0 : this.item.owner.hashCode(), tf.getMaxSize());
 				setCursorPos0(this.hashCode(),cursor.index);
             } catch (Throwable t) {
                 t.printStackTrace();

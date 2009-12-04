@@ -78,7 +78,7 @@ class TextBoxLFImpl extends TextFieldLFImpl implements TextFieldLF {
 
         myInfo.scrollY = myInfo.isModified = true;
         updateTextInfo();
-        setString0(this.hashCode(), tf.buffer, this.item.owner == null ? 0 : this.item.owner.hashCode());
+        setString0(this.hashCode(), tf.buffer, this.item.owner == null ? 0 : this.item.owner.hashCode(), tf.getMaxSize());
 		setCursorPos0(this.hashCode(),cursor.index);
 	}
 

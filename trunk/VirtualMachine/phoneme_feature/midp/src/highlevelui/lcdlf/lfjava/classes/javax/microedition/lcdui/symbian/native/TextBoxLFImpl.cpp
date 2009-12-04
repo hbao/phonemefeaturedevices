@@ -96,6 +96,7 @@ Java_javax_microedition_lcdui_TextFieldLFImpl_setString0()
 	int err;
     int id = KNI_GetParameterAsInt(1);
     int parentId = KNI_GetParameterAsInt(3);
+    int maxSize = KNI_GetParameterAsInt(4);
 
     KNI_StartHandles(2);
 
@@ -118,7 +119,7 @@ Java_javax_microedition_lcdui_TextFieldLFImpl_setString0()
 	else 
 	{
 		// application takes ownership
-		err = static_cast<MApplication*>(Dll::Tls())->SetTextFieldString(id, text, parentId);
+		err = static_cast<MApplication*>(Dll::Tls())->SetTextFieldString(id, text, parentId, maxSize);
     }
 
     if (err != KErrNone) 
