@@ -846,9 +846,9 @@ HBufC* CMIDPApp::GetTextFieldString(TInt aId)
 	return iCanvas->GetInlineText(aId);
 }
 
-TInt CMIDPApp::SetTextFieldString(TInt aId, HBufC* aText, TInt aParentId)
+TInt CMIDPApp::SetTextFieldString(TInt aId, HBufC* aText, TInt aParentId, TInt aMaxSize)
 {
-	return iCanvas->SetTextFieldString(aId, aText, aParentId);
+	return iCanvas->SetTextFieldString(aId, aText, aParentId, aMaxSize);
 }
 void CMIDPApp::SetCursorPosition(TInt aPosition)
 {

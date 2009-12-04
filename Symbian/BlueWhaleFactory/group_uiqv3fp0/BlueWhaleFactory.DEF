@@ -20,5 +20,6 @@ EXPORTS
 	?StartFepInlineEditL@CFEPInputCore@@QAEXABVTDesC16@@HABVTCursorSelection@@@Z @ 19 NONAME ; void CFEPInputCore::StartFepInlineEditL(class TDesC16 const &, int, class TCursorSelection const &)
 	?TextPtr@CIndexedText@@QAEPAVHBufC16@@XZ @ 20 NONAME ; class HBufC16 * CIndexedText::TextPtr(void)
 	?UpdateFepInlineTextL@CFEPInputCore@@QAEXABVTDesC16@@H@Z @ 21 NONAME ; void CFEPInputCore::UpdateFepInlineTextL(class TDesC16 const &, int)
+	?DocumentMaximumLengthForFep@CFEPInputCore@@QBEHXZ @ 22 NONAME ; int CFEPInputCore::DocumentMaximumLengthForFep(void) const
 	_E32Dll=__E32Dll	; Entry point for emulation
 
