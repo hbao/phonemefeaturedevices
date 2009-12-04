@@ -208,7 +208,7 @@ class CVMManager : public CBase, public MDebugApplication, public MRunnable, pub
 		// text field things
 		virtual TInt GetNextState() {return 0;}
 		virtual HBufC* GetTextFieldString(TInt){ return NULL;}
-		virtual TInt SetTextFieldString(TInt, HBufC*, TInt){ return KErrNone;}
+		virtual TInt SetTextFieldString(TInt, HBufC*, TInt, TInt){ return KErrNone;}
 		virtual void SetCursorPosition(TInt) {}
 		virtual void GetEditData(TInt&, TInt&) {}
 		virtual TBool GetUnderline() {return EFalse;}
@@ -432,7 +432,7 @@ public:
 	// text field things
 	virtual TInt GetNextState();
 	virtual HBufC* GetTextFieldString(TInt aId);
-	virtual TInt SetTextFieldString(TInt aId, HBufC* aText, TInt aParentId);
+	virtual TInt SetTextFieldString(TInt aId, HBufC* aText, TInt aParentId, TInt aMaxSize);
 	virtual void SetCursorPosition(TInt aPosition);
 	virtual void GetEditData(TInt& aEditPos, TInt& aEditLength);
 	virtual TBool GetUnderline();

@@ -52,7 +52,7 @@ public:
 	virtual void EndEditSession() = 0;
 	virtual TInt GetNextState() = 0;
 	virtual HBufC* GetInlineText(TInt aId)= 0;
-	virtual TInt SetTextFieldString(TInt aId, HBufC* aText, TInt aParentId) = 0;
+	virtual TInt SetTextFieldString(TInt aId, HBufC* aText, TInt aParentId, TInt aMaxSize) = 0;
 	virtual void SetCursorPosition(TInt aPosition) = 0;
 	virtual void GetEditData(TInt& aEditPos, TInt& aEditLength) = 0;
 	virtual TBool GetUnderline() = 0;
