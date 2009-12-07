@@ -27,55 +27,29 @@
  * www.bluewhalesystems.com if you need additional 
  * information or have any questions.  
  */ 
-#ifndef __HOSTRESOLVER_H__
-#define __HOSTRESOLVER_H__
-class CHostResolver : public CEComPlusRefCountedBase,MConnectionCallback, public MHostResolver
+
+#ifndef __CONNECTIONMANAGER_H__
+#define __CONNECTIONMANAGER_H__
+
+#include <es_sock.h>
+#include <OSVersion.h>
+#include "Initialize.h"
+
+const TInt KCID_MConnectionManager = 0xA0003F54;
+const TInt KIID_MConnectionManager = 0xA0003F55;
+
+const TObjectUniqueKey KPropertyObjectConnectionManager = {KIID_MConnectionManager, 0x00000001};
+
+class MConnectionManager : public MInitialize
 {
-	public:
-		CHostResolver(TAny * aConstructionParameters,MSocketManager* aFactory,CThreadRunner& aThreadRunner,MProperties* aProperties);
-		virtual ~CHostResolver();
-		// MUnknown
-		MUnknown * QueryInterfaceL( TInt aInterfaceId );
-		void AddRef()  {CEComPlusRefCountedBase::AddRef();}
-		void Release() {CEComPlusRefCountedBase::Release();}
-		
-		// MStateMachineCallback
-		void CallbackCommandL( MStateMachine::TCommand aCommand );
-		void ReportStateChanged( TInt aComponentId, MStateMachine::TState aState );
-
-		// MConnectionCallback
-		void ReportError(TErrorType aErrorType, TInt aErrorCode);
-
-		// MHostResolver
-		TInt ResolveHost(const TDesC& aHost,TUint32& aAddr);
-		void Close();
-		// debug
-		void DebugResolver();
-	private:
-		static void ResolveHostCallback(TAny* aThis);
-		void DoResolveHostCallbackL();
-		void ConstructConnectionL();
-		void ConstructL();
-	private:
-		MProperties* iProperties;
-		MSocketManager* iFactory;
-		const TDesC* iHost;
-		TUint32 iResolved;
-		MWritableConnection* iConnection;
-		typedef enum
-		{
-			EStart,
-			EResolving,
-			EError,
-			EResolved
-		} TState;
-		TState iState;
-#if __S60_VERSION__ >= __S60_V3_FP0_VERSION_NUMBER__
-		MIAPSession* iIAPSession;
-#else
-		TInt iIAP;
-#endif
-		CThreadRunner& iThreadRunner;
+public:
+	virtual void RaiseConnectionL(RSocketServ& aSocketServer) = 0;
+	virtual void Start(TRequestStatus& aStatus) = 0;
+	virtual RConnection& Connection() = 0;
+	virtual void Close() = 0;
+protected :
+	virtual ~MConnectionManager(){}
+	
 };
 
-#endif /*__HOSTRESOLVER_H__*/
+#endif // __CONNECTIONMANAGER_H__

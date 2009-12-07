@@ -34,6 +34,7 @@
 #include "HostResolver.h"
 #include "SocketDebug.h"
 #include "midpservices.h"
+#include "ConnectionManager.h"
 
 CSocketFactory::CSocketFactory(MEventQueue* aQueue,MProperties* aProperties,MPropertyPersist* aPersist)
 	: iQueue(aQueue),iProperties(aProperties),iPersist(aPersist)
@@ -46,6 +47,11 @@ CSocketFactory::~CSocketFactory()
 #if __S60_VERSION__ >= __S60_V3_FP0_VERSION_NUMBER__
 	delete iAPNManager;
 #endif
+	if(iConnectionManager)
+	{
+		iConnectionManager->Release();
+		iConnectionManager = NULL;
+	}
 }
 
 void CSocketFactory::ConstructL()
@@ -61,6 +67,8 @@ void CSocketFactory::StartL(RThread& /*aThread*/)
 #if __S60_VERSION__ >= __S60_V3_FP0_VERSION_NUMBER__
 	iAPNManager = CAPNManager::NewL(iProperties);
 #endif
+	iConnectionManager = DiL( MConnectionManager );
+	iConnectionManager->InitializeL(iProperties);
 }
 
 void CSocketFactory::StopL()
@@ -136,7 +144,7 @@ MHostResolver* CSocketFactory::CreateResolver()
 {
 	DEBUGPRINT(1,_L("CSocketFactory::CreateResolver"));
 	MHostResolver* ret = NULL;
-	CHostResolver* created = new CHostResolver(NULL,this,*iThreadRunner);
+	CHostResolver* created = new CHostResolver(NULL,this,*iThreadRunner,iProperties);
 	if(created)
 	{
 		created->AddRef();

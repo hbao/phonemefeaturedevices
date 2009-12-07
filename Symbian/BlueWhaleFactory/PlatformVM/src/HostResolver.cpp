@@ -45,10 +45,11 @@
 #include "SocketDebug.h"
 
 
-CHostResolver::CHostResolver(TAny * aConstructionParameters,MSocketManager* aFactory,CThreadRunner& aThreadRunner)
-	: CEComPlusRefCountedBase(aConstructionParameters),iFactory(aFactory),iHost(NULL),iThreadRunner(aThreadRunner)
+CHostResolver::CHostResolver(TAny * aConstructionParameters,MSocketManager* aFactory,CThreadRunner& aThreadRunner,MProperties* aProperties)
+	: CEComPlusRefCountedBase(aConstructionParameters),iFactory(aFactory),iHost(NULL),iThreadRunner(aThreadRunner),iProperties(aProperties)
 {
 	iState = EStart;
+	iProperties->AddRef();
 }
 
 CHostResolver::~CHostResolver()
@@ -68,7 +69,6 @@ CHostResolver::~CHostResolver()
 
 void CHostResolver::ConstructL()
 {
-	iProperties = DiL( MProperties );
 	MConnectionCallback * connectionCallback = reinterpret_cast<MConnectionCallback*>(QueryInterfaceL(KIID_MConnectionCallback));
 	CleanupReleasePushL(*connectionCallback);
 	iProperties->SetObjectL(KPropertyObjectStateMachineCallback, connectionCallback);
