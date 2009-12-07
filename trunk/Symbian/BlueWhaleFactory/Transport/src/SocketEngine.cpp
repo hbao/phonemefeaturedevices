@@ -475,25 +475,19 @@ void CSocketEngine::SetupConnectionL()
 	TConnectionInfo inf;
 	TPckg<TConnectionInfo> info(inf);
 	TUint count;
-	TRAPD(iapError, iapUid = iProperties->GetIntL(KPropertyIntSocketConnectionIap));
-	if(iapUid != -1)
+	if(iConnection.EnumerateConnections(count) == KErrNone)
 	{
-		if(iConnection.EnumerateConnections(count) == KErrNone)
+		for(TInt i=1;i<=count;i++)
 		{
-			for(TInt i=1;i<=count;i++)
+			if(iConnection.GetConnectionInfo(i, info)== KErrNone)
 			{
-				if(iConnection.GetConnectionInfo(i, info)== KErrNone)
+				if(iConnection.Attach(info,RConnection::EAttachTypeNormal) == KErrNone)
 				{
-					if(info().iIapId == iapUid)
-					{
-						if(iConnection.Attach(info,RConnection::EAttachTypeNormal) == KErrNone)
-						{
-							startConnection = EFalse;
-							TRequestStatus* status = &iStatus;
-							User::RequestComplete(status,KErrNone);
-							SetActive();
-						}
-					}
+					startConnection = EFalse;
+					TRequestStatus* status = &iStatus;
+					User::RequestComplete(status,KErrNone);
+					SetActive();
+					break;
 				}
 			}
 		}
