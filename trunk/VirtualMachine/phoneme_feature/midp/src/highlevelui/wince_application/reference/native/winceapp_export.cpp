@@ -651,7 +651,7 @@ static BOOL GetStringEnv(TCHAR *pszVar, TCHAR *pszValue) {
 
     ret = FALSE;
     dwSize = 0;
-    rc = RegOpenKeyEx(HKEY_LOCAL_MACHINE, TEXT("Software\\Apps\\Blue Whale Systems Ltd BlueWhale"), 0, KEY_QUERY_VALUE, &$
+    rc = RegOpenKeyEx(HKEY_LOCAL_MACHINE, TEXT("Software\\Apps\\Blue Whale Systems Ltd BlueWhale"), 0, KEY_QUERY_VALUE, &hKey);
     if (rc == ERROR_SUCCESS) {
         rc = RegQueryValueEx(hKey, pszVar, NULL, &dwValType, NULL, &dwSize);
         if (rc == ERROR_SUCCESS) {
@@ -673,7 +673,7 @@ static BOOL SetStringEnv(TCHAR *pszVar, TCHAR *pszValue) {
     BOOL                ret;
 
     ret = FALSE;
-    rc = RegCreateKeyEx(HKEY_LOCAL_MACHINE, TEXT("Software\\Apps\\Blue Whale Systems Ltd BlueWhale"), 0, NULL, 0, KEY_ALL$
+    rc = RegCreateKeyEx(HKEY_LOCAL_MACHINE, TEXT("Software\\Apps\\Blue Whale Systems Ltd BlueWhale"), 0, NULL, 0, KEY_ALL_ACCESS, NULL, &hKey, &dwDisposition);
     if (rc == ERROR_SUCCESS) {
         RegSetValueEx(hKey, pszVar, 0, REG_SZ, (LPBYTE)pszValue, (wcslen(pszValue)+1) * sizeof(TCHAR));
         ret = TRUE;
