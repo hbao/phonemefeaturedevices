@@ -48,6 +48,6 @@ RESOURCE APP_REGISTRATION_INFO
 
 RESOURCE TBUF r_opaque_data
 {
-	buf = "Platform";
+	buf = "";
 }
 
