@@ -27,55 +27,44 @@
  * www.bluewhalesystems.com if you need additional 
  * information or have any questions.  
  */ 
-#ifndef __HOSTRESOLVER_H__
-#define __HOSTRESOLVER_H__
-class CHostResolver : public CEComPlusRefCountedBase,MConnectionCallback, public MHostResolver
+
+#ifndef __CONNECTIONMANAGERIMPL_H__
+#define __CONNECTIONMANAGERIMPL_H__
+
+#include <CommDbConnPref.h>
+#include "EcomPlusRefcountedActive.h"
+#include "ConnectionManager.h"
+
+class CConnectionManager : public CEComPlusRefCountedActive, public MConnectionManager
 {
-	public:
-		CHostResolver(TAny * aConstructionParameters,MSocketManager* aFactory,CThreadRunner& aThreadRunner,MProperties* aProperties);
-		virtual ~CHostResolver();
-		// MUnknown
-		MUnknown * QueryInterfaceL( TInt aInterfaceId );
-		void AddRef()  {CEComPlusRefCountedBase::AddRef();}
-		void Release() {CEComPlusRefCountedBase::Release();}
-		
-		// MStateMachineCallback
-		void CallbackCommandL( MStateMachine::TCommand aCommand );
-		void ReportStateChanged( TInt aComponentId, MStateMachine::TState aState );
+public:
+	static MConnectionManager* NewL( TAny * aConstructionParameters );
+private:
+	CConnectionManager(TAny * aConstructionParameters );
+	virtual ~CConnectionManager();
+private: // MConnectionManager
+	virtual void RaiseConnectionL(RSocketServ& aSocketServer);
+	virtual void Start(TRequestStatus& aStatus);
+	virtual RConnection& Connection();
+	virtual void Close();
+private: // MInitialize
+	virtual void InitializeL(MProperties * aInitializationProperties);
+private: // MUnknown
+	virtual MUnknown * QueryInterfaceL( TInt aInterfaceId );
+	virtual void AddRef();
+	virtual void Release();
 
-		// MConnectionCallback
-		void ReportError(TErrorType aErrorType, TInt aErrorCode);
+	
+private: // CActive
+	void RunL();
+	void DoCancel();
+	TInt RunError(TInt aError);
+private:
+	MProperties*	iProperties;
+	RConnection		iConnection;
+	TCommDbConnPref	iCommDbConnPref; 
+	TRequestStatus* iClientStatus;
+	TBool iStarted;
 
-		// MHostResolver
-		TInt ResolveHost(const TDesC& aHost,TUint32& aAddr);
-		void Close();
-		// debug
-		void DebugResolver();
-	private:
-		static void ResolveHostCallback(TAny* aThis);
-		void DoResolveHostCallbackL();
-		void ConstructConnectionL();
-		void ConstructL();
-	private:
-		MProperties* iProperties;
-		MSocketManager* iFactory;
-		const TDesC* iHost;
-		TUint32 iResolved;
-		MWritableConnection* iConnection;
-		typedef enum
-		{
-			EStart,
-			EResolving,
-			EError,
-			EResolved
-		} TState;
-		TState iState;
-#if __S60_VERSION__ >= __S60_V3_FP0_VERSION_NUMBER__
-		MIAPSession* iIAPSession;
-#else
-		TInt iIAP;
-#endif
-		CThreadRunner& iThreadRunner;
 };
-
-#endif /*__HOSTRESOLVER_H__*/
+#endif // __CONNECTIONMANAGERIMPL_H__ 
