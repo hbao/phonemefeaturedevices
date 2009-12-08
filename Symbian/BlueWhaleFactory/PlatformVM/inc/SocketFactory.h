@@ -43,7 +43,6 @@ class CHostResolver;
 class CApSelect;
 class CCommsDatabase;
 class MPropertyPersist;
-class MConnectionManager;
 
 class MSocketManager
 {
@@ -120,7 +119,6 @@ class CSocketFactory : public CBase, public MSocketManager, public MRunnable
 		CApSelect* iApSelect;
 		TInt iCurrentPort;
 		TInt iErrorStatus;
-		MConnectionManager* iConnectionManager;
 #if __S60_VERSION__ >= __S60_V3_FP0_VERSION_NUMBER__
 		CAPNManager* iAPNManager;
 #endif

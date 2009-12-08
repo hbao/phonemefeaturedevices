@@ -36,7 +36,6 @@
 #include "SocketReader.h"
 #include "SocketWriter.h"
 #include "DebugUtilities.h"
-#include "ConnectionManager.h"
 #include <OSVersion.h>
 
 #ifdef _DEBUG_SOCKETENGINE_
@@ -126,6 +125,13 @@ void CSocketEngine::DoReset()
 
 
 	iSocket.Close();
+
+
+#if (__S60_VERSION__ > __S60_V1_FP2_VERSION_NUMBER__) || (__UIQ_VERSION_NUMBER__ >= __UIQ_V3_FP0_VERSION_NUMBER__)
+	
+	iConnection.Close();
+
+#endif // __S60_VERSION__ > __S60_V1_FP2_VERSION_NUMBER__
 
 	iRaisingConnectionRetry = 0;
 }
@@ -277,11 +283,7 @@ CSocketEngine::~CSocketEngine()
 		iTimer = 0;
 	}
 
-    if(iConnection)
-    {
-    	iConnection->Release();
-    	iConnection = NULL;
-    }
+
 
 #if (__S60_VERSION__ > __S60_V1_FP2_VERSION_NUMBER__) || (__UIQ_VERSION_NUMBER__ >= __UIQ_V3_FP0_VERSION_NUMBER__)
 
@@ -364,12 +366,7 @@ void CSocketEngine::StartConnectionL()
 	TRAPD(iapError, iapUid = iProperties->GetIntL(KPropertyIntSocketConnectionIap));
 
 #if (__S60_VERSION__ > __S60_V1_FP2_VERSION_NUMBER__) || (__UIQ_VERSION_NUMBER__ >= __UIQ_V3_FP0_VERSION_NUMBER__)
-	iConnection->Start(iStatus);
-	// Request time out
-	iTimer->AfterL(KTimeIntervalSecondsTimeOut);
-	SetActive();
-
-/*	if(iapUid != 0)
+	if(iapUid != 0)
 	{
 		iCommDbConnPref.SetDialogPreference(ECommDbDialogPrefDoNotPrompt); 
 	}
@@ -387,7 +384,7 @@ void CSocketEngine::StartConnectionL()
 	iTimer->AfterL(KTimeIntervalSecondsTimeOut);
 
 	SetActive();
-*/
+
 #else // __S60_VERSION__ > __S60_V1_FP2_VERSION_NUMBER__
 
 	iConnPref.iRanking = 1; 
@@ -469,8 +466,7 @@ void CSocketEngine::SetupConnectionL()
 	LOG_DEBUG( "CSocketEngine::SetupConnectionL");
 	TBool startConnection = ETrue;
 #if (__S60_VERSION__ > __S60_V1_FP2_VERSION_NUMBER__) || (__UIQ_VERSION_NUMBER__ >= __UIQ_V3_FP0_VERSION_NUMBER__)
-	iConnection->RaiseConnectionL(iSocketServ);
-/*	
+	
 	User::LeaveIfError( iConnection.Open(iSocketServ) );
 
 	// this code allows connection sharing.
@@ -497,7 +493,7 @@ void CSocketEngine::SetupConnectionL()
 		}
 	}
 #endif 
-*/	
+	
 #endif
 	if(startConnection)
 	{
@@ -575,7 +571,7 @@ void CSocketEngine::CheckDNSL()
 {
 	const TState state = State();
 
-	User::LeaveIfError(iResolver.Open(iSocketServ, KAfInet, KProtocolInetUdp, iConnection->Connection()));
+	User::LeaveIfError(iResolver.Open(iSocketServ, KAfInet, KProtocolInetUdp, iConnection));
 	iServerName.Copy(iProperties->GetStringL(KPropertyStringSocketServer));
 	iResolver.GetByName(iServerName, iNameEntry, iStatus);
 	SetState(KStateSocketEngineResolvingServerNameNoConnect);
@@ -610,7 +606,7 @@ void CSocketEngine::CheckDNSAndOpenSocketL()
 
 #if (__S60_VERSION__ > __S60_V1_FP2_VERSION_NUMBER__) || (__UIQ_VERSION_NUMBER__ >= _UIQ_V3_FP0_VERSION_NUMBER__)
 
-			User::LeaveIfError(iResolver.Open(iSocketServ, KAfInet, KProtocolInetUdp, iConnection->Connection()));
+			User::LeaveIfError(iResolver.Open(iSocketServ, KAfInet, KProtocolInetUdp, iConnection));
 
 #else // __S60_VERSION__ > __S60_V1_FP2_VERSION_NUMBER__
 
@@ -647,7 +643,7 @@ void CSocketEngine::OpenSocketL(TUint32 aAddr)
 
 #if (__S60_VERSION__ > __S60_V1_FP2_VERSION_NUMBER__) || (__UIQ_VERSION_NUMBER__ >= __UIQ_V3_FP0_VERSION_NUMBER__)
 
-		User::LeaveIfError(iSocket.Open(iSocketServ, KAfInet, KSockStream, KProtocolInetTcp, iConnection->Connection()));
+		User::LeaveIfError(iSocket.Open(iSocketServ, KAfInet, KSockStream, KProtocolInetTcp, iConnection));
 
 #else // __S60_VERSION__ > __S60_V1_FP2_VERSION_NUMBER__
 
@@ -788,8 +784,6 @@ void CSocketEngine::InitializeL( MProperties * aInitializationProperties /* IN *
 	// The same situation as for callback interfaces in general.
 	//iProperties->AddRef();
 
-	iConnection = GoL( iProperties, KPropertyObjectConnectionManager, MConnectionManager );
-	
 	iCallback = GoL( iProperties, KPropertyObjectStateMachineCallback, MConnectionCallback );
 
 	// QueryInterfaceL just raised refcount on an object which owns us.
@@ -1006,7 +1000,7 @@ void CSocketEngine::HandleRunLWhileRaisingConnectionNoOpenL(TInt aStatus)
 		// Just try again.
 		++iRaisingConnectionRetry;
 
-		iConnection->Close();
+		iConnection.Close();
 		
 		LOG_INFO1( "CSocketEngine::RunL KStateSocketRaisingConnection", aStatus );
 		if( iRaisingConnectionRetry <= KNumberRaisingConnectionRetries )
@@ -1125,7 +1119,6 @@ void CSocketEngine::HandleRunLWhileResolvingServerNameNoConnectL(TInt aStatus)
 void CSocketEngine::HandleRunLWhileResolvingServerNameL(TInt aStatus)
 {
 	iResolver.Close();
-	iConnection->Close();
 	if(	KErrNone == aStatus )
     {
 		// DNS look up successful

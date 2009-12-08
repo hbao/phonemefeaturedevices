@@ -49,7 +49,7 @@
 #include "NetworkInfo.h"
 #include "IAPInfo.h"
 #endif
-#include "ConnectionManagerImpl.h"
+
 #include "CommDBUtil.h"
 // End of object include files
 
@@ -189,9 +189,6 @@ EXPORT_C MUnknown * REComPlusSession::CreateImplementationL(TUid aImplementation
 		unknown = CREATEOBJECT(CCommDBWrapper,aConstructionParameters);
 		break;
 #endif
-	case KCID_MConnectionManager:
-		unknown = CREATEOBJECT(CConnectionManager,aConstructionParameters);
-		break;
 	}
 	
     if(!unknown)

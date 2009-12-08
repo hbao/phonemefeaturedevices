@@ -94,9 +94,9 @@ SOURCEPATH		..\Logger
 SOURCE			LoggerImpl.cpp
 
 SOURCEPATH		..\Transport\src
+SOURCE			SocketEngine.cpp
 SOURCE			SocketWriter.cpp
 SOURCE			SocketReader.cpp
-SOURCE			ConnectionManager.cpp
 
 SOURCEPATH		..\Timer
 SOURCE			TimeOutTimer.cpp
@@ -164,6 +164,3 @@ deffile .\bluewhalefactoryarm.def
 #endif
 
 NOSTRICTDEF
-
-SOURCEPATH ..\Transport\src
-SOURCE SocketEngine.cpp
