@@ -57,7 +57,6 @@
 class CSocketReader;
 class CSocketWriter;
 class CTimeOutTimer;
-class MConnectionManager;
 
 const TInt KNumberRaisingConnectionRetries = 3;
 
@@ -168,7 +167,14 @@ private: // Member variables
 
 
 #if (__S60_VERSION__ > __S60_V1_FP2_VERSION_NUMBER__) || (__UIQ_VERSION_NUMBER__ >= __UIQ_V3_FP0_VERSION_NUMBER__)
-	MConnectionManager			*iConnection;
+
+	RConnection					iConnection;
+
+	// Just for kicks, I will make sure this variable used to issue an
+	// asynchronous call in RaiseConnectionL exists even when that
+	// method goes out of scope.
+	TCommDbConnPref				iCommDbConnPref; 
+
 #else // __S60_VERSION__ > __S60_V1_FP2_VERSION_NUMBER__
 
 	CIntConnectionInitiator *	iInitiator;

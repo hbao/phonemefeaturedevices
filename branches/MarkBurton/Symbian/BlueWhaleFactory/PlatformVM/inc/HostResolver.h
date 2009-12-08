@@ -32,7 +32,7 @@
 class CHostResolver : public CEComPlusRefCountedBase,MConnectionCallback, public MHostResolver
 {
 	public:
-		CHostResolver(TAny * aConstructionParameters,MSocketManager* aFactory,CThreadRunner& aThreadRunner,MProperties* aProperties);
+		CHostResolver(TAny * aConstructionParameters,MSocketManager* aFactory,CThreadRunner& aThreadRunner);
 		virtual ~CHostResolver();
 		// MUnknown
 		MUnknown * QueryInterfaceL( TInt aInterfaceId );
