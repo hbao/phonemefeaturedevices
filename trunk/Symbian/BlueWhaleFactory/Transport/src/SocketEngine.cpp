@@ -50,6 +50,11 @@
 #define __USE_CONNECTION_SHARING__
 #endif
 
+#ifdef __USE_CONNECTION_SHARING__
+#include <hal.h>
+#endif
+
+
 // TODO: Not sure if such a long time out will be needed when there's no "bad certificate use anyway dialog?".
 const TInt CSocketEngine::KTimeIntervalSecondsTimeOut = 60; // 60 seconds time-out -- longer needed because of bad certificate dialog.
 
@@ -471,15 +476,22 @@ void CSocketEngine::SetupConnectionL()
 
 	// this code allows connection sharing.
 #ifdef __USE_CONNECTION_SHARING__
-	TInt iapUid = 0;
 	TConnectionInfo inf;
 	TPckg<TConnectionInfo> info(inf);
 	TUint count;
+	TInt uid = 0;
+	/*
+	 * We found a problem on N96's where there seemed to be an non-Started() connection
+	 * Blindly calling Start() after the Attach fixed the problem on the N96 but broke
+	 * Other devices.
+	 * A  hacky fix is to check the machine ID
+	 */
+	HAL::Get(HALData::EMachineUid, uid);
 	if(iConnection.EnumerateConnections(count) == KErrNone)
 	{
-		for(TInt i=1;i<=count;i++)
+		if(iConnection.GetConnectionInfo(count, info)== KErrNone)
 		{
-			if(iConnection.GetConnectionInfo(i, info)== KErrNone)
+			if(uid != KUidN96Value || count >1)
 			{
 				if(iConnection.Attach(info,RConnection::EAttachTypeNormal) == KErrNone)
 				{
@@ -487,7 +499,6 @@ void CSocketEngine::SetupConnectionL()
 					TRequestStatus* status = &iStatus;
 					User::RequestComplete(status,KErrNone);
 					SetActive();
-					break;
 				}
 			}
 		}
