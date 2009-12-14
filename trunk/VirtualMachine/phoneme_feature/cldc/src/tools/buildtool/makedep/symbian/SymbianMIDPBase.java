@@ -818,10 +818,12 @@ void writeRules() throws Exception
 		puttabln("$(INT_COMMON_XML_DIR)\\properties.xml");
 		putln();
 		
+        putln("# create MIDP type keystore used for application verification & HTTPS connections");
         putln("$(KEYSTORE) : $(SYMBIAN_SDK_VM_ROOT_PATH) $(MIDP_TOOLS) $(J2SE_KEYSTORE)");
 		puttabln("@echo Making ME keystore $(KEYSTORE)");
 		puttabln("@$(JAVA6) -cp .\\tools $(ME_KEYTOOL_CLASS) -import -alias rootCA -domain trusted -keystore $(J2SE_KEYSTORE) -MEkeystore $(KEYSTORE) -storepass 3edcvgy76tfcxsw2");
 		puttabln("@$(JAVA6) -cp .\\tools $(ME_KEYTOOL_CLASS) -import -alias manufacturerCA -domain manufacturer -keystore $(J2SE_KEYSTORE) -MEkeystore $(KEYSTORE) -storepass 3edcvgy76tfcxsw2");
+        puttabln("@$(JAVA6) -cp .\\tools $(ME_KEYTOOL_CLASS) -import -alias PCAG2V2 -keystore $(J2SE_KEYSTORE) -MEkeystore $(KEYSTORE) -storepass 3edcvgy76tfcxsw2");
 		puttabln("@$(JAVA6) -cp .\\tools $(ME_KEYTOOL_CLASS) -list -MEkeystore $(KEYSTORE)");
 
 		putln();
