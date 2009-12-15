@@ -283,7 +283,7 @@
 <localized_string Key="AMS_EXTRENAL_STORAGE_NAME"
                 Value="Memory card "/>
 <localized_string Key="AMS_MGR_TITLE"
-                 Value="Java MIDlets"/>
+                 Value="Applications"/>
 <localized_string Key="AMS_MGR_SETTINGS"
                 Value="Settings"/>
 <localized_string Key="AMS_MGR_PREFERENCES"

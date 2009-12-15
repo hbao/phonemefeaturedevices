@@ -636,7 +636,57 @@ static void CreateMenuBar() {
     }
 }
 
+
+static void ToLower(TCHAR* s) {
+    while (*s) {
+        *s = tolower(*s);
+        s++;
+    }
+}
+
+static BOOL GetStringEnv(TCHAR *pszVar, TCHAR *pszValue) {
+    HKEY                hKey;
+    DWORD               dwSize, dwValType, rc;
+    BOOL                ret;
+
+    ret = FALSE;
+    dwSize = 0;
+    rc = RegOpenKeyEx(HKEY_LOCAL_MACHINE, TEXT("Software\\Apps\\Blue Whale Systems Ltd BlueWhale"), 0, KEY_QUERY_VALUE, &hKey);
+    if (rc == ERROR_SUCCESS) {
+        rc = RegQueryValueEx(hKey, pszVar, NULL, &dwValType, NULL, &dwSize);
+        if (rc == ERROR_SUCCESS) {
+            if (dwSize > 0) {
+                rc = RegQueryValueEx(hKey, pszVar, NULL, &dwValType, (LPBYTE)pszValue, &dwSize);
+                if (rc == ERROR_SUCCESS) {
+                    ret = TRUE;
+                }
+            }
+        }
+    }
+    RegCloseKey(hKey);
+    return ret;
+}
+
+static BOOL SetStringEnv(TCHAR *pszVar, TCHAR *pszValue) {
+    HKEY                hKey;
+    DWORD               dwDisposition, rc;
+    BOOL                ret;
+
+    ret = FALSE;
+    rc = RegCreateKeyEx(HKEY_LOCAL_MACHINE, TEXT("Software\\Apps\\Blue Whale Systems Ltd BlueWhale"), 0, NULL, 0, KEY_ALL_ACCESS, NULL, &hKey, &dwDisposition);
+    if (rc == ERROR_SUCCESS) {
+        RegSetValueEx(hKey, pszVar, 0, REG_SZ, (LPBYTE)pszValue, (wcslen(pszValue)+1) * sizeof(TCHAR));
+        ret = TRUE;
+    }
+    RegCloseKey(hKey);
+    return ret;
+}
+
+
 static BOOL InitInstance(HINSTANCE hInstance, int CmdShow) {
+    TCHAR tsValue[256];
+    char  value[256];
+
     HWND _hwndMain = CreateWindowEx(0,
                                _szAppName,
                                _szTitle,
@@ -673,8 +723,31 @@ static BOOL InitInstance(HINSTANCE hInstance, int CmdShow) {
 
 #if !ENABLE_CDC
     JVMSPI_SetSystemProperty("x-bw-platform-name", "BlueWhale");
+    if (GetStringEnv(TEXT("x-bw-platform-name"), tsValue)) {
+        memset(value, 0, sizeof(value));
+        WideCharToMultiByte(CP_ACP, 0, tsValue, -1, value, wcslen(tsValue), NULL, NULL);
+        JVMSPI_SetSystemProperty("x-bw-platform-name", value);
+    }
+
+/*
+    if (GetStringEnv(TEXT("x-bw-partner-name"), tsValue)) {
+        wprintf(TEXT("Partner: %s\n"), tsValue);
+    }
+*/
+
     JVMSPI_SetSystemProperty("x-bw-app-name", "BlueWhaleMail");
+    if (GetStringEnv(TEXT("x-bw-app-name"), tsValue)) {
+        memset(value, 0, sizeof(value));
+        WideCharToMultiByte(CP_ACP, 0, tsValue, -1, value, wcslen(tsValue), NULL, NULL);
+        JVMSPI_SetSystemProperty("x-bw-app-name", value);
+    }
+
     JVMSPI_SetSystemProperty("x-bw-app-full-name", "com.bluewhalesystems.client.midlet.BlueWhaleMail");
+    if (GetStringEnv(TEXT("x-bw-app-full-name"), tsValue)) {
+        memset(value, 0, sizeof(value));
+        WideCharToMultiByte(CP_ACP, 0, tsValue, -1, value, wcslen(tsValue), NULL, NULL);
+        JVMSPI_SetSystemProperty("x-bw-app-full-name", value);
+    }
 #endif
 
     MSGQUEUEOPTIONS msgQueueOptions = {0};
