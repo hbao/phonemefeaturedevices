@@ -45,7 +45,7 @@ void CTestAutoAPN::tearDown()
 	REComPlusSession::SetDelegate(NULL);
 }
 
-MUnknown * CTestAutoAPN::Create(TUid aImplementationUid, TUid aInterfaceUid, TAny* aConstructionParameters)
+MUnknown * CTestAutoAPN::Create(TUid aImplementationUid, TUid /*aInterfaceUid*/, TAny* /*aConstructionParameters*/)
 {
 	MUnknown * ret = NULL;
 	switch(aImplementationUid.iUid)
@@ -222,6 +222,4 @@ void CTestAutoAPN::testWithUnknownNetwork()
 	CleanupStack::PopAndDestroy(session);
 	CleanupStack::PopAndDestroy(manager);
 	CleanupStack::PopAndDestroy(properties);
-	
-	
 }

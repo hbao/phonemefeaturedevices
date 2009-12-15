@@ -67,7 +67,7 @@ public: // MTelephonyWrapper
 		User::RequestComplete(status,KErrNone);
 	}
 	
-	virtual void NotifyChange(TRequestStatus& aReqStatus, const CTelephony::TNotificationEvent& aEvent, TDes8& aDes) const
+	virtual void NotifyChange(TRequestStatus& aReqStatus, const CTelephony::TNotificationEvent& /*aEvent*/, TDes8& /*aDes*/) const
 	{
 		TRequestStatus* status = &aReqStatus; 
 		User::RequestComplete(status,KErrCancel);
@@ -78,7 +78,7 @@ public: // MTelephonyWrapper
 		CActiveScheduler::Stop();
 	}
 	
-	virtual TInt CancelAsync(CTelephony::TCancellationRequest aCancel) const
+	virtual TInt CancelAsync(CTelephony::TCancellationRequest /*aCancel*/) const
 	{
 		if(iClientStatus)
 		{
@@ -87,7 +87,7 @@ public: // MTelephonyWrapper
 		return KErrNone;
 	}
 public: // MUnknown implementation.
-	virtual MUnknown * QueryInterfaceL( TInt aInterfaceId )
+	virtual MUnknown * QueryInterfaceL( TInt /*aInterfaceId*/ )
 	{
 		return NULL;
 	}
@@ -118,7 +118,7 @@ public:
 		TRequestStatus* status = &aReqStatus; 
 		User::RequestComplete(status,KErrNone);
 	}
-	virtual void NotifyChange(TRequestStatus& aReqStatus, const CTelephony::TNotificationEvent& aEvent, TDes8& aDes) const
+	virtual void NotifyChange(TRequestStatus& aReqStatus, const CTelephony::TNotificationEvent& aEvent, TDes8& /*aDes*/) const
 	{
 		aReqStatus = KRequestPending;
 		if(aEvent == CTelephony::ECurrentNetworkInfoChange)
@@ -179,6 +179,7 @@ public:
 		{
 			User::RequestComplete((TRequestStatus*&)iClientStatus2,KErrNone);
 		}
+		return KErrNone;
 	}
 	
 	static TInt TimeOut(TAny* aThis)
@@ -224,7 +225,7 @@ public:
 	};
 };
 
-MUnknown * CTestNetworkInfo::CreateHomeNetworkL(TUid aImplementationUid, TUid aInterfaceUid, TAny* aConstructionParameters)
+MUnknown * CTestNetworkInfo::CreateHomeNetworkL(TUid aImplementationUid, TUid /*aInterfaceUid*/, TAny* /*aConstructionParameters*/)
 {
 	switch(aImplementationUid.iUid)
 	{
@@ -235,7 +236,7 @@ MUnknown * CTestNetworkInfo::CreateHomeNetworkL(TUid aImplementationUid, TUid aI
 	}
 }
 
-MUnknown * CTestNetworkInfo::CreateTimerL(TUid aImplementationUid, TUid aInterfaceUid, TAny* aConstructionParameters)
+MUnknown * CTestNetworkInfo::CreateTimerL(TUid aImplementationUid, TUid /*aInterfaceUid*/, TAny* /*aConstructionParameters*/)
 {
 	switch(aImplementationUid.iUid)
 	{
@@ -246,7 +247,7 @@ MUnknown * CTestNetworkInfo::CreateTimerL(TUid aImplementationUid, TUid aInterfa
 	}
 }
 
-MUnknown * CTestNetworkInfo::CreateL(TUid aImplementationUid, TUid aInterfaceUid, TAny* aConstructionParameters)
+MUnknown * CTestNetworkInfo::CreateL(TUid aImplementationUid, TUid /*aInterfaceUid*/, TAny* /*aConstructionParameters*/)
 {
 	switch(aImplementationUid.iUid)
 	{
@@ -322,7 +323,7 @@ void CTestNetworkInfo::testObserver()
 	TS_ASSERT(iPass);
 }
 
-void CTestNetworkInfo::testRegisteredNetwork()
+void CTestNetworkInfo::testHomeNetwork()
 {
 	REComPlusSession::SetDelegate(CreateHomeNetworkL);
 	CNetworkInfoManager* info = CNetworkInfoManager::NewL();
@@ -331,5 +332,29 @@ void CTestNetworkInfo::testRegisteredNetwork()
 	CActiveScheduler::Start();
 	TBool ret = info->IsHomeNetwork();
 	TS_ASSERT(ret);
+	CleanupStack::PopAndDestroy(info);
+}
+
+void CTestNetworkInfo::testRegisteredNetwork()
+{
+	REComPlusSession::SetDelegate(CreateHomeNetworkL);
+	CNetworkInfoManager* info = CNetworkInfoManager::NewL();
+	CleanupStack::PushL(info);
+	info->StartL();
+	CActiveScheduler::Start();
+	TBool ret = info->IsRegisteredOnNetwork();
+	TS_ASSERT(ret);
+	CleanupStack::PopAndDestroy(info);
+}
+
+void CTestNetworkInfo::testCallStatus()
+{
+	REComPlusSession::SetDelegate(CreateHomeNetworkL);
+	CNetworkInfoManager* info = CNetworkInfoManager::NewL();
+	CleanupStack::PushL(info);
+	info->StartL();
+	CActiveScheduler::Start();
+	TBool ret = info->IsCallOngoing();
+	TS_ASSERT(!ret);
 	CleanupStack::PopAndDestroy(info);
 }

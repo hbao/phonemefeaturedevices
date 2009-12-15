@@ -81,11 +81,16 @@ MUnknown * CTelephonyWrapper::QueryInterfaceL( TInt aInterfaceId )
 		return CEComPlusRefCountedBase::QueryInterfaceL(aInterfaceId);
 	}
 }
-	
+TInt CTelephonyWrapper::GetLineStatus(const CTelephony::TPhoneLine &aLine, TDes8 &aStatus) const
+{
+	return iTelephony->GetLineStatus(aLine,aStatus);
+}
+
 void CTelephonyWrapper::GetCurrentNetworkInfo(TRequestStatus& aReqStatus, TDes8& aNetworkInfo) const
 {
 	iTelephony->GetCurrentNetworkInfo(aReqStatus,aNetworkInfo);
 }
+
 void CTelephonyWrapper::GetNetworkRegistrationStatus(TRequestStatus& aReqStatus, TDes8& aStatus) const
 {
 	iTelephony->GetNetworkRegistrationStatus(aReqStatus,aStatus);
@@ -116,6 +121,7 @@ CNetworkInfoManager::~CNetworkInfoManager()
 {
 	delete iRegistered;
 	delete iCurrent;
+	delete iCallStatus;
 	if(iTelephony)
 	{
 		iTelephony->Release();
@@ -131,6 +137,7 @@ void CNetworkInfoManager::ConstructL()
 	iTelephony = static_cast<MTelephonyWrapper*>(REComPlusSession::CreateImplementationL(TUid::Uid(KCID_MTelephonyWrapper), TUid::Uid(KIID_MTelephonyWrapper),NULL));
 	iCurrent = CCurrentNetworkInfo::NewL(*iTelephony);
 	iRegistered = CRegisteredNetworkInfo::NewL(*iTelephony);
+	iCallStatus = CCallStatusInfo::NewL(*iTelephony);
 }
 
 EXPORT_DECL void CNetworkInfoManager::StartL()
@@ -163,6 +170,11 @@ EXPORT_DECL TBool CNetworkInfoManager::IsRegisteredOnNetwork()
 EXPORT_DECL TBool CNetworkInfoManager::IsHomeNetwork()
 {
 	return iRegistered->IsHomeNetwork();
+}
+
+EXPORT_DECL TBool CNetworkInfoManager::IsCallOngoing()
+{
+	return iCallStatus->IsCallOngoing();
 }
 
 EXPORT_DECL void CNetworkInfoManager::SetObserver(MNetWorkInfoObserver* aObserver)
@@ -365,4 +377,38 @@ TInt CRegisteredNetworkInfo::RunError(TInt /*aError*/)
 void CRegisteredNetworkInfo::SetObserver(MNetWorkInfoObserver* aObserver)
 {
 	iObserver = aObserver;
+}
+////////////////////////////////////////////////////////////////////////////
+CCallStatusInfo* CCallStatusInfo::NewL(MTelephonyWrapper& aTelephony)
+{
+	CCallStatusInfo* self = new (ELeave) CCallStatusInfo(aTelephony);
+	CleanupStack::PushL(self);
+	self->ConstructL();
+	CleanupStack::Pop(self);
+	return self;
+	
+}
+
+CCallStatusInfo::CCallStatusInfo(MTelephonyWrapper& aTelephony) : iTelephony(aTelephony)
+{}
+
+void CCallStatusInfo::ConstructL()
+{}
+
+CCallStatusInfo::~CCallStatusInfo()
+{}
+
+TBool CCallStatusInfo::IsCallOngoing()
+{
+	TBool ret = EFalse;
+	CTelephony::TPhoneLine line = CTelephony::EVoiceLine;
+	CTelephony::TCallStatusV1 info;
+	CTelephony::TCallStatusV1Pckg infoPckg(info);
+
+	TInt status = iTelephony.GetLineStatus(line, infoPckg);
+	ret = ( info.iStatus != CTelephony::EStatusUnknown
+		 && info.iStatus != CTelephony::EStatusIdle);
+	DEBUGMSG2(_L("Call status %d %d"),status,(TInt)info.iStatus);
+		
+	return ret;
 }

@@ -42,6 +42,7 @@ class MTelephonyWrapper : public MUnknown
 public:
 	virtual void GetNetworkRegistrationStatus(TRequestStatus& aReqStatus, TDes8& aStatus) const = 0;
 	virtual void GetCurrentNetworkInfo(TRequestStatus& aReqStatus, TDes8& aNetworkInfo) const = 0;
+	virtual TInt GetLineStatus(const CTelephony::TPhoneLine &aLine, TDes8 &aStatus) const = 0;
 	virtual void NotifyChange(TRequestStatus& aReqStatus, const CTelephony::TNotificationEvent& aEvent, TDes8& aDes) const = 0 ;
 	virtual TInt CancelAsync(CTelephony::TCancellationRequest aCancel) const = 0;
 protected:
@@ -61,6 +62,7 @@ public: // MUnknown implementation.
 public: // MTelephonyWrapper
 	virtual void GetNetworkRegistrationStatus(TRequestStatus& aReqStatus, TDes8& aStatus) const;
 	virtual void GetCurrentNetworkInfo(TRequestStatus& aReqStatus, TDes8& aNetworkInfo) const;
+	virtual TInt GetLineStatus(const CTelephony::TPhoneLine &aLine, TDes8 &aStatus) const;
 	virtual void NotifyChange(TRequestStatus& aReqStatus, const CTelephony::TNotificationEvent& aEvent, TDes8& aDes) const;
 	virtual TInt CancelAsync(CTelephony::TCancellationRequest aCancel) const;
 
@@ -135,6 +137,20 @@ private:
 	MNetWorkInfoObserver* iObserver;
 };
 
+class CCallStatusInfo : public CBase
+{
+public:
+	static CCallStatusInfo* NewL(MTelephonyWrapper& aTelephony);
+	virtual ~CCallStatusInfo();
+	TBool IsCallOngoing();
+private: 
+	CCallStatusInfo(MTelephonyWrapper& aTelephony);
+	void ConstructL();
+
+private:
+	MTelephonyWrapper& iTelephony;
+};
+
 class CNetworkInfoManager : public CBase
 {
 public:
@@ -147,7 +163,8 @@ public:
 	const TDesC& CurrentCountryCode();
 	TBool IsRegisteredOnNetwork();
 	TBool IsHomeNetwork();
-
+	TBool IsCallOngoing();
+	
 private:
 	CNetworkInfoManager();
 	void ConstructL();
@@ -155,6 +172,7 @@ private:
 	MTelephonyWrapper* iTelephony;
 	CCurrentNetworkInfo* iCurrent;
 	CRegisteredNetworkInfo* iRegistered;
+	CCallStatusInfo* iCallStatus;
 	TBool iListening;
 	MNetWorkInfoObserver* iObserver;
 };

@@ -85,7 +85,9 @@ public:
 	void testNetworkInfoStart();
 	void testGetCurrentInfo();
 	void testObserver();
+	void testHomeNetwork();
 	void testRegisteredNetwork();
+	void testCallStatus();
 public:
 	TRequestStatus* iTestStatus ;
 	TBool iPass;

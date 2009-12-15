@@ -327,13 +327,19 @@
 		<fail unless="sisx.present" message="SISX file not generated -- check to see if earlier build steps failed." />
 
 	</target>
+    
+    <target name="deploypkg" >
+        <copy file="sis\bluewhale_${deviceSDK}.pkg"
+              tofile="sis\deployed_${deviceSDK}\bluewhale_${deviceSDK}.pkg"/>
+    </target>
 
 	<target name="numbered_clean_build">
 		<echo>dos_command[${dos_command}]    executionDirectory[${executionDirectory}]   deviceSDK[${deviceSDK}]    platform: [${platform}]   release: [${release}]   EPOCDEVICE[${EPOCDEVICE}]   pathAdditions[${pathAdditions}]</echo>
 		<antcall target="injectbuildnumber" />
 		<antcall target="build_bluewhaleplatform" />
 		<antcall target="makesis" />
-
+        <antcall target="deploypkg" />
+        
 		<!-- Be nice and cleanup a little -->
 		<antcall target="revertbuildnumber" />
 	</target>
