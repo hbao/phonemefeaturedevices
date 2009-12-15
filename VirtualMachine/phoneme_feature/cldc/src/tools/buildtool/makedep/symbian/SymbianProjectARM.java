@@ -164,7 +164,7 @@ class SymbianProjectARM extends SymbianIDEProjectARM
     void writeDefFileLine(String aOsVersion) throws Exception
 	{
 		putln();
-		if(!aOsVersion.equals("_s60v3fp0"))
+		if(!aOsVersion.equals("_s60v3fp0") && !aOsVersion.equals("_uiqv3fp0"))
 		{
 			putln("exportunfrozen");
 		}
@@ -174,7 +174,7 @@ class SymbianProjectARM extends SymbianIDEProjectARM
 	
 	void createDefFile(String aOsVersion)  throws Exception
 	{
-		if (aOsVersion.equals("_s60v3fp0"))
+		if (aOsVersion.equals("_s60v3fp0") || aOsVersion.equals("_uiqv3fp0"))
 		{
 			FileOutputStream out = new FileOutputStream(tool().getOutputFileFullPath(getOutputDir() + "\\cldc_vm_lib_arm" + aOsVersion + ".def"));
 			out.write("EXPORTS\n".getBytes());
@@ -234,7 +234,7 @@ class SymbianProjectARM extends SymbianIDEProjectARM
 			out.write("\tRunVMCode__FPCUsPciPPcP12MApplication @ 2 NONAME ; RunVMCode(unsigned short const *, char *, int, char **, MApplication *)\n".getBytes());
 			out.close();
 		}
-	}	
+  	}	
 	
     Vector getLibraries(String aOsVersion)
     {

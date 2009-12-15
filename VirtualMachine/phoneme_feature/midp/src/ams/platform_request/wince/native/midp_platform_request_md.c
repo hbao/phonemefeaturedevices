@@ -38,6 +38,8 @@
 #include <midp_properties_port.h>
 #include <midpMalloc.h>
 
+#define MAX_URL 1024
+
 /**
  * @file
  *
@@ -60,10 +62,9 @@ static const char* const PLATFORM_REQUEST_KEY =
  */
 int platformRequest(char* pszUrl) {
     char *pszCommand;
-    STARTUPINFO si;
-    PROCESS_INFORMATION pi;
+    SHELLEXECUTEINFO shExecInfo;
     TCHAR command[MAX_PATH+1];
-    TCHAR commandLine[1024];
+    TCHAR commandLine[MAX_URL+1];
 
     if (strlen(pszUrl) == 0) {
         /*
@@ -91,21 +92,23 @@ int platformRequest(char* pszUrl) {
         return 0;
     }
 
-    MultiByteToWideChar(CP_ACP, 0, pszCommand, -1, command, MAX_PATH);
-    MultiByteToWideChar(CP_ACP, 0, pszUrl, -1, commandLine, 1023);
+    // #3519: WinCE VM: Support platformRequest("tel:+447786116478");
+    // Pass all requests to a shell and let it figure out the most
+    // application to execute the request
 
-    memset(&si, 0, sizeof(si));
-    si.cb = sizeof(si);
+    MultiByteToWideChar(CP_ACP, 0, pszCommand, -1, command, MAX_PATH-1);
+    MultiByteToWideChar(CP_ACP, 0, pszUrl, -1, commandLine, MAX_URL-1);
 
-    /* spawn the request using the configured URL handler and URL parameter
-     * do not inherit handles
-     */
-    if (CreateProcess(command, commandLine, NULL, NULL, FALSE, 0, NULL, NULL, &si, &pi)) {
-        CloseHandle(pi.hProcess);
-        CloseHandle(pi.hThread);
-    } else {
-        REPORT_WARN(LC_AMS, "Spawning a handler process failed. Check the platformRequest configuration. ");
-    }
+    shExecInfo.cbSize = sizeof(SHELLEXECUTEINFO);
+    shExecInfo.fMask = NULL;
+    shExecInfo.hwnd = NULL;
+    shExecInfo.lpVerb = NULL;
+    shExecInfo.lpFile = commandLine;
+    shExecInfo.lpParameters = NULL;
+    shExecInfo.lpDirectory = NULL;
+    shExecInfo.nShow = SW_MAXIMIZE;
+    shExecInfo.hInstApp = NULL;
+    ShellExecuteEx(&shExecInfo);
 
     return 1;
 }
