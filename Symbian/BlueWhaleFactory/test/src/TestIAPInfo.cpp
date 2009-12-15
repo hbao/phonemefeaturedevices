@@ -62,7 +62,7 @@ void CTestIAPInfo::testScan()
 	TS_ASSERT(ETrue);
 }
 
-MUnknown * CTestIAPInfo::CreateIAPAvailabilitySimL(TUid aImplementationUid, TUid aInterfaceUid, TAny* aConstructionParameters)
+MUnknown * CTestIAPInfo::CreateIAPAvailabilitySimL(TUid aImplementationUid, TUid /*aInterfaceUid*/, TAny* /*aConstructionParameters*/)
 {
 	switch(aImplementationUid.iUid)
 	{
@@ -86,7 +86,7 @@ void CTestIAPInfo::testIAPAvailabilityChange()
 	CleanupStack::PopAndDestroy(info);
 }
 
-MUnknown * CTestIAPInfo::CreateNetworkChangSimL(TUid aImplementationUid, TUid aInterfaceUid, TAny* aConstructionParameters)
+MUnknown * CTestIAPInfo::CreateNetworkChangSimL(TUid aImplementationUid, TUid /*aInterfaceUid*/, TAny* /*aConstructionParameters*/)
 {
 	switch(aImplementationUid.iUid)
 	{
@@ -114,7 +114,7 @@ void CTestIAPInfo::testNetworkChange()
 	CleanupStack::PopAndDestroy(info);
 }
 
-MUnknown * CTestIAPInfo::CreateConnectionCountSimL(TUid aImplementationUid, TUid aInterfaceUid, TAny* aConstructionParameters)
+MUnknown * CTestIAPInfo::CreateConnectionCountSimL(TUid aImplementationUid, TUid /*aInterfaceUid*/, TAny* /*aConstructionParameters*/)
 {
 	switch(aImplementationUid.iUid)
 	{
@@ -187,22 +187,22 @@ TInt CIAPAvailabilityTestMonitor::ConnectL()
 	return KErrNone;
 }
 
-TInt CIAPAvailabilityTestMonitor::NotifyEventL( MConnectionMonitorObserver& aObserver )
+TInt CIAPAvailabilityTestMonitor::NotifyEventL( MConnectionMonitorObserver& /*aObserver*/ )
 {
 	return KErrNone;
 }
 
-TInt CIAPAvailabilityTestMonitor::GetConnectionInfo( const TUint aIndex,TUint& aConnectionId,TUint& aSubConnectionCount ) const
+TInt CIAPAvailabilityTestMonitor::GetConnectionInfo( const TUint /*aIndex*/,TUint& /*aConnectionId*/,TUint& /*aSubConnectionCount*/ ) const
 {
 	return KErrNone;
 }
 
-void CIAPAvailabilityTestMonitor::GetStringAttribute( const TUint aConnectionId,const TUint aSubConnectionId,const TUint aAttribute,TDes& aValue,TRequestStatus& aStatus ) const
+void CIAPAvailabilityTestMonitor::GetStringAttribute( const TUint /*aConnectionId*/,const TUint /*aSubConnectionId*/,const TUint /*aAttribute*/,TDes& /*aValue*/,TRequestStatus& /*aStatus*/ ) const
 {
 	User::Invariant();
 }
 
-void CIAPAvailabilityTestMonitor::GetPckgAttribute( const TUint aConnectionId,const TUint aSubConnectionId,const TUint aAttribute,TDes8& aValue,TRequestStatus& aStatus ) const
+void CIAPAvailabilityTestMonitor::GetPckgAttribute( const TUint /*aConnectionId*/,const TUint /*aSubConnectionId*/,const TUint aAttribute,TDes8& aValue,TRequestStatus& aStatus ) const
 {
 	iClientStatus = &aStatus;
 	*iClientStatus = KRequestPending;
@@ -225,12 +225,12 @@ void CIAPAvailabilityTestMonitor::GetPckgAttribute( const TUint aConnectionId,co
 	}
 }
 
-void CIAPAvailabilityTestMonitor::GetConnectionCount( TUint& aConnectionCount, TRequestStatus& aStatus )
+void CIAPAvailabilityTestMonitor::GetConnectionCount( TUint& /*aConnectionCount*/, TRequestStatus& /*aStatus*/ )
 {
 	User::Invariant();
 }
 
-void CIAPAvailabilityTestMonitor::CancelAsyncRequest(TInt aReqToCancel)
+void CIAPAvailabilityTestMonitor::CancelAsyncRequest(TInt /*aReqToCancel*/)
 {
 	if(iClientStatus)
 	{
@@ -253,20 +253,20 @@ TInt CNetworkTestMonitor::ConnectL()
 	return KErrNone;
 }
 
-TInt CNetworkTestMonitor::NotifyEventL( MConnectionMonitorObserver& aObserver )
+TInt CNetworkTestMonitor::NotifyEventL( MConnectionMonitorObserver& /*aObserver*/ )
 {
 	return KErrNone;
 }
 
-TInt CNetworkTestMonitor::GetConnectionInfo( const TUint aIndex,TUint& aConnectionId,TUint& aSubConnectionCount ) const
+TInt CNetworkTestMonitor::GetConnectionInfo( const TUint /*aIndex*/,TUint& /*aConnectionId*/,TUint& /*aSubConnectionCount*/ ) const
 {
 	return KErrNone;
 }
 
-void CNetworkTestMonitor::GetStringAttribute( const TUint aConnectionId,const TUint aSubConnectionId,const TUint aAttribute,TDes& aValue,TRequestStatus& aStatus ) const
+void CNetworkTestMonitor::GetStringAttribute( const TUint /*aConnectionId*/,const TUint /*aSubConnectionId*/,const TUint /*aAttribute*/,TDes& /*aValue*/,TRequestStatus& /*aStatus*/ ) const
 {}
 
-void CNetworkTestMonitor::GetPckgAttribute( const TUint aConnectionId,const TUint aSubConnectionId,const TUint aAttribute,TDes8& aValue,TRequestStatus& aStatus ) const
+void CNetworkTestMonitor::GetPckgAttribute( const TUint /*aConnectionId*/,const TUint /*aSubConnectionId*/,const TUint aAttribute,TDes8& aValue,TRequestStatus& aStatus ) const
 {
 	iClientStatus = &aStatus;
 	*iClientStatus = KRequestPending;
@@ -291,10 +291,10 @@ void CNetworkTestMonitor::GetPckgAttribute( const TUint aConnectionId,const TUin
 }
 
 
-void CNetworkTestMonitor::GetConnectionCount( TUint& aConnectionCount, TRequestStatus& aStatus )
+void CNetworkTestMonitor::GetConnectionCount( TUint& /*aConnectionCount*/, TRequestStatus& /*aStatus*/ )
 {}
 
-void CNetworkTestMonitor::CancelAsyncRequest(TInt aReqToCancel)
+void CNetworkTestMonitor::CancelAsyncRequest(TInt /*aReqToCancel*/)
 {
 	if(iClientStatus)
 	{
@@ -318,20 +318,20 @@ TInt CConnectionCountMonitor::ConnectL()
 	return KErrNone;
 }
 
-TInt CConnectionCountMonitor::NotifyEventL( MConnectionMonitorObserver& aObserver )
+TInt CConnectionCountMonitor::NotifyEventL( MConnectionMonitorObserver& /*aObserver*/ )
 {
 	return KErrNone;
 }
 
-TInt CConnectionCountMonitor::GetConnectionInfo( const TUint aIndex,TUint& aConnectionId,TUint& aSubConnectionCount ) const
+TInt CConnectionCountMonitor::GetConnectionInfo( const TUint /*aIndex*/,TUint& /*aConnectionId*/,TUint& /*aSubConnectionCount*/ ) const
 {
 	return KErrNone;
 }
 
-void CConnectionCountMonitor::GetStringAttribute( const TUint aConnectionId,const TUint aSubConnectionId,const TUint aAttribute,TDes& aValue,TRequestStatus& aStatus ) const
+void CConnectionCountMonitor::GetStringAttribute( const TUint /*aConnectionId*/,const TUint /*aSubConnectionId*/,const TUint /*aAttribute*/,TDes& /*aValue*/,TRequestStatus& /*aStatus*/ ) const
 {}
 
-void CConnectionCountMonitor::GetPckgAttribute( const TUint aConnectionId,const TUint aSubConnectionId,const TUint aAttribute,TDes8& aValue,TRequestStatus& aStatus ) const
+void CConnectionCountMonitor::GetPckgAttribute( const TUint /*aConnectionId*/,const TUint /*aSubConnectionId*/,const TUint /*aAttribute*/,TDes8& /*aValue*/,TRequestStatus& aStatus ) const
 {
 	iClientStatus = &aStatus;
 	*iClientStatus = KRequestPending;
@@ -349,7 +349,7 @@ void CConnectionCountMonitor::GetConnectionCount( TUint& aConnectionCount, TRequ
 	User::RequestComplete(status,KErrNone);
 }
 
-void CConnectionCountMonitor::CancelAsyncRequest(TInt aReqToCancel)
+void CConnectionCountMonitor::CancelAsyncRequest(TInt /*aReqToCancel*/)
 {
 	if(iClientStatus)
 	{

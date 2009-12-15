@@ -75,7 +75,7 @@ _LIT(KVMThreadName,"_BWMVMT%d");
 _LIT(KManThreadName,"_BWMMan%d");
 
 _LIT8(KPartner1, "sky");
-_LIT8(KPartner1DisplayName, "SkyMobileEmail");
+_LIT8(KPartner1DisplayName, "Sky Mobile Email");
 
 class CSymbianSocket;
 class CTicker;

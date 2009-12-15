@@ -52,7 +52,7 @@ protected:
 	virtual void CancelAsyncRequest(TInt aReqToCancel);
 	
 	// MUnknown implementation.
-	virtual MUnknown * QueryInterfaceL( TInt aInterfaceId )
+	virtual MUnknown * QueryInterfaceL( TInt /*aInterfaceId*/ )
 	{
 		return NULL;
 	}
@@ -81,7 +81,7 @@ protected:
 	virtual void CancelAsyncRequest(TInt aReqToCancel);
 	
 	// MUnknown implementation.
-	virtual MUnknown * QueryInterfaceL( TInt aInterfaceId )
+	virtual MUnknown * QueryInterfaceL( TInt /*aInterfaceId*/ )
 	{
 		return NULL;
 	}
@@ -110,7 +110,7 @@ protected:
 	virtual void CancelAsyncRequest(TInt aReqToCancel);
 	
 	// MUnknown implementation.
-	virtual MUnknown * QueryInterfaceL( TInt aInterfaceId )
+	virtual MUnknown * QueryInterfaceL( TInt /*aInterfaceId*/ )
 	{
 		return NULL;
 	}

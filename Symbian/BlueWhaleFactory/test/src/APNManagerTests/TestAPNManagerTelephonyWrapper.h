@@ -67,7 +67,16 @@ public: // MTelephonyWrapper
 		User::RequestComplete(status,KErrNone);
 	}
 	
-	virtual void NotifyChange(TRequestStatus& aReqStatus, const CTelephony::TNotificationEvent& aEvent, TDes8& aDes) const
+	virtual TInt GetLineStatus(const CTelephony::TPhoneLine & /*aLine*/, TDes8 &aStatus) const
+	{
+		CTelephony::TCallStatusV1 info;
+		CTelephony::TCallStatusV1Pckg infoPckg(info);
+		info.iStatus = CTelephony::EStatusIdle;
+		aStatus.Copy(infoPckg);
+		return KErrNone;
+	}
+	
+	virtual void NotifyChange(TRequestStatus& aReqStatus, const CTelephony::TNotificationEvent& aEvent, TDes8& /*aDes*/) const
 	{
 		aReqStatus = KRequestPending;
 		if(aEvent == CTelephony::ECurrentNetworkInfoChange)
@@ -80,7 +89,7 @@ public: // MTelephonyWrapper
 		}
 	}
 	
-	virtual TInt CancelAsync(CTelephony::TCancellationRequest aCancel) const
+	virtual TInt CancelAsync(CTelephony::TCancellationRequest /*aCancel*/) const
 	{
 		if(iClientStatus)
 		{
@@ -93,7 +102,7 @@ public: // MTelephonyWrapper
 		return KErrNone;
 	}
 public: // MUnknown implementation.
-	virtual MUnknown * QueryInterfaceL( TInt aInterfaceId )
+	virtual MUnknown * QueryInterfaceL( TInt /*aInterfaceId*/ )
 	{
 		return NULL;
 	}
