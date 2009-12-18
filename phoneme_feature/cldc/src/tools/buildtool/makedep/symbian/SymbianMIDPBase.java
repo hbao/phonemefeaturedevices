@@ -160,6 +160,7 @@ abstract class SymbianMIDPBase extends NMakefile
 		v.addElement("$(RESTRICTED_CRYPTO_DIR)\\restricted_crypto\\reference\\classes\\com\\sun\\midp\\crypto\\RSA.java");
 		v.addElement("$(RESTRICTED_CRYPTO_DIR)\\restricted_crypto\\reference\\classes\\com\\sun\\midp\\crypto\\RsaShaSig.java");
 		v.addElement("$(RESTRICTED_CRYPTO_DIR)\\restricted_crypto\\reference\\classes\\com\\sun\\midp\\crypto\\RsaSig.java");
+		v.addElement("$(RESTRICTED_CRYPTO_DIR)\\restricted_crypto\\reference\\classes\\com\\sun\\midp\\crypto\\ARC4.java");
 
         v.addElement("$(RESTRICTED_CRYPTO_DIR)\\ssl\\reference\\classes\\com\\sun\\midp\\ssl\\Handshake.java");
         v.addElement("$(RESTRICTED_CRYPTO_DIR)\\ssl\\reference\\classes\\com\\sun\\midp\\ssl\\In.java"); 
@@ -821,9 +822,10 @@ void writeRules() throws Exception
         putln("# create MIDP type keystore used for application verification & HTTPS connections");
         putln("$(KEYSTORE) : $(SYMBIAN_SDK_VM_ROOT_PATH) $(MIDP_TOOLS) $(J2SE_KEYSTORE)");
 		puttabln("@echo Making ME keystore $(KEYSTORE)");
+		puttabln("if exist $(KEYSTORE) -@del $(KEYSTORE)");
 		puttabln("@$(JAVA6) -cp .\\tools $(ME_KEYTOOL_CLASS) -import -alias rootCA -domain trusted -keystore $(J2SE_KEYSTORE) -MEkeystore $(KEYSTORE) -storepass 3edcvgy76tfcxsw2");
 		puttabln("@$(JAVA6) -cp .\\tools $(ME_KEYTOOL_CLASS) -import -alias manufacturerCA -domain manufacturer -keystore $(J2SE_KEYSTORE) -MEkeystore $(KEYSTORE) -storepass 3edcvgy76tfcxsw2");
-        puttabln("@$(JAVA6) -cp .\\tools $(ME_KEYTOOL_CLASS) -import -alias PCAG2V2 -keystore $(J2SE_KEYSTORE) -MEkeystore $(KEYSTORE) -storepass 3edcvgy76tfcxsw2");
+        puttabln("@$(JAVA6) -cp .\\tools $(ME_KEYTOOL_CLASS) -import -alias PCA3ss_v4 -domain trusted -keystore $(J2SE_KEYSTORE) -MEkeystore $(KEYSTORE) -storepass 3edcvgy76tfcxsw2");
 		puttabln("@$(JAVA6) -cp .\\tools $(ME_KEYTOOL_CLASS) -list -MEkeystore $(KEYSTORE)");
 
 		putln();
