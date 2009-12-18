@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--  called from build.xml to build for WinCE -->
+<project name="phoneme_featre_wince">
+
+
+	<description>
+        An Ant script to build the phoneme_feature WinCE targets.
+    </description>
+
+	<property environment="env" />
+	
+	<path id="svnant.classpath">
+		<fileset dir="${env.BLUEWHALE_JAVA}/svnant-1.1.0-RC2/lib">
+			<include name="*.jar" />
+		</fileset>
+	</path>
+	<typedef resource="org/tigris/subversion/svnant/svnantlib.xml" classpathref="svnant.classpath" />
+
+	<target name="revertbuildnumber">
+		<echo>${deviceSDK}</echo>
+		<svn javasvn="no">
+			<revert dir="${basedir}/midp/src/configuration/configuration_xml/wince/properties.xml" />
+		</svn>
+		<svn javasvn="no">
+			<revert dir="${basedir}/cldc/src/vm/share/natives/natives.cpp" />
+		</svn>
+	</target>
+
+	<!-- Calls a python script which replaces the specified string '0000' in the properties.xml file with the -->
+	<!-- current Subversion revision number	-->
+	<target name="injectbuildnumber" depends="revertbuildnumber">
+		<echo>${deviceSDK}</echo>
+		<exec executable="python.exe" dir="${basedir}" failonerror="true">
+			<arg value="..\BlueTools\replaceStringWithSubversionRevision.py" />
+			<arg value="${basedir}/midp/src/configuration/configuration_xml/wince/properties.xml" />
+			<arg value="unknown_v00.00.00" />
+			<arg value="." />
+			<arg value="${deviceSDK}_v" />
+		</exec>
+		<exec executable="python.exe" dir="${basedir}" failonerror="true">
+			<arg value="..\BlueTools\replaceStringWithSubversionRevision.py" />
+			<arg value="${basedir}/cldc/src/vm/share/natives/natives.cpp" />
+			<arg value="unknown_v00.00.00" />
+			<arg value="." />
+			<arg value="${deviceSDK}_v" />
+		</exec>
+	</target>
+
+	<target name="getbuildversion">
+		<svn javasvn="no">
+			<info target="https://svn1.hosted-projects.com/bluewhalesystems/mail/trunk" />
+		</svn>
+		<property name ="src.revision" value="${svn.info.rev}" />
+		<script language ="javascript">
+			<![CDATA[
+			// pad leading zeros
+			var revision = project.getProperty("src.revision");
+			for (var i = revision.length(); i < 6; i += 1)
+			{
+				revision = "0".concat(revision);
+			}
+
+			// insert the dots
+			revision = revision.replace(/(.{2})/g, "$1.");
+			revision = revision.replace(/\.$/g, "");
+			project.setProperty("build.version", revision);
+		]]>	</script>
+	</target>
+
+	<target name="vm_wm5ppc_arm" description="Windows Mobile 5 PocketPC SDK - ARM" depends="getbuildversion">
+
+		<echo>---------------------------------------------------</echo>
+		<echo>Windows Mobile 5 PocketPC - ARM - eVC++ 4.0</echo>
+		<echo>---------------------------------------------------</echo>
+
+		<!-- Be nice and ensure external dependencies were built successfully early in the process -->
+		<property name="finalExpectedOutputFile" value="C:\wince_vm\wm5_ppc\midp\bin\arm\runMidlet.exe" />
+
+		<delete includeEmptyDirs="true" quiet="true">
+			<fileset file="${finalExpectedOutputFile}" />
+		</delete>
+
+		<property name="platform" value="wince" />
+		<property name="arch" value="arm" />
+		<property name="release" value="release" />
+
+		<property name="deviceSDK" value="wm5ppc_arm" />
+		
+		<property name="executionDirectory" value="${basedir}/wince_arm_evc4/wm5_ppc" />
+		<property name="HOME" value="${basedir}" />
+
+		<antcall target="injectbuildnumber" />
+		<antcall target="build_pcsl_wince" />
+		<antcall target="build_cldc_wince" />
+		<antcall target="build_midp_wince" />
+		<antcall target="build_cab" />
+
+		<available file="${finalExpectedOutputFile}" property="finalexe.present" />
+		<fail unless="finalexe.present" message="runMidlet.exe NOT produced: ${finalExpectedOutputFile} -- check to see if earlier build steps failed." />
+
+	</target>	
+	
+	
+	<target name="vm_wm2003ppc_arm" description="Windows Mobile 2003 PocketPC SDK - ARM" depends="getbuildversion">
+
+		<echo>---------------------------------------------------</echo>
+		<echo>Windows Mobile 2003 PocketPC - ARM - eVC++ 4.0</echo>
+		<echo>---------------------------------------------------</echo>
+
+		<antcall target="getbuildversion" />
+		
+		<!-- Be nice and ensure external dependencies were built successfully early in the process -->
+		<property name="finalExpectedOutputFile" value="C:\wince_vm\wm2003_ppc\midp\bin\arm\runMidlet.exe" />
+
+		<delete includeEmptyDirs="true" quiet="true">
+			<fileset file="${finalExpectedOutputFile}" />
+		</delete>
+
+		<property name="platform" value="wince" />
+		<property name="arch" value="arm" />
+		<property name="release" value="release" />
+
+		<property name="deviceSDK" value="wm2003ppcarm" />
+
+		<property name="executionDirectory" value="${basedir}/wince_arm_evc4/wm2003_ppc" />
+		<property name="HOME" value="${basedir}" />
+
+		<antcall target="injectbuildnumber" />
+		<antcall target="build_pcsl_wince" />
+		<antcall target="build_cldc_wince" />
+		<antcall target="build_midp_wince" />
+		<antcall target="build_cab" />
+
+		<available file="${finalExpectedOutputFile}" property="finalexe.present" />
+		<fail unless="finalexe.present" message="runMidlet.exe NOT produced: ${finalExpectedOutputFile} -- check to see if earlier build steps failed." />
+
+	</target>	
+	
+	
+	
+	<target name="build_pcsl_wince">
+		<echo>--- Build PCSL ---</echo>
+		<property name="dos_command" value="call ant_run_sh.bat build-pcsl.sh" />
+		<antcall target="dos_exec" />
+	</target>
+
+
+	<target name="build_cldc_wince">
+		<echo>--- Build CLDC ---</echo>
+		<property name="dos_command" value="call ant_run_sh.bat build-cldc.sh wm2003ppcarm_v${build.version}" />
+		<antcall target="dos_exec" />
+	</target>
+
+
+	<target name="build_midp_wince">
+		<echo>--- Build MIDP ---</echo>
+		<property name="dos_command" value="call ant_run_sh.bat build-midp.sh" />
+		<antcall target="dos_exec" />
+	</target>
+
+
+	<target name="build_cab">
+		<echo>--- Build CAB ---</echo>
+		<property name="dos_command" value="call ant_run_sh.bat build-cab.sh v${src.revision}" />
+		<antcall target="dos_exec" />
+	</target>
+
+
+	<target name="dos_exec" description="Execute a DOS command">
+		<echo>dos_command[${dos_command}]    properties: [${deviceSDK}]    platform: [${platform}]   release: [${release}]   executionDirectory[${executionDirectory}]</echo>
+		<exec executable="cmd" dir="${executionDirectory}" failonerror="true">
+			<arg value="/c" />
+			<arg value="${dos_command}" />
+		</exec>
+	</target>	
+	
+	
+</project>
+

@@ -1,0 +1,133 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="http://www-106.ibm.com/developerworks/xml/library/x-antxsl/examples/example2/ant2html.xsl"?>
+<!--
+/**
+ * Copyright (c) 2004-2008 Blue Whale Systems Ltd. All Rights Reserved. 
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER 
+ *  
+ * This program is free software; you can redistribute it and/or 
+ * modify it under the terms of the GNU General Public License version 
+ * 2 only, as published by the Free Software Foundation.  
+ *  
+ * This software is provided "as is," and the copyright holder makes no representations or warranties, express or
+ * implied, including but not limited to warranties of merchantability or fitness for any particular purpose or that the
+ * use of this software or documentation will not infringe any third party patents, copyrights, trademarks or other
+ * rights.
+ * 
+ * The copyright holder will not be liable for any direct, indirect special or consequential damages arising out of any
+ * use of this software or documentation.
+ * 
+ * See the GNU  General Public License version 2 for more details 
+ * (a copy is included at /legal/license.txt).  
+ *  
+ * You should have received a copy of the GNU General Public License 
+ * version 2 along with this work; if not, write to the Free Software 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 
+ * 02110-1301 USA  
+ *  
+ * Please contact Blue Whale Systems Ltd, Suite 123, The LightBox
+ * 111 Power Road, Chiswick, London, W4 5PY, United Kingdom or visit 
+ * www.bluewhalesystems.com if you need additional 
+ * information or have any questions.  
+ */ 
+-->
+<project name="wince_today_item" default="bluewhale_wm2003ppc_arm" basedir=".">
+
+	<description>
+        An Ant script to build the WinCE Today Item.
+        </description>
+
+	<target name="usage">
+		<echo message="  Execute one of: " />
+		<echo message="      ant bluewhale_wm2003ppc_arm" />
+	</target>
+
+	<target name="help" depends="usage" />	
+
+	<!-- Enables us to access the systems environment variables, e.g. ${env.Path} (note "Path" is case sensitive in Ant and must exactly "Path" in Windows 2000 and greater) -->
+	<property environment="env" />
+
+	<path id="svnant.classpath">
+		<fileset dir="${env.BLUEWHALE_JAVA}/svnant-1.1.0-RC2/lib">
+			<include name="*.jar" />
+		</fileset>
+	</path>
+	<typedef resource="org/tigris/subversion/svnant/svnantlib.xml" classpathref="svnant.classpath" />
+	
+	<target name="update">
+		<svn javasvn="no" >
+			<update dir="${basedir}" />
+		</svn>
+	</target>
+
+	<target name="all" depends="bluewhale_wm2003ppc_arm" />
+
+	<target name="cruisecontrol_bluewhale_wm2003ppc_arm" depends="update,bluewhale_wm2003ppc_arm" />
+
+        <target name="svncheck" description="Use SVN to get the current revision">
+            <exec executable="svn"  resultproperty="svn.exec.result" errorproperty="svn.exec.error" failifexecutionfails="false"> 
+                <arg line="info"/> 
+                    <redirector outputproperty="svn.revision">
+                       <outputfilterchain>
+                           <linecontains>
+                               <contains value="Last Changed Rev: "/>
+                           </linecontains>
+                           <tokenfilter>
+                               <!-- Remove all but the revision number -->
+                               <replaceregex pattern=".*: " replace=""/>
+                           </tokenfilter>
+                       </outputfilterchain>
+                    </redirector>
+                </exec>
+            <echoproperties prefix="svn"/>
+        </target>
+
+	<target name="bluewhale_wm2003ppc_arm" description="Windows Mobile 2003 - Today Item">
+
+		<echo>---------------------------------------------------</echo>
+		<echo>Windows Mobile 2003 - ARM - Today Item</echo>
+		<echo>---------------------------------------------------</echo>
+
+		<svn javasvn="no">
+			<info target="https://svn1.hosted-projects.com/bluewhalesystems/mail/trunk" />
+		</svn>
+		<property name ="src.revision" value="${svn.info.rev}" />
+
+		<!-- Be nice and ensure external dependencies were built successfully early in the process -->
+		<property name="finalExpectedOutputFile" value="C:\wince_vm\wm2003_ppc\deployed\bluewhale_wm2003ppcarm_v${src.revision}.cab" />
+
+		<delete includeEmptyDirs="true" quiet="true">
+			<fileset file="${finalExpectedOutputFile}" />
+		</delete>
+
+		<property name="platform" value="wince" />
+		<property name="arch" value="arm" />
+		<property name="release" value="release" />
+                <property name="deviceSDK" value="Windows Mobile 2003 PocketPC" />
+
+		<property name="executionDirectory" value="${basedir}" />
+		<property name="HOME" value="${basedir}" />
+
+		<antcall target="build_solution" />
+
+		<available file="${finalExpectedOutputFile}" property="finalexe.present" />
+		<fail unless="finalexe.present" message="BlueWhale cabinet NOT produced: ${finalExpectedOutputFile} -- check to see if earlier build steps failed." />
+
+	</target>
+
+	<target name="build_solution">
+		<echo>--- Build Solution [v${src.revision}] ---</echo>
+
+		<property name="dos_command" value="call build_solution.bat v${src.revision}" />
+		<antcall target="dos_exec" />
+	</target>
+
+	<target name="dos_exec" description="Execute a DOS command">
+		<echo>dos_command[${dos_command}]    properties: [${deviceSDK}]    platform: [${platform}]   release: [${release}]   executionDirectory[${executionDirectory}]</echo>
+		<exec executable="cmd" dir="${executionDirectory}" failonerror="true">
+			<arg value="/c" />
+			<arg value="${dos_command}" />
+		</exec>
+	</target>
+	
+</project>
