@@ -825,7 +825,7 @@ void writeRules() throws Exception
 		puttabln("if exist $(KEYSTORE) -@del $(KEYSTORE)");
 		puttabln("@$(JAVA6) -cp .\\tools $(ME_KEYTOOL_CLASS) -import -alias rootCA -domain trusted -keystore $(J2SE_KEYSTORE) -MEkeystore $(KEYSTORE) -storepass 3edcvgy76tfcxsw2");
 		puttabln("@$(JAVA6) -cp .\\tools $(ME_KEYTOOL_CLASS) -import -alias manufacturerCA -domain manufacturer -keystore $(J2SE_KEYSTORE) -MEkeystore $(KEYSTORE) -storepass 3edcvgy76tfcxsw2");
-        puttabln("@$(JAVA6) -cp .\\tools $(ME_KEYTOOL_CLASS) -import -alias PCA3ss_v4 -domain trusted -keystore $(J2SE_KEYSTORE) -MEkeystore $(KEYSTORE) -storepass 3edcvgy76tfcxsw2");
+        puttabln("@$(JAVA6) -cp .\\tools $(ME_KEYTOOL_CLASS) -import -alias PCA3ss_v4 -domain manufacturer -keystore $(J2SE_KEYSTORE) -MEkeystore $(KEYSTORE) -storepass 3edcvgy76tfcxsw2");
 		puttabln("@$(JAVA6) -cp .\\tools $(ME_KEYTOOL_CLASS) -list -MEkeystore $(KEYSTORE)");
 
 		putln();
