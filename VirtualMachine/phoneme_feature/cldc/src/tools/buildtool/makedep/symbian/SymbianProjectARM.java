@@ -94,7 +94,7 @@ class SymbianProjectARM extends SymbianIDEProjectARM
 			writeDefines(osVersion);
 			writeSource();
 			writeInclude();
-			writeLibraries(osVersion);
+			writeLibraries();
 			writeStaticLibraries(osVersion);
 			writeDefFileLine(osVersion);
 			closeOutputFile();
@@ -138,9 +138,9 @@ class SymbianProjectARM extends SymbianIDEProjectARM
         }
     }
     
-    void writeLibraries(String aOsVersion) throws Exception
+    void writeLibraries() throws Exception
     {
-        Vector v = getLibraries(aOsVersion);
+        Vector v = getLibraries();
         for (int i=0; i<v.size(); i++) 
         {
             putln("LIBRARY " + v.elementAt(i));
@@ -236,7 +236,7 @@ class SymbianProjectARM extends SymbianIDEProjectARM
 		}
   	}	
 	
-    Vector getLibraries(String aOsVersion)
+    Vector getLibraries()
     {
         Vector v = new Vector();
         v.addElement("euser.lib");
@@ -250,11 +250,6 @@ class SymbianProjectARM extends SymbianIDEProjectARM
 		v.addElement("gsmu.lib");
 		v.addElement("etext.lib");
 		v.addElement("bafl.lib");
-		v.addElement("apgrfx.lib");
-		if (aOsVersion.equals("_s60v3fp0"))
-		{
-			v.addElement("swinstcli.lib");
-		}
         return v;
     }
 	
@@ -356,7 +351,7 @@ class SymbianProjectARM extends SymbianIDEProjectARM
 		putln("UID\t0x1000008d 0x2000E279");
         if (aOsVersion.equals("_s60v3fp0"))
         {
-			putln("CAPABILITY\tNetworkServices ReadUserData WriteUserData ReadDeviceData WriteDeviceData TrustedUI SwEvent");
+			putln("CAPABILITY\tNetworkServices ReadUserData WriteUserData ReadDeviceData WriteDeviceData SwEvent");
 		}
 		else if (aOsVersion.equals("_uiqv3fp0"))
 		{
