@@ -34,6 +34,9 @@
 #include "DummyCommDb.h"
 
 _LIT(KTestIAP,"My Test");
+_LIT(KTestIAP2,"My Test2");
+_LIT(KTestIAP3,"My Test3");
+
 _LIT(KTestBearerType,"XXX");
 _LIT(KTestBearer,"YYY");
 _LIT(KTestIfName,"ZZZZ");
@@ -97,8 +100,29 @@ public:
 		row1->WriteUintL(key3,data3);
 						
 		IAPTable.iData.Append(row1);
-		iDatabase.Append(IAPTable);
+		
+		CRow* row2 = new CRow;
+		row2->WriteTextL(TPtrC(COMMDB_NAME),KTestIAP2());
+        
+        data2 = 2;
+		row2->WriteUintL(key2,data2);
+        
+        row2->WriteUintL(key3,data3);
+                        
+        IAPTable.iData.Append(row2);
+
+        CRow* row3 = new CRow;
+        row3->WriteTextL(TPtrC(COMMDB_NAME),KTestIAP3());
+         
+        data2 = 3;
+        row3->WriteUintL(key2,data2);
+         
+        row3->WriteUintL(key3,data3);
+                         
+        IAPTable.iData.Append(row3);
+        iDatabase.Append(IAPTable);
 	}
+	
 	void AddBearerTableL()
 	{
 		CRow* row = new CRow;
@@ -470,4 +494,23 @@ void CTestCommDBUtil::testRemoveWAPBearer()
 	bearer = commDB->RemoveWAPBearerL(5,6);
 	TS_ASSERT(bearer == 0);
 	CleanupStack::PopAndDestroy(commDB);
+}
+
+void CTestCommDBUtil::testMatchIAP()
+{   
+    REComPlusSession::SetDelegate(CommDBWrapperCreate);
+    MCCommDBUtil* commDB = static_cast<MCCommDBUtil*>(CCommDBUtil::NewL());
+    CleanupReleasePushL(*commDB);
+    TUint32 network = 0;
+    TUint32 iap = commDB->MatchIAPL(KTestIAP,network);
+    TInt count =0;
+    while(iap != 0)
+    {
+        count++;
+        iap = commDB->NextMatchIAPL(KTestIAP,network);
+    }
+    commDB->CloseMatchIAP();
+    TS_ASSERT(count > 1);
+    TS_ASSERT(network != 0);
+    CleanupStack::PopAndDestroy(commDB);
 }
