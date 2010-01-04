@@ -45,11 +45,22 @@ EXPORT_DECL CAPNDatabase::~CAPNDatabase()
 EXPORT_DECL void CAPNDatabase::LoadDatabaseL()
 {
 	_LIT(KUnitedKingdom,"234");
+	_LIT(KRepublicOfIreland,"272");
+	
+	User::LeaveIfError(iDatabase.Append(TOperatorAPN(KUnitedKingdom,_L("10"),_L("O2"),_L("mobile.o2.co.uk"),_L("bypass"),_L("web"))));
+	User::LeaveIfError(iDatabase.Append(TOperatorAPN(KUnitedKingdom,_L("15"),_L("Vodafone"),_L("internet"),_L("web"),_L("web"))));
 	User::LeaveIfError(iDatabase.Append(TOperatorAPN(KUnitedKingdom,_L("20"),_L("3"),_L("three.co.uk"),_L("guest"),_L("guest"))));
 	User::LeaveIfError(iDatabase.Append(TOperatorAPN(KUnitedKingdom,_L("30"),_L("T-Mobile"),_L("general.t-mobile.uk"),_L("user"),_L("pass"))));
-	User::LeaveIfError(iDatabase.Append(TOperatorAPN(KUnitedKingdom,_L("15"),_L("Vodafone"),_L("internet"),_L("web"),_L("web"))));
-	User::LeaveIfError(iDatabase.Append(TOperatorAPN(KUnitedKingdom,_L("10"),_L("O2"),_L("mobile.o2.co.uk"),_L("bypass"),_L("web"))));
 	User::LeaveIfError(iDatabase.Append(TOperatorAPN(KUnitedKingdom,_L("33"),_L("Orange"),_L("orangeinternet"),_L(""),_L("pass"))));
+	
+	User::LeaveIfError(iDatabase.Append(TOperatorAPN(KUnitedKingdom,_L("50"),_L("Wave Telecom"),_L("pepper"),_L(""),_L(""))));
+	User::LeaveIfError(iDatabase.Append(TOperatorAPN(KUnitedKingdom,_L("55"),_L("Sure Mobile"),_L("internet"),_L(""),_L("pass"))));
+	User::LeaveIfError(iDatabase.Append(TOperatorAPN(KUnitedKingdom,_L("58"),_L("Manx Telecom"),_L("3gpronto"),_L(""),_L(""))));
+
+	User::LeaveIfError(iDatabase.Append(TOperatorAPN(KRepublicOfIreland,_L("01"),_L("Vodafone Ireland"),_L("hs.vodafone.ie"),_L("vodafone"),_L("vodafone"))));
+	User::LeaveIfError(iDatabase.Append(TOperatorAPN(KRepublicOfIreland,_L("01"),_L("Vodafone Ireland"),_L("isp.vodafone.ie"),_L("vodafone"),_L("vodafone"))));
+	User::LeaveIfError(iDatabase.Append(TOperatorAPN(KRepublicOfIreland,_L("02"),_L("O2 Ireland"),_L("internet"),_L(""),_L(""))));
+
 }
 
 EXPORT_DECL TInt CAPNDatabase::Count()
@@ -85,4 +96,21 @@ TBool CAPNDatabase::ByOperator(const TOperatorAPN& aLeft,const TOperatorAPN& aRi
 	{
 		return EFalse;
 	}
+}
+
+EXPORT_DECL TInt CAPNDatabase::GetNext(const TDesC& aCountryCode,const TDesC& aOperatorCode, TInt aIndex)
+{
+    TInt ret = KErrNotFound;
+    TInt count = iDatabase.Count();
+    for(TInt i=aIndex;i<count;i++)
+    {
+        if(aCountryCode.Compare(iDatabase[i].iCountryCode) == 0 &&
+           aOperatorCode.Compare(iDatabase[i].iNetworkId) == 0)
+        {
+            ret = i;
+            break;
+        }
+                
+    }
+    return ret;
 }
