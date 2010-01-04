@@ -126,6 +126,10 @@ public:
 	virtual TInt CommitTransaction() = 0;
 	virtual void RollbackTransaction() = 0;
 	virtual TUint32 FindIAPL(const TDesC& aName,TUint32& aNetwork) = 0;
+	virtual TUint32 MatchIAPL(const TDesC& aName,TUint32& aNetwork) = 0;
+	virtual TUint32 NextMatchIAPL(const TDesC& aName,TUint32& aNetwork) = 0;
+	virtual void CloseMatchIAP() = 0;
+	
 	virtual TUint32 FindBearerL(const TDesC& aBearerType,const TDesC& aName) = 0;
 	virtual TUint32 FindServiceL(const TDesC& aServiceType,const TDesC& aName) = 0;
 	virtual TUint32 FindNetworkL(const TDesC& aName) = 0;
@@ -155,6 +159,9 @@ public:
 	TInt CommitTransaction();
 	void RollbackTransaction();
 	TUint32 FindIAPL(const TDesC& aName,TUint32& aNetwork);
+	TUint32 MatchIAPL(const TDesC& aName,TUint32& aNetwork);
+	TUint32 NextMatchIAPL(const TDesC& aName,TUint32& aNetwork);
+	void CloseMatchIAP();
 	TUint32 FindBearerL(const TDesC& aBearerType,const TDesC& aName);
 	TUint32 FindServiceL(const TDesC& aServiceType,const TDesC& aName);
 	TUint32 FindNetworkL(const TDesC& aName);
@@ -180,6 +187,7 @@ protected:
 	void ConstructL();
 private:
 	MCommDBWrapper* iCommDb;
+	MCCommsDbTableViewWrapper* iMatchCommsAp;
 };
 
 
