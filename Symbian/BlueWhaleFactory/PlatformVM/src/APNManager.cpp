@@ -175,16 +175,33 @@ void CAPNManager::BuildCurrentValidIAPsL()
 	if(iAPNCreationEnabled && iNetWorkInfo->IsHomeNetwork())
 	{
 		DEBUGMSG(_L("Auto APN creation enabled"));
-		TUint32 blueWhaleIAP = iCommDBUtil->FindIAPL(KBlueWhaleAPN,network);
+		TUint32 blueWhaleIAP = iCommDBUtil->MatchIAPL(KBlueWhaleAPNMatch,network);
+		TInt count = 0;
+		while(blueWhaleIAP != 0)
+		{
+			count++;
+			blueWhaleIAP = iCommDBUtil->NextMatchIAPL(KBlueWhaleAPNMatch,network);
+		}
+		iCommDBUtil->CloseMatchIAP();
+		
 		DEBUGMSG1(_L("BWM IAP %d"),blueWhaleIAP);
-		if(blueWhaleIAP == 0)
+		if(count == 0)
 		{
 			blueWhaleIAP = CreateBlueWhaleIAPL();
 		}
+		blueWhaleIAP = iCommDBUtil->MatchIAPL(KBlueWhaleAPNMatch,network);
+		count = 0;
+		while(blueWhaleIAP != 0)
+		{
+			iCurrentIAPList.AppendL(TIAPWithPort(blueWhaleIAP,0,KBlueWhalePriority));
+			count++;
+			blueWhaleIAP = iCommDBUtil->NextMatchIAPL(KBlueWhaleAPNMatch,network);
+		}
+		iCommDBUtil->CloseMatchIAP();
+				
 		if(blueWhaleIAP != 0)
 		{
 			DEBUGMSG1(_L("Adding BWM %d"),blueWhaleIAP);
-			iCurrentIAPList.AppendL(TIAPWithPort(blueWhaleIAP,0,KBlueWhalePriority));
 		}
 	}
 
@@ -218,7 +235,7 @@ void CAPNManager::BuildCurrentValidIAPsL()
 		
 }
 
-TInt CAPNManager::GetIAP(TInt aIndex,TInt aPort)
+TInt CAPNManager::GetIAP(TInt aIndex,TInt /*aPort*/)
 {
 #ifndef __FORCE_ASK_USER__
 	TInt iap = KErrNotFound;
@@ -283,7 +300,7 @@ void CAPNManager::UdateBlueWhaleIAPL(const TDesC& aCountryCode,const TDesC& aNet
 	{
 		TOperatorAPN& APNInfo = iDatabase.GetEntry(networkIndex);
 		DEBUGMSG2(_L("Updating %d %S"),networkIndex,&APNInfo.iAPN);
-		iCommDBUtil->UpdateOutgoingGprsL(KBlueWhaleAPN(),APNInfo.iAPN,APNInfo.iUser,APNInfo.iPasswd);
+		iCommDBUtil->UpdateOutgoingGprsL(APNInfo.iName,APNInfo.iAPN,APNInfo.iUser,APNInfo.iPasswd);
 	}
 	iCommDBUtil->CommitTransaction();
 }
@@ -333,25 +350,31 @@ TUint32 CAPNManager::CreateBlueWhaleIAPL()
 	}
 
 	networkIndex = iDatabase.GetEntry(countryCode,networkId);
-	if(networkIndex != KErrNotFound)
+	TUint number = 1;
+	TBuf<32> APNName;
+	while(networkIndex != KErrNotFound)
 	{
 		DEBUGMSG1(_L("Getting entry %d"),networkIndex);
 		TOperatorAPN& APNInfo = iDatabase.GetEntry(networkIndex);
-		service = iCommDBUtil->CreateNewOutgoingGprsL(KBlueWhaleAPN(),APNInfo.iAPN,APNInfo.iUser,APNInfo.iPasswd);
+		APNName.Format(KBlueWhaleAPN2(),number);
+		service = iCommDBUtil->CreateNewOutgoingGprsL(APNName,APNInfo.iAPN,APNInfo.iUser,APNInfo.iPasswd);
 		bearer = iCommDBUtil->FindBearerL(bearerType,_L("GPRS Modem"));
-	}
 #endif
-	if(service !=0 && bearer != 0)
-	{
-		TUint32 wap_id = iCommDBUtil->CreateNewWAPAccessPointL(KBlueWhaleAPN());
-		TUint32 network = iCommDBUtil->CreateNewNetworkL(KBlueWhaleAPN());
-		ret = iCommDBUtil->CreateNewInternetAccessPointL(KBlueWhaleAPN,service,bearer,bearerType,network);
-		iCommDBUtil->CreateNewWAPBearerL(wap_id,ret);
-		User::LeaveIfError(iCommDBUtil->CommitTransaction());
-	}
-	else
-	{
-		iCommDBUtil->RollbackTransaction();
+		if(service !=0 && bearer != 0)
+		{
+			TUint32 wap_id = iCommDBUtil->CreateNewWAPAccessPointL(APNName);
+			TUint32 network = iCommDBUtil->CreateNewNetworkL(APNName);
+			ret = iCommDBUtil->CreateNewInternetAccessPointL(APNName,service,bearer,bearerType,network);
+			iCommDBUtil->CreateNewWAPBearerL(wap_id,ret);
+			User::LeaveIfError(iCommDBUtil->CommitTransaction());
+		}
+		else
+		{
+			iCommDBUtil->RollbackTransaction();
+			break;
+		}
+		networkIndex = iDatabase.GetNext(countryCode,networkId,networkIndex + 1);
+		number++;
 	}
 	return ret;
 }
@@ -413,7 +436,7 @@ void CAPNManager::IAPReportL(TBool aSuccess,TInt aIAP,TInt aPort)
 			iIAPInfo->ActiveIAP(iapName);
 			if(iapName.Length() > 0)
 			{
-				if(iapName.Compare(KBlueWhaleAPN) != 0)
+				if(iapName.Left(KBlueWhaleAPNMatch().Length()).Compare(KBlueWhaleAPNMatch()) != 0)
 				{
 					// user chose APN that wasn't ours
 					TUint32 network;
@@ -424,7 +447,7 @@ void CAPNManager::IAPReportL(TBool aSuccess,TInt aIAP,TInt aPort)
 				else
 				{
 					TUint32 network;
-					TInt iap = iCommDBUtil->FindIAPL(KBlueWhaleAPN,network);
+					TInt iap = iCommDBUtil->FindIAPL(iapName,network);
 					iRuntimeDatabase.AddWorkingIAP(TIAPWithPort(iap,aPort,KBlueWhalePriority));
 					iRuntimeDatabase.SaveL(iProperties);
 				}

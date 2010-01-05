@@ -41,7 +41,9 @@
 
 #define __DONT_USE_OWNAPN__
 
-_LIT(KBlueWhaleAPN,"BlueWhale!");
+//_LIT(KBlueWhaleAPN,"BlueWhale!");
+_LIT(KBlueWhaleAPNMatch,"BlueWhale");
+_LIT(KBlueWhaleAPN2,"BlueWhale%d");
 const TStringUniqueKey PROPERTY_STRING_COUNTRY_CODE = {0x00000100, 0x00000001};
 const TStringUniqueKey PROPERTY_STRING_NETWORK_ID 	= {0x00000100, 0x00000002};
 const TIntUniqueKey PROPERTY_INT_DB_COUNT			= {0x00000100, 0x00000003};
