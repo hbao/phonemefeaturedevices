@@ -270,7 +270,7 @@ class SymbianProject extends SymbianIDEProject
         putln("UID\t0x1000008d 0x2000E279");
         if (aOsVersion.equals("_s60v3fp0"))
         {
-			putln("CAPABILITY\tNetworkServices ReadUserData WriteUserData ReadDeviceData WriteDeviceData TrustedUI SWEvent");
+			putln("CAPABILITY\tNetworkServices ReadUserData WriteUserData ReadDeviceData WriteDeviceData SWEvent");
 		}
 		else if (aOsVersion.equals("_uiqv3fp0"))
 		{
