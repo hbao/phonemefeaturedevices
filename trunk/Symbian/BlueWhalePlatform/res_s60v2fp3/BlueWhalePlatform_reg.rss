@@ -37,16 +37,11 @@ UID2 KUidAppRegistrationResourceFile
 UID3 0x2000E27A
 
 RESOURCE APP_REGISTRATION_INFO
-    {
+{
     app_file = "BlueWhalePlatform";
     attributes = KAppBuiltAsDll;
     localisable_resource_file = "\\resource\\apps\\BlueWhalePlatform_loc";
  	embeddability=KAppNotEmbeddable;
 	newfile=KAppDoesNotSupportNewFile;
- }
-
-RESOURCE NUMBER_INT8 r_startup_detect
-{
-	  value = 1;
 }
 
