@@ -114,6 +114,8 @@ LIBRARY			eikcoctl.lib
 LIBRARY			qikcore.lib
 LIBRARY			hal.lib
 LIBRARY			ws32.lib
+LIBRARY			efsrv.lib
+LIBRARY			bafl.lib
 LIBRARY			BlueWhaleFactory.lib
 
 // New heap allocator, which is more effective in out of memory situations.

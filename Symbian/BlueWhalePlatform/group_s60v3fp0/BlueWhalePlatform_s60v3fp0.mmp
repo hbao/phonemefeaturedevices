@@ -42,7 +42,7 @@ UID               0x100039CE 0x2000E27A
 TARGETPATH        \sys\bin
 
 VENDORID        0
-CAPABILITY     NetworkServices ReadUserData WriteUserData ReadDeviceData WriteDeviceData TrustedUI SwEvent
+CAPABILITY     NetworkServices ReadUserData WriteUserData ReadDeviceData WriteDeviceData SwEvent
 epocstacksize 0x5000
 epocheapsize 0x1000 0x200000
 
