@@ -100,14 +100,3 @@ items =
 //
 
 
-RESOURCE LOCALISABLE_APP_INFO r_localisable_app_info
-    {
-    short_caption = "BlueWhale";
-    caption_and_icon = 
-    CAPTION_AND_ICON_INFO
-        {
-        caption = "BlueWhale";
-        number_of_icons = 1;
-	   	icon_file = "\\resource\\apps\\BlueWhalePlatform.mif";
-	    };
-    }
