@@ -305,6 +305,13 @@ void CBaseMIDPView::ViewActivatedL(const TVwsViewId &/*aPrevViewId*/, TUid /*aCu
 void CBaseMIDPView::ViewDeactivated()
 {
 	iCanvas->MakeVisible(EFalse);
+	if(iQueue)
+	{
+		TEventInfo event;
+		event.iEvent = KMIDPForegroundEvent;
+		event.iIntParam1 = EFalse;
+	    iQueue->AddEvent(event);
+	}
 }
 
 TKeyResponse CBaseMIDPView::OfferKeyEventL(const TKeyEvent &aKeyEvent, TEventCode aType)

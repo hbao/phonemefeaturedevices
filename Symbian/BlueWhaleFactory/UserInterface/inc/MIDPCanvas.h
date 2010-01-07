@@ -132,7 +132,6 @@ public:
 	virtual TInt OkCommand();
 	virtual void HandleCommandL(TInt aCommand);
 	void DoFullScreen();
-	virtual RWindow& Window() const {return CCoeControl::Window();};
 private:
 	void FreeCommands();
 	void SetCbaL();
@@ -165,7 +164,11 @@ private:
 		}
 		void RunL()
 		{
-			iParent->Window().Invalidate(iRect);
+			RWindow* window = reinterpret_cast<RWindow*>(iParent->DrawableWindow());
+			if (window)
+			{
+				window->Invalidate(iRect);
+			}
 		}
 		void DoCancel()
 		{}
