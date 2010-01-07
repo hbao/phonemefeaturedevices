@@ -45,6 +45,7 @@ public:
 	void testLoad();
 	void testFailToFind();
 	void testFind();
+	void testMultipleFind();
 };
 
 #endif

@@ -236,4 +236,32 @@ public:
 };
 
 
+_LIT(KRepublicOfIreland,"272");
+_LIT(KVFIE,"01");
+
+class CVFIETelephonyWrapper : public CBaseTelephonyWrapper
+{
+public:
+	CVFIETelephonyWrapper()
+	{}
+	
+	virtual ~CVFIETelephonyWrapper()
+	{}
+	
+	virtual void GetCurrentNetworkInfo(TRequestStatus& aReqStatus, TDes8& aNetworkInfo) const
+	{
+		CTelephony::TNetworkInfoV1 info;
+		CTelephony::TNetworkInfoV1Pckg infoPckg(info);
+		
+		info.iCountryCode.Copy(KRepublicOfIreland);
+		info.iNetworkId.Copy(KVFIE);
+		info.iLongName.Copy(_L("Vodafone"));
+		info.iStatus = CTelephony::ENetworkStatusCurrent;
+		aNetworkInfo.Copy(infoPckg);
+		TRequestStatus* status = &aReqStatus; 
+		User::RequestComplete(status,KErrNone);
+	}
+	
+};
+
 #endif

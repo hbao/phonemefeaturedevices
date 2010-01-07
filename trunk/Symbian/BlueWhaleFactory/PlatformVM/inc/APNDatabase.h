@@ -54,6 +54,7 @@ public:
 	virtual void Close() = 0;
 	virtual TOperatorAPN& GetEntry(TInt aIndex) = 0;
 	virtual TInt GetEntry(const TDesC& aCountryCode,const TDesC& aOperatorCode) = 0;
+	virtual TInt GetNext(const TDesC& aCountryCode,const TDesC& aOperatorCode, TInt aIndex) = 0;
 protected:
 	virtual ~MAPNDatabase(){}
 };
@@ -68,6 +69,7 @@ public:
 	virtual void Close();
 	virtual TOperatorAPN& GetEntry(TInt aIndex);
 	virtual TInt GetEntry(const TDesC& aCountryCode,const TDesC& aOperatorCode);
+	virtual TInt GetNext(const TDesC& aCountryCode,const TDesC& aOperatorCode, TInt aIndex);
 private:
 	static TBool ByOperator(const TOperatorAPN& aLeft,const TOperatorAPN& aRight);
 private:
