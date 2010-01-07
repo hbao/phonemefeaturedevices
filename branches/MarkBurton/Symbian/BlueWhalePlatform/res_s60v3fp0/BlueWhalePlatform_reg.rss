@@ -37,17 +37,9 @@ UID2 KUidAppRegistrationResourceFile
 UID3 0x2000E27A
 
 RESOURCE APP_REGISTRATION_INFO
-    {
+{
     app_file = "BlueWhalePlatform";
-    localisable_resource_file = "\\resource\\apps\\BlueWhalePlatform";
-  	localisable_resource_id = R_LOCALISABLE_APP_INFO;
+    localisable_resource_file = "\\resource\\apps\\BlueWhalePlatform_loc";
  	embeddability=KAppNotEmbeddable;
 	newfile=KAppDoesNotSupportNewFile;
-	opaque_data = r_opaque_data;
- }
-
-RESOURCE TBUF r_opaque_data
-{
-	buf = "";
 }
-

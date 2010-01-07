@@ -215,41 +215,98 @@ void CBlueWhalePlatformAppUi::ExitCallback(TAny* aThis)
 	This->Exit();
 }
 
+HBufC8* CBlueWhalePlatformAppUi::GetPartnerStringL()
+{
+	HBufC8* result = NULL;
+	
+	// get the resource filename
+	TParsePtrC parse(Application()->ResourceFileName());
+	TFileName partnerResourceFileName = parse.DriveAndPath();
+	partnerResourceFileName.Append(_L("bluewhalepartner.rsc"));
+	BaflUtils::NearestLanguageFile(iEikonEnv->FsSession(), partnerResourceFileName);
+	
+	// open the file
+	RResourceFile partnerFile;
+	partnerFile.OpenL(iEikonEnv->FsSession(), partnerResourceFileName);
+	CleanupClosePushL(partnerFile);
+	partnerFile.ConfirmSignatureL();
+	
+	// read the partner string
+	HBufC8* buf = partnerFile.AllocReadLC(2);
+	TResourceReader reader;
+	reader.SetBuffer(buf);
+	result = HBufC8::NewL(buf->Length());
+	reader.Read(const_cast<TUint8*>(result->Des().Ptr()), buf->Length());
+	result->Des().SetLength(buf->Length());
+
+	// clean up
+	CleanupStack::PopAndDestroy(buf);
+	CleanupStack::PopAndDestroy(&partnerFile);
+	return result;
+	}
+
 #if (__S60_VERSION__ >= __S60_V3_FP0_VERSION_NUMBER__) || (__UIQ_VERSION_NUMBER__ >= __UIQ_V3_FP0_VERSION_NUMBER__)
 TBool CBlueWhalePlatformAppUi::ProcessCommandParametersL(CApaCommandLine& aCommandLine)
 {
+	HBufC8* partnerString = NULL;
+	TRAPD(err, partnerString = GetPartnerStringL());
+	if (!partnerString)
+	{
+		// create an empty string
+		partnerString = HBufC8::NewL(0);
+	}
+	CleanupStack::PushL(partnerString);
+	
 	TBool autoStarted = EFalse;
+	if (aCommandLine.TailEnd() == _L8("Autostart"))
+	{
+		autoStarted = ETrue;
+	}
 	if(aCommandLine.Command() == EApaCommandBackground)
 	{
 		iEikonEnv->RootWin().SetOrdinalPosition(-1);
-		autoStarted = ETrue;
 	}
 	else
 	{
 		iEikonEnv->RootWin().SetOrdinalPosition(0);
-		autoStarted = EFalse;
 	}
 	
 	iView = GetOrCreateViewL(KCID_MBaseMIDPView,KCID_MBaseMIDPView,this,ETrue);
-	StartMidpL(aCommandLine.OpaqueData(), autoStarted);
+	StartMidpL(*partnerString, autoStarted);
+	CleanupStack::PopAndDestroy(partnerString);
 	return __BWM_APPUI__::ProcessCommandParametersL(aCommandLine);
 }
 #elif __S60_VERSION__ >= __S60_V2_FP1_VERSION_NUMBER__
 TBool CBlueWhalePlatformAppUi::ProcessCommandParametersL(TApaCommand aCommand, TFileName &aDocumentName, const TDesC8 &aTail)
 {
+	HBufC8* partnerString = NULL;
+	TRAPD(err, partnerString = GetPartnerStringL());
+	if (!partnerString)
+	{
+		// create an empty string
+		partnerString = HBufC8::NewL(0);
+	}
+	CleanupStack::PushL(partnerString);
+
+	TBool autoStarted = EFalse;
+	if (aTail == _L8("Autostart"))
+	{
+		autoStarted = ETrue;
+	}
 	if (aCommand == EApaCommandRun)
 	{
 		iEikonEnv->RootWin().SetOrdinalPosition(0);
 	    iView = GetOrCreateViewL(KCID_MBaseMIDPView,KCID_MBaseMIDPView,this,ETrue);
-	    StartMidpL(aTail, EFalse);
+	    StartMidpL(*partnerString, autoStarted);
 	}
 	else
 	{
-		// autostarting - need to to bring the window to the front or midlet will fail to launch on s60v2fp2
+		// should background here but can't - midlet will fail to launch on s60v2fp2
 		iEikonEnv->RootWin().SetOrdinalPosition(0);
 	    iView = GetOrCreateViewL(KCID_MBaseMIDPView,KCID_MBaseMIDPView,this,ETrue);
-	    StartMidpL(aTail, ETrue);
+	    StartMidpL(*partnerString, autoStarted);
 	}
+	CleanupStack::PopAndDestroy(partnerString);
 	return CAknViewAppUi::ProcessCommandParametersL(aCommand, aDocumentName, aTail);
 }
 #endif
