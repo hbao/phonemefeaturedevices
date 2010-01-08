@@ -225,12 +225,12 @@ class CVMManager : public CBase, public MDebugApplication, public MRunnable, pub
 		void DebugResources();
 	private:
 		void TearDownMemory();
-		void LoadPropertiesL();
 		void SavePropertiesL();
 		virtual void ThreadTerminated(TThreadId aId,TInt aReason);
 	protected:
 		virtual ~CVMManager();
 		CVMManager();
+        virtual void LoadPropertiesL();
 		static void TimeoutCallback(TAny * aThis);
 		RArray<THeapMapper> iHeapMapper;
 		CTicker* iTicker;
@@ -408,7 +408,7 @@ private:
 class CMIDPApp : public CVMManager
 {
 public:
-	static CMIDPApp* NewL();
+	static CMIDPApp* NewL(const TDesC8& aShortcutName);
 	static TInt VibraTimerFunction(TAny* aSelf);
 	void StartL(RThread& aThread);	
 	void SetCanvas(MMIDPCanvas* aCanvas);
@@ -446,8 +446,10 @@ public:
 	virtual TInt DecodeImage(char* aOutData, char* aOutMaskData);
 
 protected:
-	CMIDPApp();
+	CMIDPApp(const TDesC8& aShortcutName);
 	virtual ~CMIDPApp();
+    virtual void LoadPropertiesL();
+
 private:
 	void ConstructL();
 	static void LaunchBrowserCallback(TAny* aThis);
@@ -482,6 +484,7 @@ private:
 	char* iOutData;
 	char* iOutMaskData;
 	CPhoneCall* iPhoneCall;
+	const TDesC8& iShortcutName;
 };
 
 
