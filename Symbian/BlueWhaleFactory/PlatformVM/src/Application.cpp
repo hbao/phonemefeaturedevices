@@ -56,6 +56,7 @@
 #include <apgtask.h>
 #include <bautils.h>
 #include <e32property.h>
+#include "ManagementObjectFactory.h"
 
 //#define __DEBUG_APP_INTERFACE__
 //#define __LOG_JAVA_MESSAGES__
@@ -565,17 +566,17 @@ void CTicker::ResumeTickerCallback(TAny * aThis)
 }
 
 ////////////////////////////////////////////////////////////////////////
-CMIDPApp* CMIDPApp::NewL()
+CMIDPApp* CMIDPApp::NewL(const TDesC8& aShortcutName)
 {
-	CMIDPApp* self = new (ELeave) CMIDPApp();
+	CMIDPApp* self = new (ELeave) CMIDPApp(aShortcutName);
 	CleanupStack::PushL(self);
 	self->ConstructL();
 	CleanupStack::Pop(self);
 	return self;
 }
 
-CMIDPApp::CMIDPApp()
-: iAudioData(NULL, 0)
+CMIDPApp::CMIDPApp(const TDesC8& aShortcutName)
+: iAudioData(NULL, 0),iShortcutName(aShortcutName)
 {
 }
 
@@ -647,6 +648,15 @@ void CMIDPApp::ConstructL()
 void CMIDPApp::StartL(RThread& aThread)
 {
 	CVMManager::StartL(aThread);
+}
+
+void CMIDPApp::LoadPropertiesL()
+{
+    CVMManager::LoadPropertiesL();
+    if(iShortcutName.Length() > 0)
+    {
+        iProperties->SetString8L(KPropertyString8ShortcutName,iShortcutName);
+    }
 }
 
 void CMIDPApp::SetCanvas(MMIDPCanvas* aCanvas)
