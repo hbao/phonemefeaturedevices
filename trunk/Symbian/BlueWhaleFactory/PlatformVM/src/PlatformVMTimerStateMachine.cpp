@@ -361,7 +361,7 @@ void CVMTimerStateMachine::CreateVML(const TDesC8& aShortcutName, const TBool aA
 	name.Format(KManThreadName(),iInstanceCount);
 
 	iVMManager = iFactory->CreateVMManagerThreadObject(name);
-	iApp = iFactory->CreateVMManagerObject();
+	iApp = iFactory->CreateVMManagerObject(aShortcutName);
 	CMyUndertaker* undertaker = new (ELeave)CMyUndertaker(&iVMManager->Thread(),this);
 	CleanupStack::PushL(undertaker);
 	undertaker->StartL();
