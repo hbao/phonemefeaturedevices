@@ -88,9 +88,9 @@ MThread* CVMObjectFactory::CreateVMManagerThreadObject(const TDesC& aName)
 	return iVMManager;
 }
 
-MDebugApplication* CVMObjectFactory::CreateVMManagerObject()
+MDebugApplication* CVMObjectFactory::CreateVMManagerObject(const TDesC8& aShortcutName)
 {
-	CMIDPApp* app = CMIDPApp::NewL();
+	CMIDPApp* app = CMIDPApp::NewL(aShortcutName);
 	app->SetCanvas(iCanvas);
 	iVMManager->AddL(app);
 	iQueue = app;
