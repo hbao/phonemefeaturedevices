@@ -48,7 +48,10 @@ EXPORT_DECL void CAPNDatabase::LoadDatabaseL()
 	_LIT(KRepublicOfIreland,"272");
 	
 	User::LeaveIfError(iDatabase.Append(TOperatorAPN(KUnitedKingdom,_L("10"),_L("O2"),_L("mobile.o2.co.uk"),_L("bypass"),_L("web"))));
+	
 	User::LeaveIfError(iDatabase.Append(TOperatorAPN(KUnitedKingdom,_L("15"),_L("Vodafone"),_L("internet"),_L("web"),_L("web"))));
+    User::LeaveIfError(iDatabase.Append(TOperatorAPN(KUnitedKingdom,_L("15"),_L("Vodafone PP"),_L("pp.vodafone.co.uk"),_L("web"),_L("web"))));
+    
 	User::LeaveIfError(iDatabase.Append(TOperatorAPN(KUnitedKingdom,_L("20"),_L("3"),_L("three.co.uk"),_L("guest"),_L("guest"))));
 	User::LeaveIfError(iDatabase.Append(TOperatorAPN(KUnitedKingdom,_L("30"),_L("T-Mobile"),_L("general.t-mobile.uk"),_L("user"),_L("pass"))));
 	User::LeaveIfError(iDatabase.Append(TOperatorAPN(KUnitedKingdom,_L("33"),_L("Orange"),_L("orangeinternet"),_L(""),_L("pass"))));
