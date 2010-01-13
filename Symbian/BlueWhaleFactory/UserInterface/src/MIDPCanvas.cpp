@@ -755,8 +755,8 @@ TKeyResponse CMIDPCanvas::PlainOfferKeyEventL(const TKeyEvent& aKeyEvent,TEventC
 {
 	TKeyResponse response = EKeyWasNotConsumed;
 	TChar ch = iKeyMapper->CharFromScanCode(aKeyEvent);
-
-	if (TChar(aKeyEvent.iCode).IsPrint())
+	
+	if (TChar(aKeyEvent.iCode).IsPrint() && (iMachineUidValue != KUidN97Value || aKeyEvent.iModifiers > EModifierAutorepeatable || !TChar(aKeyEvent.iCode).IsAlphaDigit()))
 	{
 		ch = aKeyEvent.iCode;
 	}
