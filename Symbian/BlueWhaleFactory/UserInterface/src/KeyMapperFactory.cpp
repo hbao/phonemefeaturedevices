@@ -130,6 +130,7 @@ class CStandardKeyboard : public CBase, public MKeyMapper
 				{
 					ret = aKeyEvent.iScanCode | 32;
 				}
+				return ret;
 			}
 #if __S60_VERSION__ >= __S60_V2_FP1_VERSION_NUMBER__
 			MAPDEVICETOMIDPKEY(EStdKeyDevice0,KEYMAP_KEY_SOFT1)
@@ -148,7 +149,7 @@ class CStandardKeyboard : public CBase, public MKeyMapper
 			MAPDEVICETOMIDPKEY(EKeyLeftArrow,KEYMAP_KEY_LEFT)
 			MAPDEVICETOMIDPKEY(EKeyRightArrow,KEYMAP_KEY_RIGHT)
 #elif __UIQ_VERSION_NUMBER__ >= __UIQ_V3_FP0_VERSION_NUMBER__
-			MAPDEVICETOMIDPKEY(EStdKeyF13,KEYMAP_KEY_SOFT1);		// left softkwy on Z10
+			MAPDEVICETOMIDPKEY(EStdKeyF13,KEYMAP_KEY_SOFT1);		// left softkey on Z10
 			MAPDEVICETOMIDPKEY(EStdKeyF14,KEYMAP_KEY_SOFT2);		// right softkey on Z10
 			MAPDEVICETOMIDPKEY(EDeviceKeyClear,KEYMAP_KEY_CLEAR)
 			MAPDEVICETOMIDPKEY(EStdDeviceKeyClear,KEYMAP_KEY_CLEAR)
