@@ -1,0 +1,166 @@
+/**
+ * Copyright (c) 2004-2008 Blue Whale Systems Ltd. All Rights Reserved. 
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER 
+ *  
+ * This program is free software; you can redistribute it and/or 
+ * modify it under the terms of the GNU General Public License version 
+ * 2 only, as published by the Free Software Foundation.  
+ *  
+ * This software is provided "as is," and the copyright holder makes no representations or warranties, express or
+ * implied, including but not limited to warranties of merchantability or fitness for any particular purpose or that the
+ * use of this software or documentation will not infringe any third party patents, copyrights, trademarks or other
+ * rights.
+ * 
+ * The copyright holder will not be liable for any direct, indirect special or consequential damages arising out of any
+ * use of this software or documentation.
+ * 
+ * See the GNU  General Public License version 2 for more details 
+ * (a copy is included at /legal/license.txt).  
+ *  
+ * You should have received a copy of the GNU General Public License 
+ * version 2 along with this work; if not, write to the Free Software 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 
+ * 02110-1301 USA  
+ *  
+ * Please contact Blue Whale Systems Ltd, Suite 123, The LightBox
+ * 111 Power Road, Chiswick, London, W4 5PY, United Kingdom or visit 
+ * www.bluewhalesystems.com if you need additional 
+ * information or have any questions.  
+ */ 
+
+
+/*
+    BlueWhalePlatform object factory
+*/
+
+MACRO __DONT_USE_IN_CODE__MMP_ONLY__S60_V3_FP0__
+
+TARGET        BlueWhaleFactory.dll
+TARGETTYPE    dll
+UID           0x1000008d 0x2000E277
+
+CAPABILITY     NetworkServices ReadUserData WriteUserData ReadDeviceData WriteDeviceData SWEvent
+
+OPTION GCCE -O2 -fno-unit-at-a-time
+
+USERINCLUDE	    ..\inc ..\Timer 
+USERINCLUDE	    ..\PlatformVM\inc ..\StateMachine 
+USERINCLUDE	    ..\Util\inc ..\CommandMessage
+USERINCLUDE	    ..\Logger ..\Transport\inc
+USERINCLUDE		..\DataAccess\inc ..\Message ..\Folder
+USERINCLUDE		..\UserInterface\inc ..\UserInterface\res
+SYSTEMINCLUDE   \epoc32\include 
+SYSTEMINCLUDE   \epoc32\include\libc 
+SYSTEMINCLUDE   \epoc32\include\mmf\plugin
+
+
+SOURCEPATH      ..\src
+SOURCE          BlueWhaleFactory.cpp 
+#if defined(WINS)
+SOURCE			BlankObject.cpp
+#endif
+
+SOURCEPATH		..\PlatformVM\src
+SOURCE			PlatformVMTimerStateMachine.cpp
+SOURCE			Application.cpp
+SOURCE			Sockets.cpp
+SOURCE			SocketFactory.cpp
+SOURCE			HostResolver.cpp
+SOURCE			DirectoryList.cpp
+SOURCE			ManagementObjectFactory.cpp
+SOURCE			AudioPlayer.cpp
+SOURCE			NetworkInfo.cpp
+SOURCE 			APNManager.cpp 
+SOURCE 			APNDatabase.cpp 
+SOURCE 			IAPInfo.cpp 
+SOURCE 			CommDBUtil.cpp
+SOURCE			PhoneCall.cpp
+
+#if defined(_DEBUGTERMINAL_)
+SOURCE 			DebugTerminal.cpp
+#endif
+
+SOURCEPATH		..\Util\src
+SOURCE			Thread.cpp
+SOURCE			PropertiesImpl.cpp
+SOURCE			DebugUtilities.cpp
+
+SOURCEPATH		..\DataAccess\src
+SOURCE			DataAccessConnection.cpp
+SOURCE			DataAccessStatement.cpp
+SOURCE			MessageEntry.cpp
+
+SOURCEPATH		..\Logger
+SOURCE			LoggerImpl.cpp
+
+SOURCEPATH		..\Transport\src
+SOURCE			SocketEngine.cpp
+SOURCE			SocketWriter.cpp
+SOURCE			SocketReader.cpp
+
+SOURCEPATH		..\Timer
+SOURCE			TimeOutTimer.cpp
+
+SOURCEPATH		..\UserInterface\src
+SOURCE			BaseMIDPView.cpp
+SOURCE			KeyMapperFactory.cpp
+SOURCE			FEPInputControl.cpp
+SOURCE			MIDPCanvas.cpp
+
+SOURCEPATH		..\UserInterface\res
+START RESOURCE  MIDPView.rss
+HEADER
+TARGETPATH      \resource\apps
+end
+
+
+
+LIBRARY         euser.lib
+LIBRARY			efsrv.lib
+LIBRARY			insock.lib
+LIBRARY			esock.lib
+LIBRARY			estor.lib 
+LIBRARY			estlib.lib
+LIBRARY			flogger.lib
+LIBRARY			securesocket.lib
+LIBRARY			commdb.lib 
+// S60 UI libraries
+LIBRARY			avkon.lib
+// Symbian UI libraries  
+LIBRARY			cone.lib 
+LIBRARY			eikcore.lib  
+LIBRARY			eikcoctl.lib
+LIBRARY			eikctl.lib
+// Symbian graphics libraries
+LIBRARY			ws32.lib
+LIBRARY			bitgdi.lib
+LIBRARY			gdi.lib 
+LIBRARY			fbscli.lib 
+LIBRARY			hal.lib
+LIBRARY			hwrmvibraclient.lib
+// Symbian application framework stuff
+LIBRARY			fepbase.lib
+LIBRARY			egul.lib
+LIBRARY			apgrfx.lib 
+LIBRARY			etext.lib
+LIBRARY			bafl.lib
+// S60 phone book access
+LIBRARY			PbkEng.lib
+LIBRARY			PbkView.lib 
+// Symbian Contacts lib
+LIBRARY			cntmodel.lib
+LIBRARY			mediaclientaudiostream.lib
+LIBRARY			mmfcontrollerframework.lib
+LIBRARY			mmfstandardcustomcommands.lib
+LIBRARY			centralrepository.lib
+LIBRARY			imageconversion.lib
+
+LIBRARY			cldc_vm_lib.lib commonengine.lib etel3rdparty.lib apengine.lib connmon.lib
+
+#if defined(WINS)
+deffile .\bluewhalefactory.def
+#else if defined(ARM)
+deffile .\bluewhalefactoryarm.def
+#endif
+
+NOSTRICTDEF
