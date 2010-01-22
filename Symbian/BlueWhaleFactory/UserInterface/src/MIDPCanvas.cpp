@@ -520,7 +520,7 @@ void CMIDPCanvas::BeginEditSession(TInt aId, TInt aConstraints)
 	TInt index = iTextArray.FindInOrder(&indexedText, TLinearOrder<CIndexedText>(CIndexedText::Order));
 	if(index == KErrNotFound)
 	{
-		SetTextFieldString(aId, KNullDesC().Alloc(), 0);
+		SetTextFieldString(aId, KNullDesC().Alloc(), 0, 0);
 		index = iTextArray.FindInOrder(&indexedText, TLinearOrder<CIndexedText>(CIndexedText::Order));
 	}
 	ASSERT(index != KErrNotFound);
@@ -589,7 +589,7 @@ HBufC* CMIDPCanvas::GetInlineText(TInt aId)
 	return iCurrentField->TextPtr();
 }
 
-TInt CMIDPCanvas::SetTextFieldString(TInt aId, HBufC* aText, TInt aParentId)
+TInt CMIDPCanvas::SetTextFieldString(TInt aId, HBufC* aText, TInt aParentId, TInt aMaxSize)
 {
 	DEBUGMSG3(_L("CMIDPCanvas::SetTextFieldString %d :%S: %d"),aId,&(aText->Des()),aParentId);
 	CIndexedText* indexedText = new CIndexedText(aId);
@@ -617,6 +617,7 @@ TInt CMIDPCanvas::SetTextFieldString(TInt aId, HBufC* aText, TInt aParentId)
 	indexedText->SetTextPtr(aText);
 	indexedText->SetEditPoint(aText->Length());
 	indexedText->SetParentId(aParentId);
+	indexedText->SetMaxSize(aMaxSize);
 	iCursorPosition = aText->Length();
 	return KErrNone;
 }

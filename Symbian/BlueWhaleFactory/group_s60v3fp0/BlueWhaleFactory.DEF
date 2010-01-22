@@ -42,4 +42,5 @@ EXPORTS
 	?Stop@CNetworkInfoManager@@QAEXXZ @ 41 NONAME ; void CNetworkInfoManager::Stop(void)
 	?TextPtr@CIndexedText@@QAEPAVHBufC16@@XZ @ 42 NONAME ; class HBufC16 * CIndexedText::TextPtr(void)
 	?UpdateFepInlineTextL@CFEPInputCore@@QAEXABVTDesC16@@H@Z @ 43 NONAME ; void CFEPInputCore::UpdateFepInlineTextL(class TDesC16 const &, int)
+	?DocumentMaximumLengthForFep@CFEPInputCore@@QBEHXZ @ 43 NONAME ; int CFEPInputCore::DocumentMaximumLengthForFep(void) const
 

@@ -204,6 +204,15 @@ EXPORT_DECL TInt CFEPInputCore::DocumentLengthForFep() const
 	return ret;
 }
 
+EXPORT_DECL TInt CFEPInputCore::DocumentMaximumLengthForFep() const
+{
+	iMutex.Wait();
+	TInt ret = iText ? iText->MaxSize() : 0;
+	iMutex.Signal();
+	DEBUGMSG1(_L("CFEPInputCore::DocumentMaximumLengthForFep %d"), ret); 
+	return ret;
+}
+
 EXPORT_DECL void CFEPInputCore::StartFepInlineEditL(const TDesC& aInitialInlineText, TInt aPositionOfInsertionPointInInlineText, const TCursorSelection& aCursorSelection)
 {
 	iMutex.Wait();
@@ -844,9 +853,7 @@ TInt CFEPInputControl::DocumentLengthForFep() const
 
 TInt CFEPInputControl::DocumentMaximumLengthForFep() const
 {
-	TInt len = 0;
-	DEBUGMSG1(_L("DocumentMaximumLengthForFep %d"),len);
-	return len;
+	return iFEPInputCore->DocumentMaximumLengthForFep();
 }
 
 void CFEPInputControl::SetCursorSelectionForFepL(const TCursorSelection& aCursorSelection)
