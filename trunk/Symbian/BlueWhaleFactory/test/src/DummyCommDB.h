@@ -84,7 +84,7 @@ public:
 		count = aObject.iStrings.Count();
 		for(TInt i=0;i<count;i++)
 		{
-			iStrings.Append(aObject.iStrings[i]);
+			iStrings.Append(new CStrData(*(aObject.iStrings[i])));
 		}
 	}
 	
@@ -215,6 +215,17 @@ public:
 	TTable(const TDesC& aName): iName(aName)
 	{
 	}
+	TTable(const TTable& aCopy)
+	{
+	    iName.Copy(aCopy.iName);
+	    TInt c = aCopy.iData.Count();
+	    for(TInt i=0;i<c;i++)
+	    {
+	        CRow* row = aCopy.iData[i];
+	        iData.Append(new CRow(*row));
+	    }
+	}
+	
 	virtual ~TTable()
 	{
 	}
