@@ -62,7 +62,8 @@ getLcConvMethodsIDByEncoding(char *encoding) {
             if (lcConv[i] == NULL) {
                 break;
             }
-            if (strcmp(lcConv[i]->encoding, encoding) == 0) {
+            if (strstr(lcConv[i]->encoding, encoding) != 0) {
+                getLcGenConvMethods(encoding);
                 return i;
             }
         }
@@ -72,6 +73,7 @@ getLcConvMethodsIDByEncoding(char *encoding) {
                 return i;
             }
         }
+        
     }
     return -1;
 }
@@ -115,7 +117,7 @@ Java_com_sun_cldc_i18n_j2me_Conv_getHandler() {
 
     KNI_DeclareHandle(str);
     KNI_GetParameterAsObject(1, str);
-
+    __asm {int 3};
     if (!KNI_IsNullHandle(str)) {
         int      strLen = KNI_GetStringLength(str);
 	jchar* strBuf;
@@ -239,6 +241,7 @@ Java_com_sun_cldc_i18n_j2me_Conv_byteToChar() {
 
     KNI_GetParameterAsObject(5, output);
     KNI_GetParameterAsObject(2, input);
+__asm{int 3};
 
     inBuf  = (char*)midpMalloc(inLength);
     if (inBuf != NULL) {
