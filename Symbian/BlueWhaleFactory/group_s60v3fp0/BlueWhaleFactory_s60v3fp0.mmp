@@ -154,6 +154,7 @@ LIBRARY			mmfcontrollerframework.lib
 LIBRARY			mmfstandardcustomcommands.lib
 LIBRARY			centralrepository.lib
 LIBRARY			imageconversion.lib
+library charconv.lib 
 
 LIBRARY			cldc_vm_lib.lib commonengine.lib etel3rdparty.lib apengine.lib connmon.lib
 

@@ -41,6 +41,7 @@
 #include <eikappui.h>
 #endif
 #include <GULUTIL.H>
+#include <CHARCONV.H>
 #include "Application.h"
 #include "DirectoryList.h"
 #include "Sockets.h"
@@ -66,8 +67,10 @@
 
 #ifdef __DEBUG_APP_INTERFACE__
 #define	DEBUGMSG(_XX) RDebug::Print(_XX)
+#define DEBUGMSG1(_XX,_YY) RDebug::Print(_XX,_YY)
 #else
 #define	DEBUGMSG(_XX)
+#define DEBUGMSG1(_XX,_YY)
 #endif
 
 #ifdef __DEBUGEVENT__
@@ -255,7 +258,7 @@ void CVMManager::TearDownMemory()
 void CVMManager::DebugMessage(const TDesC& /*aMsg*/)
 {
 #ifdef __WINSCW__
-	DEBUGMSG(aMsg);
+	//DEBUGMSG(aMsg);
 #else
 //	TBuf<32> filename;
 //	filename.Format(_L("vm-%d.txt"),(TInt)RThread().Id());
@@ -607,6 +610,11 @@ CMIDPApp::~CMIDPApp()
 	delete iImageConverter;
 	delete iPhoneCall;
 	delete iPhoneNumber;
+	iRfs.Close();
+	delete iConverter;
+	delete iNativeInput;
+	delete iNativeOutput;
+	delete iUnicodeInput;
 }
 
 void CMIDPApp::ConstructL()
@@ -643,6 +651,21 @@ void CMIDPApp::ConstructL()
 	{
 		TRAPD(ignore, iPhoneCall = CPhoneCall::NewL());	// don't let telephony failures stop us starting up
 	}
+
+	/*
+	iEncoding.Copy(_L8("GBK"));
+	SetConverterCallback(this);
+
+	iNativeInput = HBufC8::NewL(256);
+	iUnicodeOutput = HBufC16::NewL(256);
+	iNativeOutput = HBufC8::NewL(256);
+	iUnicodeInput = HBufC16::NewL(256);
+	iUnicodeInput->Des().Copy(_L("Hello World \u64dd"));
+	ConvertUnicodeToNativeCallback(this);
+	iNativeInput->Des().Copy(*iNativeOutput);
+	ConvertNativeToUnicodeCallback(this);
+	RDebug::Print(_L("Converted string %S"),&(iUnicodeOutput->Des()));
+	*/
 }
 
 void CMIDPApp::StartL(RThread& aThread)
@@ -1176,7 +1199,170 @@ TInt CMIDPApp::DecodeImage(char* aOutData, char* aOutMaskData)
 	return iImageConverter->iStatus.Int();
 }
 
+void CMIDPApp::SetConverterCallback(TAny* aThis)
+{
+    CMIDPApp* This = static_cast<CMIDPApp*>(aThis);   
+    if(!This->iConverter)
+    {
+        This->InitializeConverterL();
+    }
+    TUint charsetID = This->iConverter->ConvertStandardNameOfCharacterSetToIdentifierL(This->iEncoding,This->iRfs);
+    This->iAvailability = This->iConverter->PrepareToConvertToOrFromL(charsetID, This->iRfs);
+}
 
+TBool CMIDPApp::SetConverter(const TDesC8& aEncoding)
+{
+    iEncoding.Copy(aEncoding);
+    TInt count = iEncoding.Length();
+    for(TInt i=0;i<count;i++)
+    {
+        if(iEncoding[i] == '_')
+        {
+            iEncoding[i] = '-';
+        }
+    }
+    iThreadRunner->DoSyncCallback(SetConverterCallback, this);
+    if(iAvailability == CCnvCharacterSetConverter::EAvailable)
+    {
+        return ETrue;
+    }
+    else
+    {
+        return EFalse;
+    }
+}
+
+TInt CMIDPApp::GetSizeOfByteInUnicode(const TDesC8& aBuffer)
+{
+    TInt ret = 0;
+    delete iNativeInput;
+    iNativeInput = NULL;
+    iNativeInput = aBuffer.Alloc();
+    if(iNativeInput)
+    {
+        delete iUnicodeOutput;
+        iUnicodeOutput = NULL;
+        iUnicodeOutput = HBufC::New(1024);
+        iThreadRunner->DoSyncCallback(ConvertNativeToUnicodeCallback, this);
+        ret = iUnicodeOutput->Des().Length();
+        delete iUnicodeOutput;
+        iUnicodeOutput = NULL;
+    }
+    return ret;
+}
+
+void CMIDPApp::ConvertUnicodeToNativeCallback(TAny* aThis)
+{
+    CMIDPApp* This = static_cast<CMIDPApp*>(aThis);   
+        
+    This->iNativeOutput->Des().Copy(KNullDesC8());
+    TUint charsetID = This->iConverter->ConvertStandardNameOfCharacterSetToIdentifierL(This->iEncoding,This->iRfs);
+    CCnvCharacterSetConverter::TAvailability availability = This->iConverter->PrepareToConvertToOrFromL(charsetID, This->iRfs);
+    if(availability == CCnvCharacterSetConverter::EAvailable)
+    {
+        TBuf8<20> outputBuffer;
+        TPtrC16 remainderOfUnicodeText(*This->iUnicodeInput);
+        for(;;)
+        {
+            const TInt returnValue=This->iConverter->ConvertFromUnicode(outputBuffer,remainderOfUnicodeText);
+            
+            if (returnValue==CCnvCharacterSetConverter::EErrorIllFormedInput)
+            {
+                User::Leave(KErrCorrupt);
+            }
+            else if (returnValue<0)
+            {
+                User::Leave(KErrGeneral);
+            }
+            
+            This->iNativeOutput->Des().Append(outputBuffer);
+            
+            if (returnValue==0)
+            {
+                break;
+            }
+
+            remainderOfUnicodeText.Set(remainderOfUnicodeText.Right(returnValue));
+        }
+    }
+}
+
+void CMIDPApp::ConvertNativeToUnicodeCallback(TAny* aThis)
+{
+    CMIDPApp* This = static_cast<CMIDPApp*>(aThis);   
+        
+    This->iUnicodeOutput->Des().Copy(KNullDesC());
+    TUint charsetID = This->iConverter->ConvertStandardNameOfCharacterSetToIdentifierL(This->iEncoding,This->iRfs);
+    CCnvCharacterSetConverter::TAvailability availability = This->iConverter->PrepareToConvertToOrFromL(charsetID, This->iRfs);
+    if(availability == CCnvCharacterSetConverter::EAvailable)
+    {
+        TBuf16<20> outputBuffer;
+        TPtrC8 remainderOfForeignText(*This->iNativeInput);
+        TInt state=CCnvCharacterSetConverter::KStateDefault;
+        for(;;)
+        {
+            const TInt returnValue = This->iConverter->ConvertToUnicode(outputBuffer, remainderOfForeignText, state);
+            if (returnValue==CCnvCharacterSetConverter::EErrorIllFormedInput)
+            {
+                User::Leave(KErrCorrupt);
+            }
+            else if (returnValue<0)
+            {
+                User::Leave(KErrGeneral);
+            }
+            
+            This->iUnicodeOutput->Des().Append(outputBuffer);
+            
+            if (returnValue==0)
+            {
+                break;
+            }
+            remainderOfForeignText.Set(remainderOfForeignText.Right(returnValue));
+        }
+    }
+    
+}
+
+TInt CMIDPApp::ConvertNativeToUnicode(const TDesC8& aBuffer, TDes16& aOutBuffer)
+{
+    delete iNativeInput;
+    iNativeInput = NULL;
+    iNativeInput = aBuffer.Alloc();
+    if(iNativeInput)
+    {
+        delete iUnicodeOutput;
+        iUnicodeOutput = NULL;
+        iUnicodeOutput = HBufC::New(1024);
+        iThreadRunner->DoSyncCallback(ConvertNativeToUnicodeCallback, this);
+        aOutBuffer.Copy(iUnicodeOutput->Des());
+        delete iUnicodeOutput;
+        iUnicodeOutput = NULL;
+        RDebug::Print(_L("Converted string %S"),&aOutBuffer);
+        return aOutBuffer.Length();
+    }
+    else
+    {
+        return 0;
+    }
+    
+}
+
+void CMIDPApp::InitializeConverterL()
+{
+    User::LeaveIfError(iRfs.Connect());
+    iConverter = CCnvCharacterSetConverter::NewL();
+#ifdef __WINSCW__
+    CArrayFix<CCnvCharacterSetConverter::SCharacterSet>* set =  iConverter->CreateArrayOfCharacterSetsAvailableLC(iRfs);
+    TInt count = set->Count();
+    for(TInt i=0;i<count;i++)
+    {
+        TPtrC str = set->At(i).Name();
+        RDebug::Print(_L("Charset %d %S"),i,&str);
+    }
+    CleanupStack::PopAndDestroy(set);
+#endif
+    
+}
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 CMIDPFontManager::CMIDPFontManager()
@@ -1210,6 +1396,7 @@ void CMIDPFontManager::ConstructL()
 	iNormalFontSpec = CCoeEnv::Static()->NormalFont()->FontSpecInTwips();
 	iNormalFontSpec.iFontStyle.SetStrokeWeight(EStrokeWeightBold);
 	iNormalFontSpec.iFontStyle.SetBitmapType(EAntiAliasedGlyphBitmap);
+	
 }
 
 void CMIDPFontManager::SetCanvas(MMIDPCanvas* aCanvas)
