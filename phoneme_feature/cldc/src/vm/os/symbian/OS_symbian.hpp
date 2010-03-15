@@ -225,8 +225,12 @@ public:
 	virtual TInt PlayAudio(const TDesC8& aType, TPtr8& aData) = 0;
 	virtual TInt InitializeDecoder(TDesC8& aSourceData, TInt& aWidth, TInt& aHeight, TBool& aHasMask) = 0;
 	virtual TInt DecodeImage(char* aOutData, char* aOutMaskData) = 0;
-	
-	// debug things
+	// character conversion things
+    virtual TBool SetConverter(const TDesC8& aEncoding) = 0;
+    virtual TInt GetSizeOfByteInUnicode(const TDesC8& aBuffer) =0;
+    virtual TInt ConvertNativeToUnicode(const TDesC8& aBuffer, TDes16& aOutBuffer) = 0;
+    
+    // debug things
 	virtual void DebugMessage(const TDesC& aMsg) = 0;
 protected:
 	virtual ~MApplication(){};
