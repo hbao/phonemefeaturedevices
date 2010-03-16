@@ -224,8 +224,10 @@ class CVMManager : public CBase, public MDebugApplication, public MRunnable, pub
 		
 		// character conversion things
 		virtual TBool SetConverter(const TDesC8& /*aEncoding*/) {return EFalse;}
-		virtual TInt GetSizeOfByteInUnicode(const TDesC8& aBuffer) { return 0;}
+	    virtual TInt GetSizeOfConvertedNative(const TDesC8& aBuffer) { return 0;}
+	    virtual TInt GetSizeOfConvertedUnicode(const TDesC16& aBuffer) { return 0;}
 		virtual TInt ConvertNativeToUnicode(const TDesC8& aBuffer, TDes16& aOutBuffer) { return 0;}
+		virtual TInt ConvertUnicodeToNative(const TDesC16& aBuffer, TDes8& aOutBuffer) { return 0;}
 		
 		// debug things
 		virtual void DebugMessage(const TDesC& aMsg);
@@ -452,8 +454,10 @@ public:
 	virtual TInt InitializeDecoder(TDesC8& aSourceData, TInt& aWidth, TInt& aHeight, TBool& aHasMask);
 	virtual TInt DecodeImage(char* aOutData, char* aOutMaskData);
 	virtual TBool SetConverter(const TDesC8& aEncoding);
-	virtual TInt GetSizeOfByteInUnicode(const TDesC8& aBuffer);
+    virtual TInt GetSizeOfConvertedNative(const TDesC8& aBuffer);
+    virtual TInt GetSizeOfConvertedUnicode(const TDesC16& aBuffer);
 	virtual TInt ConvertNativeToUnicode(const TDesC8& aBuffer, TDes16& aOutBuffer);
+	virtual TInt ConvertUnicodeToNative(const TDesC16& aBuffer, TDes8& aOutBuffer);
 	
 protected:
 	CMIDPApp(const TDesC8& aShortcutName);

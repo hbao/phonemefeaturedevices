@@ -615,6 +615,7 @@ CMIDPApp::~CMIDPApp()
 	delete iNativeInput;
 	delete iNativeOutput;
 	delete iUnicodeInput;
+	delete iUnicodeOutput;
 }
 
 void CMIDPApp::ConstructL()
@@ -652,20 +653,6 @@ void CMIDPApp::ConstructL()
 		TRAPD(ignore, iPhoneCall = CPhoneCall::NewL());	// don't let telephony failures stop us starting up
 	}
 
-	/*
-	iEncoding.Copy(_L8("GBK"));
-	SetConverterCallback(this);
-
-	iNativeInput = HBufC8::NewL(256);
-	iUnicodeOutput = HBufC16::NewL(256);
-	iNativeOutput = HBufC8::NewL(256);
-	iUnicodeInput = HBufC16::NewL(256);
-	iUnicodeInput->Des().Copy(_L("Hello World \u64dd"));
-	ConvertUnicodeToNativeCallback(this);
-	iNativeInput->Des().Copy(*iNativeOutput);
-	ConvertNativeToUnicodeCallback(this);
-	RDebug::Print(_L("Converted string %S"),&(iUnicodeOutput->Des()));
-	*/
 }
 
 void CMIDPApp::StartL(RThread& aThread)
@@ -1232,7 +1219,7 @@ TBool CMIDPApp::SetConverter(const TDesC8& aEncoding)
     }
 }
 
-TInt CMIDPApp::GetSizeOfByteInUnicode(const TDesC8& aBuffer)
+TInt CMIDPApp::GetSizeOfConvertedNative(const TDesC8& aBuffer)
 {
     TInt ret = 0;
     delete iNativeInput;
@@ -1268,13 +1255,18 @@ void CMIDPApp::ConvertUnicodeToNativeCallback(TAny* aThis)
             
             if (returnValue==CCnvCharacterSetConverter::EErrorIllFormedInput)
             {
-                User::Leave(KErrCorrupt);
+                break;
             }
             else if (returnValue<0)
             {
                 User::Leave(KErrGeneral);
             }
             
+            if(This->iNativeOutput->Des().MaxLength() < This->iNativeOutput->Des().Length() + outputBuffer.Length())
+            {
+                This->iNativeOutput = This->iNativeOutput->ReAlloc(This->iNativeOutput->Des().MaxLength() + 1024);
+            }
+
             This->iNativeOutput->Des().Append(outputBuffer);
             
             if (returnValue==0)
@@ -1304,13 +1296,16 @@ void CMIDPApp::ConvertNativeToUnicodeCallback(TAny* aThis)
             const TInt returnValue = This->iConverter->ConvertToUnicode(outputBuffer, remainderOfForeignText, state);
             if (returnValue==CCnvCharacterSetConverter::EErrorIllFormedInput)
             {
-                User::Leave(KErrCorrupt);
+                break;
             }
             else if (returnValue<0)
             {
                 User::Leave(KErrGeneral);
             }
-            
+            if(This->iUnicodeOutput->Des().MaxLength() < This->iUnicodeOutput->Des().Length() + outputBuffer.Length())
+            {
+                This->iUnicodeOutput = This->iUnicodeOutput->ReAlloc(This->iUnicodeOutput->Des().MaxLength() + 1024);
+            }
             This->iUnicodeOutput->Des().Append(outputBuffer);
             
             if (returnValue==0)
@@ -1327,6 +1322,7 @@ TInt CMIDPApp::ConvertNativeToUnicode(const TDesC8& aBuffer, TDes16& aOutBuffer)
 {
     delete iNativeInput;
     iNativeInput = NULL;
+    TInt len = aBuffer.Size();
     iNativeInput = aBuffer.Alloc();
     if(iNativeInput)
     {
@@ -1337,7 +1333,6 @@ TInt CMIDPApp::ConvertNativeToUnicode(const TDesC8& aBuffer, TDes16& aOutBuffer)
         aOutBuffer.Copy(iUnicodeOutput->Des());
         delete iUnicodeOutput;
         iUnicodeOutput = NULL;
-        RDebug::Print(_L("Converted string %S"),&aOutBuffer);
         return aOutBuffer.Length();
     }
     else
@@ -1345,6 +1340,48 @@ TInt CMIDPApp::ConvertNativeToUnicode(const TDesC8& aBuffer, TDes16& aOutBuffer)
         return 0;
     }
     
+}
+TInt CMIDPApp::GetSizeOfConvertedUnicode(const TDesC16& aBuffer)
+{
+    TInt ret = 0;
+    delete iUnicodeInput;
+    iUnicodeInput = NULL;
+    iUnicodeInput = aBuffer.Alloc();
+    if(iUnicodeInput)
+    {
+        delete iNativeOutput;
+        iNativeOutput = NULL;
+        iNativeOutput = HBufC8::New(1024);
+        iThreadRunner->DoSyncCallback(ConvertUnicodeToNativeCallback, this);
+        ret = iNativeOutput->Des().Length();
+        delete iNativeOutput;
+        iNativeOutput = NULL;
+    }
+    return ret;
+}
+
+
+
+TInt CMIDPApp::ConvertUnicodeToNative(const TDesC16& aBuffer, TDes8& aOutBuffer)
+{    
+    delete iUnicodeInput;
+    iUnicodeInput = NULL;
+    iUnicodeInput = aBuffer.Alloc();
+    if(iUnicodeInput)
+    {
+        delete iNativeOutput;
+        iNativeOutput = NULL;
+        iNativeOutput = HBufC8::New(1024);
+        iThreadRunner->DoSyncCallback(ConvertUnicodeToNativeCallback, this);
+        aOutBuffer.Copy(iNativeOutput->Des());
+        delete iNativeOutput;
+        iNativeOutput = NULL;
+        return aOutBuffer.Length();
+    }
+    else
+    {
+        return 0;
+    }
 }
 
 void CMIDPApp::InitializeConverterL()
