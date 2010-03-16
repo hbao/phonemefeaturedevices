@@ -128,7 +128,7 @@ abstract class SymbianIDETool extends IDETool
         }
         //props.put("ENABLE_JAVA_DEBUGGER", "true");
         //props.put("ENABLE_ROM_JAVA_DEBUGGER", "true");
-		props.put("ENABLE_PROFILER", "true");
+		//props.put("ENABLE_PROFILER", "true");
 
 		props.put("ENABLE_ISOLATES", "true");
         props.put(DEBUG_LOOPGEN, "true");
