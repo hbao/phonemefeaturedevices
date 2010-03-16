@@ -29,9 +29,17 @@
 #include <string.h>
 #include <conv.h>
 #include <OS_Symbian.hpp>
-#include "pcsl_print.h"
 
 #define KMaxBufferLen 1024;
+
+#define __DEBUG_CONV__
+
+#ifdef __DEBUG_CONV__
+#include "pcsl_print.h"
+#define DEBUGMSG1(_XX,_YY){pcsl_print(_XX);pcsl_print(_YY);pcsl_print("\n");}
+#else
+#define DEBUGMSG1
+#endif
 
 LOCAL_C HBufC8* NativeToDescriptor8(char* aSource)
 {
@@ -53,6 +61,12 @@ LOCAL_C HBufC8* NativeToDescriptor8(char* aSource,int aOffset,int aLen)
     return buffer8;
 }
 
+LOCAL_C HBufC16* UnicodeToDescriptor16(const TUint16* aSource,int aOffset,int aLen)
+{
+    HBufC16* ret = NULL;
+    return ret;
+}
+
 LOCAL_C int byteMaxLen()
 {
     return KMaxBufferLen;
@@ -64,7 +78,7 @@ LOCAL_C int byteLen(const unsigned char* aBuffer, int aLen)
     HBufC8* buffer8 = NativeToDescriptor8((char*)aBuffer,0,aLen);
     if(buffer8)
     {
-        ret = 2 * static_cast<MApplication*>(Dll::Tls())->GetSizeOfByteInUnicode(*buffer8);
+        ret = static_cast<MApplication*>(Dll::Tls())->GetSizeOfConvertedNative(*buffer8);
         delete buffer8;
     }
     return ret;
@@ -73,12 +87,19 @@ LOCAL_C int byteLen(const unsigned char* aBuffer, int aLen)
 
 LOCAL_C int unicodeToNative(const jchar* aInBuffer, int aInLen, unsigned char* aOutBuffer, int aOutLen)
 {
-__asm{int 3};
+    int ret = 0;
+    HBufC16* buffer16 = UnicodeToDescriptor16(aInBuffer,0,aInLen);
+    if(buffer16)
+    {
+        TPtr8 outBuffer(aOutBuffer,aOutLen);
+        ret = static_cast<MApplication*>(Dll::Tls())->ConvertUnicodeToNative(buffer16->Des(),outBuffer);
+        delete buffer16;
+    }
+    return ret;
 }
 
 LOCAL_C int nativeToUnicode(const unsigned char* aInBuffer, int aInLen, jchar* aOutBuffer, int aOutLen)
 {
-__asm{int 3};
     int ret = 0;
     HBufC8* buffer8 = NativeToDescriptor8((char*)aInBuffer,0,aInLen);
     if(buffer8)
@@ -88,7 +109,6 @@ __asm{int 3};
         delete buffer8;
     }
     return ret;
-
 }
 
 LOCAL_C int sizeOfByteInUnicode(const unsigned char* aBuffer, int aOffset, int aLen)
@@ -97,7 +117,7 @@ LOCAL_C int sizeOfByteInUnicode(const unsigned char* aBuffer, int aOffset, int a
     HBufC8* buffer8 = NativeToDescriptor8((char*)aBuffer,aOffset,aLen);
     if(buffer8)
     {
-        ret = static_cast<MApplication*>(Dll::Tls())->GetSizeOfByteInUnicode(*buffer8);
+        ret = static_cast<MApplication*>(Dll::Tls())->GetSizeOfConvertedNative(*buffer8);
         delete buffer8;
     }
     return ret;
@@ -105,12 +125,19 @@ LOCAL_C int sizeOfByteInUnicode(const unsigned char* aBuffer, int aOffset, int a
 
 LOCAL_C int sizeOfUnicodeInByte(const jchar* aBuffer, int aOffset, int aLen)
 {
-__asm{int 3};
+    int ret = 0;
+    HBufC16* buffer16 = UnicodeToDescriptor16(aBuffer,0,aLen);
+    if(buffer16)
+    {
+        ret = static_cast<MApplication*>(Dll::Tls())->GetSizeOfConvertedUnicode(*buffer16);
+        delete buffer16;
+    }
+    return ret;
 }
 
 LcConvMethodsRec conv_methods = 
     {
-        "gbk gb2312 GBK GB2312",
+        "gb2312 gbk GB2312 GBK ISO_8859_1 KO18_r US_ASCII WINDOWS_1252",
         &byteMaxLen,
         &byteLen,
         &unicodeToNative,
@@ -122,7 +149,7 @@ LcConvMethodsRec conv_methods =
 LcConvMethods getLcGenConvMethods(char *aEncoding) 
 {
     LcConvMethods ret = NULL;
-    
+    DEBUGMSG1("getLcGenConvMethods ",aEncoding);
     HBufC8* buffer8 = NativeToDescriptor8(aEncoding);
     if(buffer8)
     {

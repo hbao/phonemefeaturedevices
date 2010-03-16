@@ -50,12 +50,9 @@ public class Gen_Reader extends StreamReader {
      * class is not available
      */
     Gen_Reader(String inp_enc) throws ClassNotFoundException {
-        System.out.println("Gen_Reader " + inp_enc);
         id = Conv.getHandler(inp_enc);
-        System.out.println("Handler id " + id);
         if (id == -1) {
             // this lets Helper throw UnsupportedEncodingException
-            System.out.println("throwing ClassNotFoundException");
             throw new ClassNotFoundException();
         }
         enc = inp_enc;
@@ -76,9 +73,7 @@ public class Gen_Reader extends StreamReader {
      */
     public Reader open(InputStream in, String open_enc) 
         throws UnsupportedEncodingException {
-        System.out.println("Gen_reader open " + open_enc + " already open " + enc);
-        if (!open_enc.equals(enc)) {
-            System.out.println("throwing UnsupportedEncodingException");
+        if (!open_enc.equalsIgnoreCase(enc)) {
             throw new UnsupportedEncodingException();
         }
         init();

@@ -33,6 +33,15 @@
 #include <midpMalloc.h>
 #include <conv.h>
 
+#define __DEBUG_CONV__
+
+#ifdef __DEBUG_CONV__
+#include "pcsl_print.h"
+#define DEBUGMSG1(_XX,_YY){pcsl_print(_XX);pcsl_print(_YY);pcsl_print("\n");}
+#else
+#define DEBUGMSG1
+#endif
+
 #if ENABLE_I18N_JAPANESE
 extern LcConvMethodsRec SJISConvRec;
 extern LcConvMethodsRec EUCJPConvRec;
@@ -58,6 +67,7 @@ static int
 getLcConvMethodsIDByEncoding(char *encoding) {
     if (encoding && *encoding) {
         int i;
+        DEBUGMSG1("getLcConvMethodsIDByEncoding ",encoding);
         for (i = 0; i < NUM_LCCONV; i++) {
             if (lcConv[i] == NULL) {
                 break;
@@ -117,7 +127,6 @@ Java_com_sun_cldc_i18n_j2me_Conv_getHandler() {
 
     KNI_DeclareHandle(str);
     KNI_GetParameterAsObject(1, str);
-    __asm {int 3};
     if (!KNI_IsNullHandle(str)) {
         int      strLen = KNI_GetStringLength(str);
 	jchar* strBuf;
@@ -241,7 +250,6 @@ Java_com_sun_cldc_i18n_j2me_Conv_byteToChar() {
 
     KNI_GetParameterAsObject(5, output);
     KNI_GetParameterAsObject(2, input);
-__asm{int 3};
 
     inBuf  = (char*)midpMalloc(inLength);
     if (inBuf != NULL) {
