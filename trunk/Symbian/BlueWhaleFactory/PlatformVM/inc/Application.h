@@ -36,6 +36,7 @@
 #include <os_symbian.hpp>
 #include <RefCountedBase.h>
 #include <flogger.h>
+#include <CHARCONV.H>
 #include <OSVersion.h>
 #if __S60_VERSION__ >= __S60_V3_FP0_VERSION_NUMBER__
 #include <HWRMVibra.h>
@@ -220,6 +221,14 @@ class CVMManager : public CBase, public MDebugApplication, public MRunnable, pub
 		virtual TInt PlayAudio(const TDesC8&, TPtr8&){ return KErrNone;}
 		virtual TInt InitializeDecoder(TDesC8& /*aSourceData*/, TInt& /*aWidth*/, TInt& /*aHeight*/, TBool& /*aHasMask*/){return KErrNone;}
 		virtual TInt DecodeImage(char* /*aOutData*/, char* /*aOutMaskData*/){return KErrNone;}
+		
+		// character conversion things
+		virtual TBool SetConverter(const TDesC8& /*aEncoding*/) {return EFalse;}
+	    virtual TInt GetSizeOfConvertedNative(const TDesC8& aBuffer) { return 0;}
+	    virtual TInt GetSizeOfConvertedUnicode(const TDesC16& aBuffer) { return 0;}
+		virtual TInt ConvertNativeToUnicode(const TDesC8& aBuffer, TDes16& aOutBuffer) { return 0;}
+		virtual TInt ConvertUnicodeToNative(const TDesC16& aBuffer, TDes8& aOutBuffer) { return 0;}
+		
 		// debug things
 		virtual void DebugMessage(const TDesC& aMsg);
 		void DebugResources();
@@ -444,12 +453,17 @@ public:
 	virtual TInt PlayAudio(const TDesC8& aType, TPtr8& aData);
 	virtual TInt InitializeDecoder(TDesC8& aSourceData, TInt& aWidth, TInt& aHeight, TBool& aHasMask);
 	virtual TInt DecodeImage(char* aOutData, char* aOutMaskData);
-
+	virtual TBool SetConverter(const TDesC8& aEncoding);
+    virtual TInt GetSizeOfConvertedNative(const TDesC8& aBuffer);
+    virtual TInt GetSizeOfConvertedUnicode(const TDesC16& aBuffer);
+	virtual TInt ConvertNativeToUnicode(const TDesC8& aBuffer, TDes16& aOutBuffer);
+	virtual TInt ConvertUnicodeToNative(const TDesC16& aBuffer, TDes8& aOutBuffer);
+	
 protected:
 	CMIDPApp(const TDesC8& aShortcutName);
 	virtual ~CMIDPApp();
     virtual void LoadPropertiesL();
-
+    void InitializeConverterL();
 private:
 	void ConstructL();
 	static void LaunchBrowserCallback(TAny* aThis);
@@ -459,7 +473,9 @@ private:
 	static void PlayAudioCallback(TAny* aThis);
 	static void InitializeDecoderCallback(TAny* aThis);
 	static void DecodeImageCallback(TAny* aThis);
-
+	static void SetConverterCallback(TAny* aThis);
+	static void ConvertNativeToUnicodeCallback(TAny* aThis);
+	static void ConvertUnicodeToNativeCallback(TAny* aThis);
 private:
 	MMIDPCanvas* iCanvas;
 #if __S60_VERSION__ >= __S60_V3_FP0_VERSION_NUMBER__
@@ -485,6 +501,15 @@ private:
 	char* iOutMaskData;
 	CPhoneCall* iPhoneCall;
 	const TDesC8& iShortcutName;
+
+    RFs iRfs;
+	CCnvCharacterSetConverter* iConverter;
+	TBuf8<32> iEncoding;
+	CCnvCharacterSetConverter::TAvailability iAvailability; 
+	HBufC8* iNativeInput;
+    HBufC8* iNativeOutput;
+    HBufC16* iUnicodeOutput;
+	HBufC16* iUnicodeInput;
 };
 
 
