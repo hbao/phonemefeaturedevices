@@ -32,7 +32,7 @@
 
 #define KMaxBufferLen 1024;
 
-#define __DEBUG_CONV__
+//#define __DEBUG_CONV__
 
 #ifdef __DEBUG_CONV__
 #include "pcsl_print.h"
