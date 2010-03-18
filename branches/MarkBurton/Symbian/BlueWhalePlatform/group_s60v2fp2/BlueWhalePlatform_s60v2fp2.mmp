@@ -93,7 +93,6 @@ LIBRARY			fepbase.lib
 LIBRARY			egul.lib
 LIBRARY			apgrfx.lib
 LIBRARY			etext.lib
-LIBRARY			fbscli.lib
 LIBRARY			imageconversion.lib
 // S60 phone book access
 LIBRARY			PbkEng.lib
@@ -110,6 +109,7 @@ LIBRARY			mmfstandardcustomcommands.lib
 LIBRARY			platformenv.lib
 LIBRARY			connmon.lib
 LIBRARY			etel.lib
+LIBRARY         charconv.lib
 STATICLIBRARY	BlueWhaleFactory.lib
 STATICLIBRARY	cldc_vm_lib.lib
 STATICLIBRARY	pcsl_file.lib
