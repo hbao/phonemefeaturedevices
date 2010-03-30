@@ -913,30 +913,34 @@ void CMIDPCanvas::SetFullScreenMode(TBool aFullscreen)
 #if __S60_VERSION__ >= __S60_V2_FP1_VERSION_NUMBER__
 TBool CMIDPCanvas::CalculateCanvasRect(TBool aIncludeCba)
 {
-	TRect oldRect = iCanvasRect;
-	if (iCommandsLength == 0 || !aIncludeCba)
+	if (iFullScreen)
 	{
-		// no cba required - use the whole screen
-		AknLayoutUtils::LayoutMetricsRect(AknLayoutUtils::EApplicationWindow, iCanvasRect);
-	}
-	else
-	{
-		TRect cbaRect;
-		AknLayoutUtils::LayoutMetricsRect(AknLayoutUtils::EControlPane, cbaRect);
-		if (cbaRect.iTl.iY == 0)
+		if (iCommandsLength == 0 || !aIncludeCba)
 		{
-			// landscape mode with commands present - use the client rect
-			AknLayoutUtils::LayoutMetricsRect(AknLayoutUtils::EMainPane, iCanvasRect);
+			// no cba required - use the whole screen
+			AknLayoutUtils::LayoutMetricsRect(AknLayoutUtils::EApplicationWindow, iCanvasRect);
 		}
 		else
 		{
-			// portrait mode with commands present - use the main pane and extend the top over the status pane
-			// (we do it this way to avoid problems with AknLayoutUtils return values - see S60 bug KIS001228)
-			AknLayoutUtils::LayoutMetricsRect(AknLayoutUtils::EMainPane, iCanvasRect);
-			iCanvasRect.iTl.iY = 0;
+			TRect cbaRect;
+			AknLayoutUtils::LayoutMetricsRect(AknLayoutUtils::EControlPane, cbaRect);
+			if (cbaRect.iTl.iY == 0)
+			{
+				// landscape mode with commands present - use the client rect
+				AknLayoutUtils::LayoutMetricsRect(AknLayoutUtils::EMainPane, iCanvasRect);
+			}
+			else
+			{
+				// portrait mode with commands present - use the whole screen minus the cba
+				AknLayoutUtils::LayoutMetricsRect(AknLayoutUtils::EApplicationWindow, iCanvasRect);
+				iCanvasRect.Resize(0, -cbaRect.Height());
+			}
 		}
 	}
-	return (oldRect != iCanvasRect);
+	else
+	{	
+		AknLayoutUtils::LayoutMetricsRect(AknLayoutUtils::EMainPane, iCanvasRect);
+	}
 }
 #endif
 
@@ -959,16 +963,9 @@ void CMIDPCanvas::DoFullScreen()
 	{
 		TQikViewMode mode(iView->ViewMode());
 		mode.SetButtonOrSoftkeyBar(!iFullScreen && iCommands.Count());
-#ifdef __WINSCW__
-		// in the emulator the menu is on the toolbar so don't hide it 
 		mode.SetAppTitleBar(!iFullScreen);
 		mode.SetStatusBar(!iFullScreen);
 		mode.SetToolbar(!iFullScreen);
-#else
-		mode.SetAppTitleBar(EFalse);
-		mode.SetStatusBar(EFalse);
-		mode.SetToolbar(EFalse);
-#endif
 		iView->SetViewModeL(mode);
 		if (iFullScreen)
 		{
