@@ -169,9 +169,9 @@ public class GraphicalInstaller extends MIDlet implements CommandListener {
     /* Url to install from */
     private String url;
     /* true if update should be forced without user confirmation */
-    private boolean forceUpdate = true;
+    private boolean forceUpdate = false;
     /* true if user confirmation should be presented */
-    private boolean noConfirmation = true;
+    private boolean noConfirmation = false;
 
     private static final boolean iDebug = false;
     private static void debugMessage(String aMsg)
@@ -1696,6 +1696,8 @@ public class GraphicalInstaller extends MIDlet implements CommandListener {
                         // Let the manager know what suite was installed
                         GraphicalInstaller.saveSettings(null,
                                                         lastInstalledMIDletId);
+
+                        parent.displaySuccessMessage(successMessage);
 
                         /*
                          * We need to prevent "flashing" on fast development

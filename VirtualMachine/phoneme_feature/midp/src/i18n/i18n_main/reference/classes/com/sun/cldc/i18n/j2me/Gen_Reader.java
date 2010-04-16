@@ -73,7 +73,7 @@ public class Gen_Reader extends StreamReader {
      */
     public Reader open(InputStream in, String open_enc) 
         throws UnsupportedEncodingException {
-        if (!open_enc.equalsIgnoreCase(enc)) {
+        if (!open_enc.equals(enc)) {
             throw new UnsupportedEncodingException();
         }
         init();

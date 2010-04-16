@@ -37,9 +37,16 @@ class CTestSimpleCommDBWrapper : public CBase,public MCommDBWrapper
 public:
 	CTestSimpleCommDBWrapper()
 	{}
-	CTestSimpleCommDBWrapper(CTestSimpleCommDBWrapper* aDest):iDest(aDest)
-    {}
-	
+	virtual ~CTestSimpleCommDBWrapper()
+	{
+		TInt count = iDatabase.Count();
+		for(TInt i=0;i<count;i++)
+		{
+			iDatabase[i].Reset();
+		}
+		iDatabase.Reset();
+	}
+
 	void AddIAPTableL()
 	{
 		TTable IAPTable(TPtrC(IAP));
@@ -172,15 +179,6 @@ public:
 			delete this;
 		}
 	}
-	void Duplicate()
-	{
-	    TInt c = iDatabase.Count();
-	    for(TInt i=0;i<c;i++)
-	    {
-	        iDest->iDatabase.Append(TTable(iDatabase[i]));
-	     }
-	}
-	
 	void Dump()
 	{
 		RDebug::Print(_L("***************************DATABASE*************************************"));
@@ -205,22 +203,6 @@ public:
 	}
 	TInt iRef;
 	RArray<TTable> iDatabase;
-private:
-	   virtual ~CTestSimpleCommDBWrapper()
-	    {
-	       if(iDest)
-	       {
-	           Duplicate();
-	       }
-	        TInt count = iDatabase.Count();
-	        for(TInt i=0;i<count;i++)
-	        {
-	            iDatabase[i].Reset();
-	        }
-	        iDatabase.Reset();
-	    }
-
-	   CTestSimpleCommDBWrapper* iDest;
 };
 
 

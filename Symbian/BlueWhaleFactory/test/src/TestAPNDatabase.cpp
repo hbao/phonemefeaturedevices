@@ -71,14 +71,14 @@ void CTestAPNDatabase::testMultipleFind()
 {
 	CAPNDatabase db;
 	db.LoadDatabaseL();
-	// find O2 uk. should have only one entry 
-	TInt found = db.GetEntry(_L("234"),_L("10"));
+	// find Vodafone uk. should have only one entry 
+	TInt found = db.GetEntry(_L("234"),_L("15"));
 	TInt count = 0;
     TS_ASSERT(found != KErrNotFound);
 	while(found != -1)
 	{
 	    count++;
-	    found = db.GetNext(_L("234"),_L("10"),found + 1);
+	    found = db.GetNext(_L("234"),_L("15"),found + 1);
 	}	
 	TS_ASSERT(count == 1);
     found = db.GetEntry(_L("272"),_L("01"));

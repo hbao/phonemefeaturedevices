@@ -37,14 +37,12 @@
 #include "TestWithPortConnectionMonitorWrapper.h"
 
 static CTestSimpleCommDBWrapper* gCurrentDB = NULL;
-static CTestSimpleCommDBWrapper* gDuplicateDB = NULL;
 
 void CTestAutoAPN::setUp()
 {}
-
 void CTestAutoAPN::tearDown()
 {
-    REComPlusSession::SetDelegate(NULL);
+	REComPlusSession::SetDelegate(NULL);
 }
 
 MUnknown * CTestAutoAPN::Create(TUid aImplementationUid, TUid /*aInterfaceUid*/, TAny* /*aConstructionParameters*/)
@@ -53,9 +51,9 @@ MUnknown * CTestAutoAPN::Create(TUid aImplementationUid, TUid /*aInterfaceUid*/,
 	switch(aImplementationUid.iUid)
 	{
 		case KCID_MCommDBWrapper:
-	        gCurrentDB = new (ELeave) CTestSimpleCommDBWrapper(gDuplicateDB);
-	        gCurrentDB->ConstructL();
-		    ret = gCurrentDB;
+			gCurrentDB = new (ELeave) CTestSimpleCommDBWrapper;
+			gCurrentDB->ConstructL();
+			ret = gCurrentDB;
 			break;
 		case KCID_MTelephonyWrapper:
 			ret = new (ELeave) CBaseTelephonyWrapper;
@@ -113,37 +111,32 @@ void CTestAutoAPN::testSet()
 {
 	MProperties* properties = DiL(MProperties);
 	CleanupReleasePushL(*properties);
-	gDuplicateDB = new (ELeave) CTestSimpleCommDBWrapper();
-	gDuplicateDB->AddRef();
+	
 	REComPlusSession::SetDelegate(Create);
 	
 	CAPNManager* manager = CAPNManager::NewL(properties);
 	CleanupStack::PushL(manager);
 	manager->SetAutoAPN();
 	CActiveScheduler::Start();
-	gCurrentDB->AddRef();
 	MIAPSession* session = manager->StartIAPSession();
 	CleanupReleasePushL(*session);
 	CleanupStack::PopAndDestroy(session);
 
-	if(gDuplicateDB)
+	if(gCurrentDB)
 	{
-	    gDuplicateDB->Dump();
-		TBool found = gDuplicateDB->Find(_L("IAP"),TPtrC(COMMDB_NAME),_L("BlueWhale1"));
+		gCurrentDB->Dump();
+		TBool found = gCurrentDB->Find(_L("IAP"),TPtrC(COMMDB_NAME),_L("BlueWhale1"));
 		TS_ASSERT(found)
 	}
+
 	CleanupStack::PopAndDestroy(manager);
 	CleanupStack::PopAndDestroy(properties);
-    gDuplicateDB->Release();
-    gDuplicateDB = NULL;
 }
 
 void CTestAutoAPN::testNotSet()
 {
 	MProperties* properties = DiL(MProperties);
 	CleanupReleasePushL(*properties);
-    gDuplicateDB = new (ELeave) CTestSimpleCommDBWrapper();
-    gDuplicateDB->AddRef();
 	
 	REComPlusSession::SetDelegate(Create);
 	
@@ -154,17 +147,15 @@ void CTestAutoAPN::testNotSet()
 	CleanupReleasePushL(*session);
 	CleanupStack::PopAndDestroy(session);
 
-    if(gDuplicateDB)
-    {
-        gDuplicateDB->Dump();
-		TBool found = gDuplicateDB->Find(_L("IAP"),TPtrC(COMMDB_NAME),_L("BlueWhale!"));
+	if(gCurrentDB)
+	{
+		gCurrentDB->Dump();
+		TBool found = gCurrentDB->Find(_L("IAP"),TPtrC(COMMDB_NAME),_L("BlueWhale!"));
 		TS_ASSERT(!found);
 	}
 
 	CleanupStack::PopAndDestroy(manager);
 	CleanupStack::PopAndDestroy(properties);
-    gDuplicateDB->Release();
-    gDuplicateDB = NULL;
 }
 
 _LIT(KNetwork2,"33"); // Orange
@@ -173,8 +164,6 @@ void CTestAutoAPN::testSetWithChangingNetwork()
 {
 	MProperties* properties = DiL(MProperties);
 	CleanupReleasePushL(*properties);
-    gDuplicateDB = new (ELeave) CTestSimpleCommDBWrapper();
-    gDuplicateDB->AddRef();
 	
 	REComPlusSession::SetDelegate(ChangingCreate);
 
@@ -204,20 +193,18 @@ void CTestAutoAPN::testSetWithChangingNetwork()
 	CleanupReleasePushL(*session2);
 	CleanupStack::PopAndDestroy(session2);
 
-	if(gDuplicateDB)
+	if(gCurrentDB)
 	{
-	    gDuplicateDB->Dump();
-		TBool found = gDuplicateDB->Find(_L("IAP"),TPtrC(COMMDB_NAME),_L("BlueWhale1"));
+		gCurrentDB->Dump();
+		TBool found = gCurrentDB->Find(_L("IAP"),TPtrC(COMMDB_NAME),_L("BlueWhale1"));
 		TS_ASSERT(found);
-		found = gDuplicateDB->Find(_L("OutgoingGPRS"),TPtrC(GPRS_APN),_L("general.t-mobile.uk"));
+		found = gCurrentDB->Find(_L("OutgoingGPRS"),TPtrC(GPRS_APN),_L("general.t-mobile.uk"));
 		TS_ASSERT(found);
 		
 	}
 
 	CleanupStack::PopAndDestroy(manager);
 	CleanupStack::PopAndDestroy(properties);
-    gDuplicateDB->Release();
-    gDuplicateDB = NULL;
 	
 }
 
@@ -225,8 +212,6 @@ void CTestAutoAPN::testWithUnknownNetwork()
 {
 	MProperties* properties = DiL(MProperties);
 	CleanupReleasePushL(*properties);
-    gDuplicateDB = new (ELeave) CTestSimpleCommDBWrapper();
-    gDuplicateDB->AddRef();
 	
 	REComPlusSession::SetDelegate(UnknownCreate);
 
@@ -241,10 +226,10 @@ void CTestAutoAPN::testWithUnknownNetwork()
 	CActiveScheduler::Start();
 	MIAPSession* session = manager->StartIAPSession();
 	CleanupReleasePushL(*session);
-	if(gDuplicateDB)
+	if(gCurrentDB)
 	{
-	    gDuplicateDB->Dump();
-		TBool found = gDuplicateDB->Find(_L("IAP"),TPtrC(COMMDB_NAME),_L("BlueWhale1"));
+		gCurrentDB->Dump();
+		TBool found = gCurrentDB->Find(_L("IAP"),TPtrC(COMMDB_NAME),_L("BlueWhale1"));
 		TS_ASSERT(!found);
 	}
 
@@ -252,16 +237,12 @@ void CTestAutoAPN::testWithUnknownNetwork()
 	CleanupStack::PopAndDestroy(session);
 	CleanupStack::PopAndDestroy(manager);
 	CleanupStack::PopAndDestroy(properties);
-    gDuplicateDB->Release();
-    gDuplicateDB = NULL;
 }
 
 void CTestAutoAPN::testMultipleAPNs()
 {
 	MProperties* properties = DiL(MProperties);
 	CleanupReleasePushL(*properties);
-    gDuplicateDB = new (ELeave) CTestSimpleCommDBWrapper();
-    gDuplicateDB->AddRef();
 	
 	REComPlusSession::SetDelegate(CreateVFIE);
 	
@@ -273,17 +254,15 @@ void CTestAutoAPN::testMultipleAPNs()
 	CleanupReleasePushL(*session);
 	CleanupStack::PopAndDestroy(session);
 
-	if(gDuplicateDB)
+	if(gCurrentDB)
 	{
-	    gDuplicateDB->Dump();
-		TBool found = gDuplicateDB->Find(_L("IAP"),TPtrC(COMMDB_NAME),_L("BlueWhale1"));
+		gCurrentDB->Dump();
+		TBool found = gCurrentDB->Find(_L("IAP"),TPtrC(COMMDB_NAME),_L("BlueWhale1"));
 		TS_ASSERT(found)
-		found = gDuplicateDB->Find(_L("IAP"),TPtrC(COMMDB_NAME),_L("BlueWhale2"));
+		found = gCurrentDB->Find(_L("IAP"),TPtrC(COMMDB_NAME),_L("BlueWhale2"));
 		TS_ASSERT(found)
 	}
 
 	CleanupStack::PopAndDestroy(manager);
 	CleanupStack::PopAndDestroy(properties);
-    gDuplicateDB->Release();
-    gDuplicateDB = NULL;
 }

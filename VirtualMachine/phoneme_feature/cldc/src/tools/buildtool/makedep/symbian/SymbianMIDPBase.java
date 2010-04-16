@@ -563,30 +563,9 @@ abstract class SymbianMIDPBase extends NMakefile
 		v.addElement("$(MIDP_SRC_DIR)\\events\\eventqueue\\reference\\classes\\com\\sun\\midp\\events\\NativeEvent.java");
 		v.addElement("$(MIDP_SRC_DIR)\\events\\eventqueue\\classes\\com\\sun\\midp\\events\\EventTypes.java");
 		v.addElement("$(MIDP_SRC_DIR)\\events\\eventqueue\\classes\\com\\sun\\midp\\events\\EventListener.java");
-        
-        // char converters
-        v.addElement("$(MIDP_SRC_DIR)\\i18n\\i18n_main\\reference\\classes\\com\\sun\\cldc\\i18n\\j2me\\Conv.java");
-        v.addElement("$(MIDP_SRC_DIR)\\i18n\\i18n_main\\reference\\classes\\com\\sun\\cldc\\i18n\\j2me\\Gen_Reader.java");
-        v.addElement("$(MIDP_SRC_DIR)\\i18n\\i18n_main\\reference\\classes\\com\\sun\\cldc\\i18n\\j2me\\Gen_Writer.java");
-        v.addElement("$(MIDP_SRC_DIR)\\i18n\\i18n_main\\reference\\classes\\com\\sun\\cldc\\i18n\\j2me\\UTF_8_Reader.java");
-        v.addElement("$(MIDP_SRC_DIR)\\i18n\\i18n_main\\reference\\classes\\com\\sun\\cldc\\i18n\\j2me\\UTF_8_Writer.java");
-        v.addElement("$(MIDP_SRC_DIR)\\i18n\\i18n_main\\reference\\classes\\com\\sun\\cldc\\i18n\\j2me\\UTF_16_Reader.java");
-        v.addElement("$(MIDP_SRC_DIR)\\i18n\\i18n_main\\reference\\classes\\com\\sun\\cldc\\i18n\\j2me\\UTF_16_Writer.java");
-        v.addElement("$(MIDP_SRC_DIR)\\i18n\\i18n_main\\reference\\classes\\com\\sun\\cldc\\i18n\\j2me\\UTF_16BE_Reader.java");
-        v.addElement("$(MIDP_SRC_DIR)\\i18n\\i18n_main\\reference\\classes\\com\\sun\\cldc\\i18n\\j2me\\UTF_16BE_Writer.java");
-        v.addElement("$(MIDP_SRC_DIR)\\i18n\\i18n_main\\reference\\classes\\com\\sun\\cldc\\i18n\\j2me\\UTF_16LE_Reader.java");
-        v.addElement("$(MIDP_SRC_DIR)\\i18n\\i18n_main\\reference\\classes\\com\\sun\\cldc\\i18n\\j2me\\UTF_16LE_Writer.java");
-        // symbian converters
-        v.addElement("$(MIDP_SRC_DIR)\\i18n\\i18n_symbian\\classes\\com\\sun\\cldc\\i18n\\j2me\\GBK_Reader.java");
-        v.addElement("$(MIDP_SRC_DIR)\\i18n\\i18n_symbian\\classes\\com\\sun\\cldc\\i18n\\j2me\\GB2312_Reader.java");
-        v.addElement("$(MIDP_SRC_DIR)\\i18n\\i18n_symbian\\classes\\com\\sun\\cldc\\i18n\\j2me\\ISO_8859_1_Reader.java");
-        v.addElement("$(MIDP_SRC_DIR)\\i18n\\i18n_symbian\\classes\\com\\sun\\cldc\\i18n\\j2me\\KO18_R_Reader.java");
-        v.addElement("$(MIDP_SRC_DIR)\\i18n\\i18n_symbian\\classes\\com\\sun\\cldc\\i18n\\j2me\\US_ASCII_Reader.java");
-        v.addElement("$(MIDP_SRC_DIR)\\i18n\\i18n_symbian\\classes\\com\\sun\\cldc\\i18n\\j2me\\WINDOWS_1252_Reader.java");
+		v.addElement("$(MIDP_SRC_DIR)\\i18n\\i18n_main\\reference\\classes\\com\\sun\\cldc\\i18n\\j2me\\UTF_8_Reader.java");
+		v.addElement("$(MIDP_SRC_DIR)\\i18n\\i18n_main\\reference\\classes\\com\\sun\\cldc\\i18n\\j2me\\UTF_8_Writer.java");
 
-
-
-        
 		// audio player
 		v.addElement("$(MIDP_SRC_DIR)\\media\\reference\\classes\\javax\\microedition\\media\\Player.java");
 		v.addElement("$(MIDP_SRC_DIR)\\media\\reference\\classes\\javax\\microedition\\media\\Controllable.java");
@@ -847,7 +826,6 @@ void writeRules() throws Exception
 		puttabln("@$(JAVA6) -cp .\\tools $(ME_KEYTOOL_CLASS) -import -alias rootCA -domain trusted -keystore $(J2SE_KEYSTORE) -MEkeystore $(KEYSTORE) -storepass 3edcvgy76tfcxsw2");
 		puttabln("@$(JAVA6) -cp .\\tools $(ME_KEYTOOL_CLASS) -import -alias manufacturerCA -domain manufacturer -keystore $(J2SE_KEYSTORE) -MEkeystore $(KEYSTORE) -storepass 3edcvgy76tfcxsw2");
         puttabln("@$(JAVA6) -cp .\\tools $(ME_KEYTOOL_CLASS) -import -alias PCA3ss_v4 -domain manufacturer -keystore $(J2SE_KEYSTORE) -MEkeystore $(KEYSTORE) -storepass 3edcvgy76tfcxsw2");
-        puttabln("@$(JAVA6) -cp .\\tools $(ME_KEYTOOL_CLASS) -import -alias EQUIFAX -domain manufacturer -keystore $(J2SE_KEYSTORE) -MEkeystore $(KEYSTORE) -storepass 3edcvgy76tfcxsw2");
 		puttabln("@$(JAVA6) -cp .\\tools $(ME_KEYTOOL_CLASS) -list -MEkeystore $(KEYSTORE)");
 
 		putln();

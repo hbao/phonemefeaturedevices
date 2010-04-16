@@ -193,10 +193,6 @@ abstract class SymbianIDEProject extends IDEProject
 				lst.addElement("..\\..\\..\\..\\midp\\src\\protocol\\file\\reference\\native\\storageFile.c");
 				lst.addElement("..\\..\\..\\..\\midp\\src\\protocol\\file\\reference\\native\\RandomAccessStream.c");
 				lst.addElement("..\\generated\\LocalizedStringsBase.c");
-                lst.addElement("..\\..\\..\\..\\midp\\src\\i18n\\i18n_main\\reference\\native\\conv.c");
-                lst.addElement("..\\..\\..\\..\\midp\\src\\i18n\\i18n_main\\reference\\native\\localeMethod.c");
-                lst.addElement("..\\..\\..\\..\\midp\\src\\i18n\\i18n_symbian\\native\\defaultLocale.c");
-                lst.addElement("..\\..\\..\\..\\midp\\src\\i18n\\i18n_symbian\\native\\GenConv.cpp");
 				lst.addElement("..\\..\\..\\..\\midp\\src\\highlevelui\\lcdui\\reference\\native\\lcdui_input.c");
 				lst.addElement("..\\..\\..\\..\\midp\\src\\highlevelui\\lcdui\\reference\\native\\lcdui_game.c");
 				lst.addElement("..\\..\\..\\..\\midp\\src\\highlevelui\\lcdui\\reference\\native\\lcdui_indicators.c");

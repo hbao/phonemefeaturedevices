@@ -756,41 +756,9 @@ TKeyResponse CMIDPCanvas::PlainOfferKeyEventL(const TKeyEvent& aKeyEvent,TEventC
 	TKeyResponse response = EKeyWasNotConsumed;
 	TChar ch = iKeyMapper->CharFromScanCode(aKeyEvent);
 	
-	switch (iMachineUidValue)
+	if (TChar(aKeyEvent.iCode).IsPrint() && (iMachineUidValue != KUidN97Value || aKeyEvent.iModifiers > EModifierAutorepeatable || TChar(ch) == aKeyEvent.iScanCode))
 	{
-	case KUidN97Value:
-	case KUidN97Value2:
-	{
-		if (TChar(aKeyEvent.iCode).IsPrint() && (aKeyEvent.iModifiers > EModifierAutorepeatable || TChar(ch) == aKeyEvent.iScanCode))
-		{
-			ch = aKeyEvent.iCode;
-		}
-		if (aKeyEvent.iScanCode == EStdKeyLeftFunc)
-		{
-			ch = EStdKeyLeftFunc;	// let this key code through - it's the symbol dialog key on the N97
-		}
-		break;
-	}
-	case KUidE71Value:
-	{
-		if (TChar(aKeyEvent.iCode).IsPrint())
-		{
-			ch = aKeyEvent.iCode;
-		}
-		if (aKeyEvent.iScanCode == EStdKeyLeftFunc)
-		{
-			ch = EStdKeyLeftFunc;	// let this key code through - it's the symbol dialog key on the E71 
-		}
-		break;
-	}
-	default:
-	{
-		if (TChar(aKeyEvent.iCode).IsPrint())
-		{
-			ch = aKeyEvent.iCode;
-		}
-		break;
-	}
+		ch = aKeyEvent.iCode;
 	}
 	
 	TEventInfo event;

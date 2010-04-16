@@ -144,7 +144,6 @@ LIBRARY			mmfcontrollerframework.lib
 LIBRARY			mmfstandardcustomcommands.lib
 LIBRARY			imageconversion.lib
 LIBRARY			etel3rdparty.lib
-library charconv.lib 
 
 LIBRARY			cldc_vm_lib.lib
 
