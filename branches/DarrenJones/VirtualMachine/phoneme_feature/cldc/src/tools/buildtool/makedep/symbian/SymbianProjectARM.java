@@ -552,6 +552,9 @@ class SymbianProjectARM extends SymbianIDEProjectARM
 	putln("USERINCLUDE ..\\..\\..\\..\\jsr211\\src\\share\\core\\native\\include");
 	putln("USERINCLUDE ..\\..\\..\\..\\jsr211\\src\\cldc_application\\core\\native\\inc");
     putln("USERINCLUDE ..\\..\\..\\..\\restricted_crypto\\src\\restricted_crypto\\reference\\native");
+    putln("USERINCLUDE ..\\..\\..\\..\\midp\\src\\i18n\\i18n_port\\include");
+    putln("USERINCLUDE ..\\..\\..\\..\\midp\\src\\i18n\\i18n_main\\reference\\native");
+    putln("USERINCLUDE ..\\..\\..\\..\\midp\\src\\i18n\\i18n_main\\include");
 	putln("SYSTEMINCLUDE \\epoc32\\include \\epoc32\\include\\libc ..\\generated . \\epoc32\\include\\mmf\\plugin");
 	}
 	

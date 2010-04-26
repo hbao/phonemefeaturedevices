@@ -86,12 +86,35 @@ public class Launcher extends MIDlet implements Runnable, CommandListener,MIDlet
     private String iUrl = null;
     private String iDefaultUrl;
     
+    private static final String ON_THE_FLY_SOFTWARE_FILE_NAME_SEPARATOR              = "-";
+    private static final String ON_THE_FLY_SOFTWARE_FILE_NAME_SEPARATOR_FOR_REGEX    = "\\-";
+    private static final String ON_THE_FLY_SOFTWARE_FILE_PREFIX                      = "d" + ON_THE_FLY_SOFTWARE_FILE_NAME_SEPARATOR;
+
     private static void debugMessage(String aMessage) {
         if (iDebug) {
             System.out.println(aMessage);
         }
     }
 
+    private static String parseProvisioningUserIdFromVmInstallFilename( String aVmInstallFileName )
+    {
+        String provisioningUserId = null;
+
+        int indexOfPrefix = aVmInstallFileName.indexOf( ON_THE_FLY_SOFTWARE_FILE_PREFIX );
+        if( -1 != indexOfPrefix )
+        {
+            int lengthOfPrefix = ON_THE_FLY_SOFTWARE_FILE_PREFIX.length();
+            int indexOfHyphenAfterPrefix = aVmInstallFileName.indexOf( ON_THE_FLY_SOFTWARE_FILE_NAME_SEPARATOR, indexOfPrefix + lengthOfPrefix );
+            if( -1 != indexOfHyphenAfterPrefix )
+            {
+                provisioningUserId = aVmInstallFileName.substring( indexOfPrefix + lengthOfPrefix, indexOfHyphenAfterPrefix );
+            }
+        }
+
+        return provisioningUserId;
+
+    }
+    
     public Launcher() {
         MIDletProxyList midletProxyList = MIDletProxyList.getMIDletProxyList();
 		iMIDletName = System.getProperty("x-bw-app-name");
@@ -101,7 +124,7 @@ public class Launcher extends MIDlet implements Runnable, CommandListener,MIDlet
         String installFileName = System.getProperty("x-bw-vm-install-filename");
         if (null != installFileName)
 		{
-			String bluewhale = new String("bluewhale");
+            String bluewhale = new String("bluewhale");
 			int bluewhaleIndex = installFileName.indexOf(bluewhale);
 			if (-1 != bluewhaleIndex)
 			{
@@ -117,6 +140,13 @@ public class Launcher extends MIDlet implements Runnable, CommandListener,MIDlet
 					}
 				}
 			}
+            // look for the user id in the install name
+            String provisioningUserId = parseProvisioningUserIdFromVmInstallFilename( installFileName );
+            if(provisioningUserId != null)
+            {
+                iDefaultUrl = new String(iDefaultUrl + "&x-bw-uid=" + provisioningUserId);
+            }
+			
 		}
 
         iLock = new Object();
