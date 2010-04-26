@@ -160,6 +160,7 @@ abstract class SymbianMIDPBase extends NMakefile
 		v.addElement("$(RESTRICTED_CRYPTO_DIR)\\restricted_crypto\\reference\\classes\\com\\sun\\midp\\crypto\\RSA.java");
 		v.addElement("$(RESTRICTED_CRYPTO_DIR)\\restricted_crypto\\reference\\classes\\com\\sun\\midp\\crypto\\RsaShaSig.java");
 		v.addElement("$(RESTRICTED_CRYPTO_DIR)\\restricted_crypto\\reference\\classes\\com\\sun\\midp\\crypto\\RsaSig.java");
+		v.addElement("$(RESTRICTED_CRYPTO_DIR)\\restricted_crypto\\reference\\classes\\com\\sun\\midp\\crypto\\ARC4.java");
 
         v.addElement("$(RESTRICTED_CRYPTO_DIR)\\ssl\\reference\\classes\\com\\sun\\midp\\ssl\\Handshake.java");
         v.addElement("$(RESTRICTED_CRYPTO_DIR)\\ssl\\reference\\classes\\com\\sun\\midp\\ssl\\In.java"); 
@@ -562,9 +563,30 @@ abstract class SymbianMIDPBase extends NMakefile
 		v.addElement("$(MIDP_SRC_DIR)\\events\\eventqueue\\reference\\classes\\com\\sun\\midp\\events\\NativeEvent.java");
 		v.addElement("$(MIDP_SRC_DIR)\\events\\eventqueue\\classes\\com\\sun\\midp\\events\\EventTypes.java");
 		v.addElement("$(MIDP_SRC_DIR)\\events\\eventqueue\\classes\\com\\sun\\midp\\events\\EventListener.java");
-		v.addElement("$(MIDP_SRC_DIR)\\i18n\\i18n_main\\reference\\classes\\com\\sun\\cldc\\i18n\\j2me\\UTF_8_Reader.java");
-		v.addElement("$(MIDP_SRC_DIR)\\i18n\\i18n_main\\reference\\classes\\com\\sun\\cldc\\i18n\\j2me\\UTF_8_Writer.java");
+        
+        // char converters
+        v.addElement("$(MIDP_SRC_DIR)\\i18n\\i18n_main\\reference\\classes\\com\\sun\\cldc\\i18n\\j2me\\Conv.java");
+        v.addElement("$(MIDP_SRC_DIR)\\i18n\\i18n_main\\reference\\classes\\com\\sun\\cldc\\i18n\\j2me\\Gen_Reader.java");
+        v.addElement("$(MIDP_SRC_DIR)\\i18n\\i18n_main\\reference\\classes\\com\\sun\\cldc\\i18n\\j2me\\Gen_Writer.java");
+        v.addElement("$(MIDP_SRC_DIR)\\i18n\\i18n_main\\reference\\classes\\com\\sun\\cldc\\i18n\\j2me\\UTF_8_Reader.java");
+        v.addElement("$(MIDP_SRC_DIR)\\i18n\\i18n_main\\reference\\classes\\com\\sun\\cldc\\i18n\\j2me\\UTF_8_Writer.java");
+        v.addElement("$(MIDP_SRC_DIR)\\i18n\\i18n_main\\reference\\classes\\com\\sun\\cldc\\i18n\\j2me\\UTF_16_Reader.java");
+        v.addElement("$(MIDP_SRC_DIR)\\i18n\\i18n_main\\reference\\classes\\com\\sun\\cldc\\i18n\\j2me\\UTF_16_Writer.java");
+        v.addElement("$(MIDP_SRC_DIR)\\i18n\\i18n_main\\reference\\classes\\com\\sun\\cldc\\i18n\\j2me\\UTF_16BE_Reader.java");
+        v.addElement("$(MIDP_SRC_DIR)\\i18n\\i18n_main\\reference\\classes\\com\\sun\\cldc\\i18n\\j2me\\UTF_16BE_Writer.java");
+        v.addElement("$(MIDP_SRC_DIR)\\i18n\\i18n_main\\reference\\classes\\com\\sun\\cldc\\i18n\\j2me\\UTF_16LE_Reader.java");
+        v.addElement("$(MIDP_SRC_DIR)\\i18n\\i18n_main\\reference\\classes\\com\\sun\\cldc\\i18n\\j2me\\UTF_16LE_Writer.java");
+        // symbian converters
+        v.addElement("$(MIDP_SRC_DIR)\\i18n\\i18n_symbian\\classes\\com\\sun\\cldc\\i18n\\j2me\\GBK_Reader.java");
+        v.addElement("$(MIDP_SRC_DIR)\\i18n\\i18n_symbian\\classes\\com\\sun\\cldc\\i18n\\j2me\\GB2312_Reader.java");
+        v.addElement("$(MIDP_SRC_DIR)\\i18n\\i18n_symbian\\classes\\com\\sun\\cldc\\i18n\\j2me\\ISO_8859_1_Reader.java");
+        v.addElement("$(MIDP_SRC_DIR)\\i18n\\i18n_symbian\\classes\\com\\sun\\cldc\\i18n\\j2me\\KO18_R_Reader.java");
+        v.addElement("$(MIDP_SRC_DIR)\\i18n\\i18n_symbian\\classes\\com\\sun\\cldc\\i18n\\j2me\\US_ASCII_Reader.java");
+        v.addElement("$(MIDP_SRC_DIR)\\i18n\\i18n_symbian\\classes\\com\\sun\\cldc\\i18n\\j2me\\WINDOWS_1252_Reader.java");
 
+
+
+        
 		// audio player
 		v.addElement("$(MIDP_SRC_DIR)\\media\\reference\\classes\\javax\\microedition\\media\\Player.java");
 		v.addElement("$(MIDP_SRC_DIR)\\media\\reference\\classes\\javax\\microedition\\media\\Controllable.java");
@@ -824,9 +846,11 @@ void writeRules() throws Exception
         putln("# create MIDP type keystore used for application verification & HTTPS connections");
         putln("$(KEYSTORE) : $(SYMBIAN_SDK_VM_ROOT_PATH) $(MIDP_TOOLS) $(J2SE_KEYSTORE)");
 		puttabln("@echo Making ME keystore $(KEYSTORE)");
+		puttabln("if exist $(KEYSTORE) -@del $(KEYSTORE)");
 		puttabln("@$(JAVA6) -cp .\\tools $(ME_KEYTOOL_CLASS) -import -alias rootCA -domain trusted -keystore $(J2SE_KEYSTORE) -MEkeystore $(KEYSTORE) -storepass 3edcvgy76tfcxsw2");
 		puttabln("@$(JAVA6) -cp .\\tools $(ME_KEYTOOL_CLASS) -import -alias manufacturerCA -domain manufacturer -keystore $(J2SE_KEYSTORE) -MEkeystore $(KEYSTORE) -storepass 3edcvgy76tfcxsw2");
-        puttabln("@$(JAVA6) -cp .\\tools $(ME_KEYTOOL_CLASS) -import -alias PCAG2V2 -keystore $(J2SE_KEYSTORE) -MEkeystore $(KEYSTORE) -storepass 3edcvgy76tfcxsw2");
+        puttabln("@$(JAVA6) -cp .\\tools $(ME_KEYTOOL_CLASS) -import -alias PCA3ss_v4 -domain manufacturer -keystore $(J2SE_KEYSTORE) -MEkeystore $(KEYSTORE) -storepass 3edcvgy76tfcxsw2");
+        puttabln("@$(JAVA6) -cp .\\tools $(ME_KEYTOOL_CLASS) -import -alias EQUIFAX -domain manufacturer -keystore $(J2SE_KEYSTORE) -MEkeystore $(KEYSTORE) -storepass 3edcvgy76tfcxsw2");
 		puttabln("@$(JAVA6) -cp .\\tools $(ME_KEYTOOL_CLASS) -list -MEkeystore $(KEYSTORE)");
 
 		putln();
