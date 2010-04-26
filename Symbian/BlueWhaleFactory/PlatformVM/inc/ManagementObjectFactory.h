@@ -49,7 +49,7 @@ class MVMObjectFactory : public MUnknown
 public:
 	virtual MThread* CreateVMThreadObject(const TDesC& aName) = 0;
 	virtual MThread* CreateVMManagerThreadObject(const TDesC& aName) = 0;
-	virtual MDebugApplication* CreateVMManagerObject() = 0;
+	virtual MDebugApplication* CreateVMManagerObject(const TDesC8& aShortcutName) = 0;
 	virtual void SetCanvas(MMIDPCanvas* aCanvas) = 0;
 	virtual MEventQueue* EventQueue() = 0;
 protected:
@@ -76,7 +76,7 @@ protected:
 	
 	virtual MThread* CreateVMThreadObject(const TDesC& aName);
 	virtual MThread* CreateVMManagerThreadObject(const TDesC& aName);
-	virtual MDebugApplication* CreateVMManagerObject();
+	virtual MDebugApplication* CreateVMManagerObject(const TDesC8& aShortcutName);
 	virtual void SetCanvas(MMIDPCanvas* aCanvas);
 	virtual MEventQueue* EventQueue() { return iQueue;}
 private:
