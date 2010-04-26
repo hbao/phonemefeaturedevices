@@ -58,6 +58,7 @@ public:
 	void testRemoveNetwork();
 	void testRemoveInternetAcessPoint();
 	void testRemoveWAPBearer();
+	void testMatchIAP();
 private:
 	static MUnknown * CommDBWrapperCreate(TUid aImplementationUid, TUid aInterfaceUid, TAny* aConstructionParameters);
 };

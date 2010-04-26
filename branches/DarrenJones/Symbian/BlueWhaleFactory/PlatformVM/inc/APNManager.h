@@ -39,9 +39,7 @@
 #include "IAPInfo.h"
 #include "CommDBUtil.h"
 
-#define __DONT_USE_OWNAPN__
-
-_LIT(KBlueWhaleAPN,"BlueWhale!");
+_LIT(KBlueWhaleAPNMatch,"BlueWhale");
 const TStringUniqueKey PROPERTY_STRING_COUNTRY_CODE = {0x00000100, 0x00000001};
 const TStringUniqueKey PROPERTY_STRING_NETWORK_ID 	= {0x00000100, 0x00000002};
 const TIntUniqueKey PROPERTY_INT_DB_COUNT			= {0x00000100, 0x00000003};
@@ -247,7 +245,7 @@ private:
 	CAPNManager();
 	CAPNManager(MProperties* aProperties);
 	void ConstructL();
-	TUint32 CreateBlueWhaleIAPL();
+	void CreateBlueWhaleIAPL();
 	void UdateBlueWhaleIAPL(const TDesC& aCountryCode,const TDesC& aNetworkId);
 	void BuildCurrentValidIAPsL();
 	void SaveSettingsL(const TDesC& aCountryCode,const TDesC& aNetworkId);
@@ -269,6 +267,8 @@ private:
 	CCommDBUtil* iCommDBUtil;
 	TBool iAPNCreationEnabled;
 	TInt iWlanCount;
+	TBuf<32> iShortCut;
+		
 #ifdef __WINSCW__
 	TBool iBeingTested;
 #endif

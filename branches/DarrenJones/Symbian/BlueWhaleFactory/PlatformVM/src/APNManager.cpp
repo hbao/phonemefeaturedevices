@@ -32,6 +32,7 @@
 #include "APNManager.h"
 #include "Properties.h"
 #include "CommDBUtil.h"
+#include "ManagementObjectFactory.h"
 
 #ifdef __WINSCW__
 #define EXPORT_DECL EXPORT_C 
@@ -96,7 +97,19 @@ void CAPNManager::ConstructL()
 
 	TRAPD(ignore,iRuntimeDatabase.LoadL(iProperties));
 	iAPNCreationEnabled = EFalse;
+
+	const TDesC8* shortcut = NULL;
+	TRAP(ignore,shortcut = &(iProperties->GetString8L(KPropertyString8ShortcutName)));
+	if(shortcut)
+	{
+		iShortCut.Copy(*shortcut);
+	}
+	else
+	{
+		iShortCut.Copy(KBlueWhaleAPNMatch());
+	}
 	
+
 	iCommDBUtil = CCommDBUtil::NewL();
 	
 	iNetWorkInfo = CNetworkInfoManager::NewL();
@@ -175,16 +188,33 @@ void CAPNManager::BuildCurrentValidIAPsL()
 	if(iAPNCreationEnabled && iNetWorkInfo->IsHomeNetwork())
 	{
 		DEBUGMSG(_L("Auto APN creation enabled"));
-		TUint32 blueWhaleIAP = iCommDBUtil->FindIAPL(KBlueWhaleAPN,network);
-		DEBUGMSG1(_L("BWM IAP %d"),blueWhaleIAP);
-		if(blueWhaleIAP == 0)
+		TUint32 blueWhaleIAP = iCommDBUtil->MatchIAPL(iShortCut,network);
+		TInt count = 0;
+		while(blueWhaleIAP != 0)
 		{
-			blueWhaleIAP = CreateBlueWhaleIAPL();
+			count++;
+			blueWhaleIAP = iCommDBUtil->NextMatchIAPL(iShortCut,network);
 		}
+		iCommDBUtil->CloseMatchIAP();
+		
+		DEBUGMSG1(_L("BWM IAP %d"),blueWhaleIAP);
+		if(count == 0)
+		{
+			CreateBlueWhaleIAPL();
+		}
+		blueWhaleIAP = iCommDBUtil->MatchIAPL(iShortCut,network);
+		count = 0;
+		while(blueWhaleIAP != 0)
+		{
+			iCurrentIAPList.AppendL(TIAPWithPort(blueWhaleIAP,0,KBlueWhalePriority));
+			count++;
+			blueWhaleIAP = iCommDBUtil->NextMatchIAPL(iShortCut,network);
+		}
+		iCommDBUtil->CloseMatchIAP();
+				
 		if(blueWhaleIAP != 0)
 		{
 			DEBUGMSG1(_L("Adding BWM %d"),blueWhaleIAP);
-			iCurrentIAPList.AppendL(TIAPWithPort(blueWhaleIAP,0,KBlueWhalePriority));
 		}
 	}
 
@@ -218,7 +248,7 @@ void CAPNManager::BuildCurrentValidIAPsL()
 		
 }
 
-TInt CAPNManager::GetIAP(TInt aIndex,TInt aPort)
+TInt CAPNManager::GetIAP(TInt aIndex,TInt /*aPort*/)
 {
 #ifndef __FORCE_ASK_USER__
 	TInt iap = KErrNotFound;
@@ -279,47 +309,32 @@ void CAPNManager::UdateBlueWhaleIAPL(const TDesC& aCountryCode,const TDesC& aNet
 			
 	User::LeaveIfError(iCommDBUtil->BeginTransaction());
 	TInt networkIndex = iDatabase.GetEntry(aCountryCode,aNetworkId);
+	TUint number = 1;
+	TBuf<32> APNName;
+
 	if(networkIndex != KErrNotFound)
 	{
 		TOperatorAPN& APNInfo = iDatabase.GetEntry(networkIndex);
 		DEBUGMSG2(_L("Updating %d %S"),networkIndex,&APNInfo.iAPN);
-		iCommDBUtil->UpdateOutgoingGprsL(KBlueWhaleAPN(),APNInfo.iAPN,APNInfo.iUser,APNInfo.iPasswd);
+		APNName.Format(_L("%S%d"),&iShortCut,number);
+		TUint32 FindIAPL(const TDesC& aName,TUint32& aNetwork);
+		iCommDBUtil->UpdateOutgoingGprsL(APNName,APNInfo.iAPN,APNInfo.iUser,APNInfo.iPasswd);
 	}
 	iCommDBUtil->CommitTransaction();
 }
 
-#ifndef __DONT_USE_OWNAPN__
-void CAPNManager::RemoveBlueWhaleIAPL()
+void CAPNManager::CreateBlueWhaleIAPL()
 {
-	TUint32 ret = 0;
-	
-	User::LeaveIfError(iCommDBUtil->BeginTransaction());
-	iCommDBUtil->RemoveOutgoingGprsL(KBlueWhaleAPN());
-			
-	TUint32 WAPId = iCommDBUtil->RemoveWAPAccessPointL(KBlueWhaleAPN());
-	iCommDBUtil->RemoveNetworkL(KBlueWhaleAPN());
-	TUint32 IAPId = iCommDBUtil->RemoveInternetAcessPointL(KBlueWhaleAPN());
-	iCommDBUtil->RemoveWAPBearerL(WAPId,IAPId);
-	
-	iCommDBUtil->CommitTransaction();
-	
-	iRuntimeDatabase.RemoveIAP(IAPId);
-	
-}
-#endif
-
-TUint32 CAPNManager::CreateBlueWhaleIAPL()
-{
-	DEBUGMSG(_L("CreateBlueWhaleIAPL"));
+	DEBUGMSG(_L("->CreateBlueWhaleIAPL"));
 	// create the BlueWhaleAPN
-	TUint32 ret = 0;
-	User::LeaveIfError(iCommDBUtil->BeginTransaction());
+	CCommDBUtil* commDBUtil = CCommDBUtil::NewL();
+	CleanupReleasePushL(*commDBUtil);
 	TUint32 service = 0;
 	TUint32 bearer = 0;
 #ifdef __USE_WINSOCK__
 	const TPtrC bearerType(TPtrC(LAN_BEARER));
-	service = iCommDBUtil->FindServiceL(TPtrC(OUTGOING_GPRS),_L("Winsock Service"));
-	bearer = iCommDBUtil->FindBearerL(bearerType,_L("Winsock"));
+	service = commDBUtil->FindServiceL(TPtrC(OUTGOING_GPRS),_L("Winsock Service"));
+	bearer = commDBUtil->FindBearerL(bearerType,_L("Winsock"));
 #else
 	const TPtrC bearerType(TPtrC(MODEM_BEARER));
 	TInt networkIndex = KErrNotFound;
@@ -333,27 +348,37 @@ TUint32 CAPNManager::CreateBlueWhaleIAPL()
 	}
 
 	networkIndex = iDatabase.GetEntry(countryCode,networkId);
-	if(networkIndex != KErrNotFound)
+	TUint number = 1;
+	TBuf<32> APNName;
+
+	while(networkIndex != KErrNotFound)
 	{
+	    User::LeaveIfError(commDBUtil->BeginTransaction());
 		DEBUGMSG1(_L("Getting entry %d"),networkIndex);
 		TOperatorAPN& APNInfo = iDatabase.GetEntry(networkIndex);
-		service = iCommDBUtil->CreateNewOutgoingGprsL(KBlueWhaleAPN(),APNInfo.iAPN,APNInfo.iUser,APNInfo.iPasswd);
-		bearer = iCommDBUtil->FindBearerL(bearerType,_L("GPRS Modem"));
-	}
+		APNName.Format(_L("%S%d"),&iShortCut,number);
+		DEBUGMSG1(_L("Creating %S"),&APNName);
+		service = commDBUtil->CreateNewOutgoingGprsL(APNName,APNInfo.iAPN,APNInfo.iUser,APNInfo.iPasswd);
+		bearer = commDBUtil->FindBearerL(bearerType,_L("GPRS Modem"));
 #endif
-	if(service !=0 && bearer != 0)
-	{
-		TUint32 wap_id = iCommDBUtil->CreateNewWAPAccessPointL(KBlueWhaleAPN());
-		TUint32 network = iCommDBUtil->CreateNewNetworkL(KBlueWhaleAPN());
-		ret = iCommDBUtil->CreateNewInternetAccessPointL(KBlueWhaleAPN,service,bearer,bearerType,network);
-		iCommDBUtil->CreateNewWAPBearerL(wap_id,ret);
-		User::LeaveIfError(iCommDBUtil->CommitTransaction());
+		if(service !=0 && bearer != 0)
+		{
+			TUint32 wap_id = commDBUtil->CreateNewWAPAccessPointL(APNName);
+			TUint32 network = commDBUtil->CreateNewNetworkL(APNName);
+			TUint32 iap = commDBUtil->CreateNewInternetAccessPointL(APNName,service,bearer,bearerType,network);
+			commDBUtil->CreateNewWAPBearerL(wap_id,iap);
+			User::LeaveIfError(commDBUtil->CommitTransaction());
+		}
+		else
+		{
+			commDBUtil->RollbackTransaction();
+			break;
+		}
+		networkIndex = iDatabase.GetNext(countryCode,networkId,networkIndex + 1);
+		number++;
 	}
-	else
-	{
-		iCommDBUtil->RollbackTransaction();
-	}
-	return ret;
+	CleanupStack::PopAndDestroy(commDBUtil);
+	DEBUGMSG(_L("<-CreateBlueWhaleIAPL"));
 }
 
 void CAPNManager::NetworkChanged(const TDesC& aCountryCode,const TDesC& aNetworkId)
@@ -413,7 +438,7 @@ void CAPNManager::IAPReportL(TBool aSuccess,TInt aIAP,TInt aPort)
 			iIAPInfo->ActiveIAP(iapName);
 			if(iapName.Length() > 0)
 			{
-				if(iapName.Compare(KBlueWhaleAPN) != 0)
+				if(iapName.Left(iShortCut.Length()).Compare(iShortCut) != 0)
 				{
 					// user chose APN that wasn't ours
 					TUint32 network;
@@ -424,7 +449,7 @@ void CAPNManager::IAPReportL(TBool aSuccess,TInt aIAP,TInt aPort)
 				else
 				{
 					TUint32 network;
-					TInt iap = iCommDBUtil->FindIAPL(KBlueWhaleAPN,network);
+					TInt iap = iCommDBUtil->FindIAPL(iapName,network);
 					iRuntimeDatabase.AddWorkingIAP(TIAPWithPort(iap,aPort,KBlueWhalePriority));
 					iRuntimeDatabase.SaveL(iProperties);
 				}

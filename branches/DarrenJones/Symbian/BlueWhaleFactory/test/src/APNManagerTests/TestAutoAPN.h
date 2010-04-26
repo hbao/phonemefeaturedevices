@@ -44,11 +44,13 @@ private:
 	static MUnknown * Create(TUid aImplementationUid, TUid aInterfaceUid, TAny* aConstructionParameters);
 	static MUnknown * ChangingCreate(TUid aImplementationUid, TUid aInterfaceUid, TAny* aConstructionParameters);
 	static MUnknown * UnknownCreate(TUid aImplementationUid, TUid aInterfaceUid, TAny* aConstructionParameters);
+	static MUnknown * CreateVFIE(TUid aImplementationUid, TUid aInterfaceUid, TAny* aConstructionParameters);
 public:
 	void testSet();
 	void testNotSet();
 	void testSetWithChangingNetwork();
 	void testWithUnknownNetwork();
+	void testMultipleAPNs();
 };
 
 

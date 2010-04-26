@@ -245,6 +245,75 @@ TUint32 CCommDBUtil::FindIAPL(const TDesC& aName,TUint32& aNetwork)
 	return ret;
 }
 
+TUint32 CCommDBUtil::MatchIAPL(const TDesC& aName,TUint32& aNetwork)
+{
+    TUint32 ret =0;
+    if(iMatchCommsAp) // somebody left this open!
+    {
+        iMatchCommsAp->Release();
+        iMatchCommsAp = NULL;
+    }
+    iMatchCommsAp = iCommDb->OpenTableL(TPtrC(IAP));
+    TInt err = iMatchCommsAp->GotoFirstRecord();
+    TBuf<64> name;
+    TBuf<64> serviceType;
+    TBuf<64> bearerType;
+    TUint32 IAPID;
+    while(err == KErrNone)
+    {
+        iMatchCommsAp->ReadTextL(TPtrC(COMMDB_NAME),name);
+        iMatchCommsAp->ReadUintL(TPtrC(COMMDB_ID),IAPID);
+        iMatchCommsAp->ReadUintL(TPtrC(IAP_NETWORK),aNetwork);
+            
+        if(name.Left(aName.Length()).Compare(aName) == 0)
+        {
+            ret = IAPID;
+            break;
+        }
+        err = iMatchCommsAp->GotoNextRecord();
+    }
+    
+    return ret;
+}
+
+TUint32 CCommDBUtil::NextMatchIAPL(const TDesC& aName,TUint32& aNetwork)
+{
+    TUint32 ret =0;
+    TInt err = iMatchCommsAp->GotoNextRecord();
+    TBuf<64> name;
+    TBuf<64> serviceType;
+    TBuf<64> bearerType;
+    TUint32 IAPID;
+    while(err == KErrNone)
+    {
+        iMatchCommsAp->ReadTextL(TPtrC(COMMDB_NAME),name);
+        iMatchCommsAp->ReadUintL(TPtrC(COMMDB_ID),IAPID);
+        iMatchCommsAp->ReadUintL(TPtrC(IAP_NETWORK),aNetwork);
+            
+        if(name.Left(aName.Length()).Compare(aName) == 0)
+        {
+            ret = IAPID;
+            break;
+        }
+        err = iMatchCommsAp->GotoNextRecord();
+    }
+    if(err != KErrNone)
+    {
+        ret = 0;
+    }
+    return ret;
+
+}
+
+void CCommDBUtil::CloseMatchIAP()
+{    
+    if(iMatchCommsAp)
+    {
+        iMatchCommsAp->Release();
+        iMatchCommsAp = NULL;
+    }
+}
+
 TUint32 CCommDBUtil::FindNetworkL(const TDesC& aName)
 {
 	TUint32 ret = 0;
