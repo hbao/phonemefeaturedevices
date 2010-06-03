@@ -266,8 +266,8 @@
 		<!-- Set default platform and release.  These are overriden by specifying  	-->
 		<!-- different values in a calling task, or using command line overrides 	-->
 		<!-- of the form e.g. 'ant -platform=winscw'								-->
-		<property name="platform" value="armi" />
-		<property name="release" value="urel" />
+		<property name="platform" value="winscw" />
+		<property name="release" value="udeb" />
 
 		<property name="dos_command" value="call abld test build ${platform} ${release}" />
 		<echo>dos_command[${dos_command}]    executionDirectory[${executionDirectory}]   deviceSDK[${deviceSDK}]    platform: [${platform}]   release: [${release}]   EPOCDEVICE[${EPOCDEVICE}]   pathAdditions[${pathAdditions}]</echo>
