@@ -78,11 +78,11 @@
 
 	<target name="cruisecontrol_bluewhalefactory_uiqv3fp0_arm" depends="update,bluewhalefactory_uiqv3fp0_arm" />
 
-	<target name="cruisecontrol_bluewhalefactory_uiqv3fp0_winscw" depends="update,update_tests,bluewhalefactory_uiqv3fp0_winscw,bluewhalefactory_test_uiqv3fp0_winscw" />
+	<target name="cruisecontrol_bluewhalefactory_uiqv3fp0_winscw" depends="update,update_tests,bluewhalefactory_uiqv3fp0_winscw" />
 
 	<target name="cruisecontrol_bluewhalefactory_s60v3fp0_arm" depends="update,bluewhalefactory_s60v3fp0_arm" />
 
-	<target name="cruisecontrol_bluewhalefactory_s60v3fp0_winscw" depends="update,update_tests,bluewhalefactory_s60v3fp0_winscw,bluewhalefactory_test_s60v3fp0_winscw" />
+	<target name="cruisecontrol_bluewhalefactory_s60v3fp0_winscw" depends="update,update_tests,bluewhalefactory_s60v3fp0_winscw" />
 
 	<target name="cruisecontrol_bluewhalefactory_s60v2fp3_arm" depends="update,bluewhalefactory_s60v2fp3_arm" />
 
